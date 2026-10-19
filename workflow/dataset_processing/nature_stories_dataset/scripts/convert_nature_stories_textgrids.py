@@ -1,11 +1,13 @@
 # edited with AI assistance: Claude Code, Claude Opus 5.5 (claude-opus-5-5)
-# last AI edit: 2026-10-02, see docs/changelog/developers/ for details
+# last AI edit: 2026-10-19, see docs/changelog/developers/ for details
 import argparse
 from pathlib import Path
 
 from praatio.utilities import textgrid_io
 
-BAD_WORDS = {"sentence_start", "sentence_end", "br", "lg", "ls", "ns", "sp",}
+BAD_WORDS = {
+    "sentence_start", "sentence_end", "br", "cg", "ig", "lg", "ls", "ns", "sl", "sp", 
+}
 
 def _unquote_praat_string(value):
     value = value.strip()
@@ -214,16 +216,12 @@ def get_word_tier(tg, input_file):
         f"Could not identify word tier in {input_file}. Available tiers: {tier_names}"
     )
 
-def textgrid_to_txt(input_file, output_file):
-    tg = read_textgrid(input_file)
-
-    word_tier = get_word_tier(tg, input_file,)
-
-    words = []
-
-    for interval in word_tier["entries"]:
-        start, end, label = interval
-
+def speech_entries(tier):
+    """
+    Yield (start time, lowercased label) for every interval of a tier that
+    is speech, skipping empty intervals and the non-speech labels in BAD_WORDS.
+    """
+    for start, end, label in tier["entries"]:
         word = label.strip()
 
         if not word:
@@ -234,7 +232,17 @@ def textgrid_to_txt(input_file, output_file):
         if normalized_word in BAD_WORDS:
             continue
 
-        words.append(word.lower())
+        yield float(start), word.lower()
+
+def textgrid_to_txt(input_file, output_file):
+    tg = read_textgrid(input_file)
+
+    word_tier = get_word_tier(tg, input_file,)
+
+    words = [
+        word
+        for start, word in speech_entries(word_tier)
+    ]
 
     if not words:
         raise ValueError(f"No words were extracted from {input_file}")

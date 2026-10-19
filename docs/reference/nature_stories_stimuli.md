@@ -24,9 +24,10 @@ its "chronological" format; `convert_nature_stories_textgrids.py` reads both.
 
 Rule `convert_nature_stories_textgrids` (script `convert_nature_stories_textgrids.py`) keeps only
 the **word sequence** of each story: it takes the `word` tier, drops empty intervals and
-non-speech labels (`sp`, `{ns}`, `{br}`, `{lg}`, `{ls}`, `sentence_start`, `sentence_end`), lowercases
-the words and writes them, space-separated, to `stimuli/transcripts/<story>.txt`. These transcripts
-are the text given to the language models.
+non-speech labels (`sp`, `{ns}`, `{br}`, `{cg}`, `{ig}`, `{lg}`, `{ls}`, `{sl}`, `sentence_start`,
+`sentence_end`; list `BAD_WORDS`), lowercases the words and writes them, space-separated, to `stimuli/transcripts/<story>.txt`. These transcripts
+are the text given to the language models. Two malformed labels, `{ls)` in `howtodraw` and `(br}`
+in `legacy`, mix two kinds of bracket and are not recognised, so they stay in the transcripts.
 
 The word timings are discarded, and no rule reads the G-Node `.wav` files. The brain side uses
 whole stories (see [`fmri_preprocessing.md`](fmri_preprocessing.md)), so nothing aligns individual
@@ -72,8 +73,71 @@ Findings:
   the G-Node `.wav` file is truncated or a different cut.
 - **No effect on the results.** The workflow reads neither the timings nor the `.wav` files.
 
-**Not verified:** what the missing 71 s of the `life` audio contain, and whether the TextGrid words
-match the audio word for word (only durations were compared).
+## 4. Word-level check against the G-Node features
+
+The G-Node release includes per-TR features that its authors computed from their own transcripts
+of the stories (`features/features_matrix.hdf`): `numWords` (words per TR), `numPhone` (phonemes per
+TR) and `semantic` (the english1000 word vectors of `features/english1000.hdf`, summed per TR).
+Rule `check_nature_stories_textgrids` (script `check_nature_stories_textgrids.py`) rebuilds these
+three features from the TextGrids and compares them with the released ones. It writes no file, so
+it runs only when named, and prints its result:
+
+```bash
+snakemake --use-conda --cores 1 check_nature_stories_textgrids
+```
+
+How the features are rebuilt (found by matching the released values, not documented by the
+release):
+
+- words and phonemes are those kept by the transcript conversion (section 2), counted in the TR
+  that contains their onset;
+- the TR is 2.0045 s, and the first released TR starts 5 TRs after TextGrid time 0;
+- the TR grid is shifted by 0.01 s against the TextGrid times; the best shift varies by about
+  10 ms between stories, so some words on TR boundaries fall into the neighbouring TR;
+- the released features are z-scored over all 10 training stories together, so `numWords` is
+  turned back into integer counts (its smallest value taken as 0) before comparing.
+
+A word counted one to three TRs away from the released count is boundary jitter, not a different
+word. The script cancels such pairs and lists every difference left ("unexplained words").
+
+Result on 2026-10-19 (`r`: Pearson correlation; semantic: mean over the 985 features):
+
+| Story | r words/TR | TRs with equal count | Net word difference | Unexplained words | r phonemes/TR | r semantic |
+|---|---|---|---|---|---|---|
+| alternateithicatom | 0.996 | 0.948 | 0 | 0 | 0.999 | 0.934 |
+| avatar | 0.997 | 0.962 | 0 | 0 | 0.999 | 0.931 |
+| howtodraw | 0.997 | 0.963 | 1 | 1 | 0.999 | 0.924 |
+| legacy | 0.998 | 0.973 | 1 | 1 | 1.000 | 0.925 |
+| life | 0.997 | 0.967 | 0 | 0 | 1.000 | 0.925 |
+| myfirstdaywiththeyankees | 0.999 | 0.989 | 0 | 0 | 0.999 | 0.931 |
+| naked | 0.997 | 0.950 | 1 | 1 | 0.999 | 0.930 |
+| odetostepfather | 0.997 | 0.965 | 3 | 3 | 1.000 | 0.928 |
+| souls | 0.998 | 0.972 | 0 | 0 | 0.999 | 0.920 |
+| undertheinfluence | 0.998 | 0.974 | 0 | 0 | 0.999 | 0.932 |
+| wheretheressmoke (test) | 0.996 | 0.935 | 1 | 1 | 0.999 | 0.931 |
+
+The 7 unexplained words, out of about 23,000:
+
+- the malformed labels `{ls)` (`howtodraw`) and `(br}` (`legacy`), see section 2;
+- one `uh` each in `naked` and `odetostepfather`, and `ukgh` in `wheretheressmoke`, which the
+  G-Node transcripts do not count (other `uh` are counted in both);
+- the last words of `odetostepfather` ("my life thank you"), counted in its final TR by the
+  TextGrid only.
+
+Findings:
+
+- **The TextGrids hold the words the subjects heard, at the times they heard them.** Apart from the
+  7 words above, the word and phoneme counts agree TR by TR within boundary jitter in all 11
+  stories.
+- **This includes all of `life`.** The G-Node features cover its 430 kept TRs, so the transcript
+  behind them includes the 71 s missing from the G-Node `.wav` file (section 3).
+- **The semantic features agree less closely** (r about 0.93) than the counts. The release must
+  build them in a way not reproduced here, for example a different normalisation of the word
+  vectors. They support the word identity, but are not an exact test of it.
+
+**Not verified:** the spelling of each word. The counts test the number and timing of the words;
+only the semantic features depend on which words they are, and only for words in the english1000
+vocabulary. A full word-by-word test would need a speech recogniser run on the audio.
 
 ## Changes
 
@@ -83,3 +147,11 @@ New page recording where the Nature Stories TextGrids come from (OpenNeuro `ds00
 release from the G-Node fMRI data), how the workflow uses them, and the check that both releases
 describe the same stimuli, including the truncated G-Node `life` audio. Written on the developer's
 request after the check was run.
+
+### 2026-10-19 14:10 — word-level check added; three more non-speech labels removed
+
+New section 4: the TextGrids were compared word count by word count with the per-TR features of the
+G-Node release, with the new rule `check_nature_stories_textgrids`, which replaces the earlier note
+that only durations had been compared. The check showed that `{cg}`, `{ig}` and `{sl}` labels were
+reaching the transcripts; they were added to the non-speech labels in section 2. Section 2 also
+records the two malformed labels that are still not removed.

@@ -1,5 +1,5 @@
 # edited with AI assistance: Claude Code, Claude Opus 5.5 (claude-opus-5-5)
-# last AI edit: 2026-10-08, see docs/changelog/developers/ for details
+# last AI edit: 2026-10-19, see docs/changelog/developers/ for details
 import json
 
 from pathlib import Path
@@ -253,6 +253,28 @@ rule convert_nature_stories_textgrids:
             python3 workflow/dataset_processing/nature_stories_dataset/scripts/convert_nature_stories_textgrids.py \
                 --textgrids {input.textgrids:q} \
                 --transcripts {output.transcripts:q}
+        """
+
+rule check_nature_stories_textgrids:
+    # compare the TextGrids with the per-TR features of the G-Node release and print the
+    # result; writes no file, so it runs only when named:
+    # snakemake --use-conda --cores 1 check_nature_stories_textgrids
+    input:
+        textgrids = NATURE_STORIES_TEXTGRID_FILES, 
+        run_onsets = NATURE_STORIES_RUN_ONSETS, 
+        features_matrix = config["nature_stories"]["features_matrix"], 
+        english1000 = config["nature_stories"]["english1000"]
+    params:
+        textgrids_dir = NATURE_STORIES_TEXTGRID_DIR
+    conda:
+        "envs/nature_stories_dataset_processing_environment.yaml"
+    shell:
+        r"""
+            python3 workflow/dataset_processing/nature_stories_dataset/scripts/check_nature_stories_textgrids.py \
+                --textgrids_dir {params.textgrids_dir:q} \
+                --run_onsets {input.run_onsets:q} \
+                --features_matrix {input.features_matrix:q} \
+                --english1000 {input.english1000:q}
         """
 
 rule verify_nature_stories_stimuli:

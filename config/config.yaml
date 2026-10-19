@@ -1,5 +1,5 @@
 # edited with AI assistance: Claude Code, Claude Opus 5.5 (claude-opus-5-5)
-# last AI edit: 2026-10-14, see docs/changelog/developers/ for details
+# last AI edit: 2026-10-19, see docs/changelog/developers/ for details
 
 # worker processes or threads used inside the jobs that parallelise internally (NSD parcel extraction,
 # Caption Scene T1w registration, p-value aggregation). Snakemake counts each job as one core, so
@@ -403,6 +403,9 @@ nature_stories:
   # (zRresp); the dataset's original file is responses/run_onsets.json
   run_onsets: "resources/datasets/nature_stories_dataset/responses/new_run_onsets.json"
   textgrids_dir: "resources/datasets/nature_stories_dataset/stimuli/textgrids"
+  # per-TR features of the G-Node release, read only by check_nature_stories_textgrids
+  features_matrix: "resources/datasets/nature_stories_dataset/features/features_matrix.hdf"
+  english1000: "resources/datasets/nature_stories_dataset/features/english1000.hdf"
   excluded_stimuli: "resources/datasets/nature_stories_dataset/excluded_stimuli.txt"
   stimuli_ready: "resources/datasets/nature_stories_dataset/.stimuli_ready"
   subjects: 11

@@ -79,11 +79,14 @@ The G-Node release includes per-TR features that its authors computed from their
 of the stories (`features/features_matrix.hdf`): `numWords` (words per TR), `numPhone` (phonemes per
 TR) and `semantic` (the english1000 word vectors of `features/english1000.hdf`, summed per TR).
 Rule `check_nature_stories_textgrids` (script `check_nature_stories_textgrids.py`) rebuilds these
-three features from the TextGrids and compares them with the released ones. It writes no file, so
-it runs only when named, and prints its result:
+three features from the TextGrids and compares them with the released ones. It writes two tables
+to `results/mind/nature_stories/qc/`: `textgrid_check.tsv`, one row per story (the columns of the
+table below), and `textgrid_check_unexplained_words.tsv`, one row per TR whose words still differ
+(story, TR, TextGrid minus G-Node count, the TextGrid words of that TR). The rule is an input of
+`all_nature_stories_dataset` only, not of `rule all`, so a normal run does not build it:
 
 ```bash
-snakemake --use-conda --cores 1 check_nature_stories_textgrids
+snakemake --use-conda --cores 1 all_nature_stories_dataset
 ```
 
 How the features are rebuilt (found by matching the released values, not documented by the
@@ -100,7 +103,9 @@ release):
 A word counted one to three TRs away from the released count is boundary jitter, not a different
 word. The script cancels such pairs and lists every difference left ("unexplained words").
 
-Result on 2026-10-19 (`r`: Pearson correlation; semantic: mean over the 985 features):
+Result on 2026-10-19, rounded from `textgrid_check.tsv` (`r`: Pearson correlation; semantic: mean
+over the 985 features). The lowest unrounded values are 0.9957 for words/TR and 0.9985 for
+phonemes/TR, both in `wheretheressmoke`:
 
 | Story | r words/TR | TRs with equal count | Net word difference | Unexplained words | r phonemes/TR | r semantic |
 |---|---|---|---|---|---|---|
@@ -155,3 +160,11 @@ G-Node release, with the new rule `check_nature_stories_textgrids`, which replac
 that only durations had been compared. The check showed that `{cg}`, `{ig}` and `{sl}` labels were
 reaching the transcripts; they were added to the non-speech labels in section 2. Section 2 also
 records the two malformed labels that are still not removed.
+
+### 2026-10-20 11:55 — check results saved to files
+
+Rule `check_nature_stories_textgrids` used to print its tables only, so the numbers of section 4
+existed only as a hand-copied table. It now writes `textgrid_check.tsv` and
+`textgrid_check_unexplained_words.tsv` to `results/mind/nature_stories/qc/` and is built by
+`all_nature_stories_dataset` (not by `rule all`). Section 4 gives the new command and the lowest
+unrounded correlations. The values did not change.

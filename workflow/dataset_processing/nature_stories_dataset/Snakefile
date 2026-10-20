@@ -1,5 +1,5 @@
 # edited with AI assistance: Claude Code, Claude Opus 5.5 (claude-opus-5-5)
-# last AI edit: 2026-10-19, see docs/changelog/developers/ for details
+# last AI edit: 2026-10-20, see docs/changelog/developers/ for details
 import json
 
 from pathlib import Path
@@ -40,6 +40,8 @@ NATURE_STORIES_PARCEL_MANIFEST = f"{NATURE_STORIES_PROCESSING_OUTPUT_DIR}/manife
 NATURE_STORIES_ISC_MANIFEST = f"{NATURE_STORIES_PROCESSING_OUTPUT_DIR}/manifests/isc_manifest.tsv"
 NATURE_STORIES_COMMON_SUPPORT = f"{NATURE_STORIES_PROCESSING_OUTPUT_DIR}/qc/common_fsaverage_support.npy"
 NATURE_STORIES_PARCEL_COVERAGE = f"{NATURE_STORIES_PROCESSING_OUTPUT_DIR}/qc/schaefer_parcel_coverage.tsv"
+NATURE_STORIES_TEXTGRID_CHECK = f"{NATURE_STORIES_PROCESSING_OUTPUT_DIR}/qc/textgrid_check.tsv"
+NATURE_STORIES_TEXTGRID_CHECK_UNEXPLAINED = f"{NATURE_STORIES_PROCESSING_OUTPUT_DIR}/qc/textgrid_check_unexplained_words.tsv"
 
 def nature_stories_parcel_output(subject, story):
     return f"{NATURE_STORIES_PROCESSING_OUTPUT_DIR}/parcels/{story}/sub-{subject}_task-{story}_parcel_ts.npy"
@@ -166,7 +168,8 @@ rule all_nature_stories_dataset:
         isc_npy = NATURE_STORIES_ISC_NPY_OUTPUTS, 
         isc_done = NATURE_STORIES_ISC_DONE, 
         stimuli_ready = NATURE_STORIES_STIMULI_READY, 
-        excluded_stimuli = NATURE_STORIES_EXCLUDED_STIMULI
+        excluded_stimuli = NATURE_STORIES_EXCLUDED_STIMULI, 
+        textgrid_check = NATURE_STORIES_TEXTGRID_CHECK
 
 rule mark_nature_stories_isc_done:
     input:
@@ -256,14 +259,16 @@ rule convert_nature_stories_textgrids:
         """
 
 rule check_nature_stories_textgrids:
-    # compare the TextGrids with the per-TR features of the G-Node release and print the
-    # result; writes no file, so it runs only when named:
-    # snakemake --use-conda --cores 1 check_nature_stories_textgrids
+    # compare the TextGrids with the per-TR features of the G-Node release; built by
+    # all_nature_stories_dataset only, not by rule all
     input:
         textgrids = NATURE_STORIES_TEXTGRID_FILES, 
         run_onsets = NATURE_STORIES_RUN_ONSETS, 
         features_matrix = config["nature_stories"]["features_matrix"], 
         english1000 = config["nature_stories"]["english1000"]
+    output:
+        textgrid_check = NATURE_STORIES_TEXTGRID_CHECK, 
+        unexplained_words = NATURE_STORIES_TEXTGRID_CHECK_UNEXPLAINED
     params:
         textgrids_dir = NATURE_STORIES_TEXTGRID_DIR
     conda:
@@ -274,7 +279,9 @@ rule check_nature_stories_textgrids:
                 --textgrids_dir {params.textgrids_dir:q} \
                 --run_onsets {input.run_onsets:q} \
                 --features_matrix {input.features_matrix:q} \
-                --english1000 {input.english1000:q}
+                --english1000 {input.english1000:q} \
+                --output {output.textgrid_check:q} \
+                --unexplained_words {output.unexplained_words:q}
         """
 
 rule verify_nature_stories_stimuli:

@@ -435,3 +435,8 @@ combined summary tables have a `similarity_type` column instead.
   `results/pictures/alignment_lineplots_language/`); the region ISC is in
   `results/language_mind/` and `results/vision_mind/` (see
   [`brain_regions.md`](docs/reference/brain_regions.md)).
+- `results/mind/nature_stories/qc/textgrid_check.tsv` and
+  `textgrid_check_unexplained_words.tsv` — the check that the Nature Stories
+  transcripts match the word and phoneme timing of the fMRI release, built only
+  by `snakemake --use-conda --cores 1 all_nature_stories_dataset` (see section 4
+  of [`nature_stories_stimuli.md`](docs/reference/nature_stories_stimuli.md)).

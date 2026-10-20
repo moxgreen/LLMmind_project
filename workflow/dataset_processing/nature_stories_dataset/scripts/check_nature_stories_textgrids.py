@@ -1,10 +1,11 @@
 # written with AI assistance: Claude Code, Claude Opus 5.5 (claude-opus-5-5)
-# last AI edit: 2026-10-19, see docs/changelog/developers/ for details
+# last AI edit: 2026-10-20, see docs/changelog/developers/ for details
 """
 Check the Nature Stories TextGrids (OpenNeuro ds003020) against the words the
 subjects heard, using the per-TR features that the G-Node release computed from
 its own transcripts: rebuild the words and phonemes per TR, and the english1000
 semantic features, from the TextGrids and correlate them with the released ones.
+Write one row per story, and one row per TR whose words still differ.
 """
 import argparse
 import json
@@ -75,6 +76,10 @@ def main():
                         help = "G-Node features_matrix.hdf.")
     parser.add_argument("--english1000", 
                         help = "G-Node english1000.hdf (semantic word vectors).")
+    parser.add_argument("--output", 
+                        help = "Output TSV with one row per story.")
+    parser.add_argument("--unexplained_words", 
+                        help = "Output TSV with one row per TR whose words still differ.")
     args = parser.parse_args()
 
     # load the released features and the english1000 word vectors
@@ -95,11 +100,11 @@ def main():
     ]
     slices.append((run_metadata["test_story"], "test", 0, run_metadata["test_trs"]))
 
-    print(
+    rows = [
         "story\tr_words\tsame_trs\tnet_word_difference\tunexplained_words\t"
         "r_phones\tr_semantic"
-    )
-    flagged = []
+    ]
+    flagged = ["story\ttr\tdifference\twords"]
 
     for story, split, onset, n_trs in slices:
         textgrid_file = Path(args.textgrids_dir)/f"{story}.TextGrid"
@@ -132,7 +137,7 @@ def main():
 
         released_semantic = features[f"semantic_{split}"][onset:onset + n_trs]
 
-        print(
+        rows.append(
             f"{story}\t"
             f"{np.corrcoef(word_counts, released_words)[0, 1]:.4f}\t"
             f"{np.mean(word_counts == released_words):.3f}\t"
@@ -148,12 +153,11 @@ def main():
                 for word_tr, (start, word) in zip(word_trs, words)
                 if word_tr == tr
             )
-            flagged.append(f"{story}\tTR {tr}\t{differences[tr]:+d}\t{tr_words}")
+            flagged.append(f"{story}\t{tr}\t{differences[tr]:+d}\t{tr_words}")
 
-    # list the TRs whose words differ between the two transcripts
-    if flagged:
-        print("\nTRs with unexplained word differences (TextGrid minus G-Node):")
-        print("\n".join(flagged))
+    # save the per-story table and the TRs whose words differ (TextGrid minus G-Node)
+    Path(args.output).write_text("\n".join(rows) + "\n")
+    Path(args.unexplained_words).write_text("\n".join(flagged) + "\n")
 
 if __name__ == "__main__":
     main()

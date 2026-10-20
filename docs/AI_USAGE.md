@@ -31,7 +31,7 @@ git history and may include later human edits.
 
 | File | AI role | Latest AI edit | Model | Review status |
 |---|---|---|---|---|
-| `README.md` | written | 2026-10-14 | Claude Opus 5.5 (`claude-opus-5-5`); Claude Sonnet 5 (`claude-sonnet-5`) until 2026-09-22 | not yet reviewed |
+| `README.md` | written | 2026-10-20 | Claude Opus 5.5 (`claude-opus-5-5`); Claude Sonnet 5 (`claude-sonnet-5`) until 2026-09-22 | not yet reviewed |
 | `docs/AI_USAGE.md` | written | 2026-10-16 | Claude Opus 5.5 (`claude-opus-5-5`) | not yet reviewed |
 | `docs/changelog/developers/2026-09-21_new_feature_bugfix_refactor_removal_documentation.md` | written | 2026-10-06 | Claude Opus 5.5 (`claude-opus-5-5`); Claude Sonnet 5 (`claude-sonnet-5`) for the original entries | not yet reviewed |
 | `docs/changelog/developers/2026-09-22_new_feature_optimisation.md` | written | 2026-10-06 | Claude Opus 5.5 (`claude-opus-5-5`); Claude Sonnet 5 (`claude-sonnet-5`) for the original entries | not yet reviewed |
@@ -54,6 +54,7 @@ git history and may include later human edits.
 | `docs/changelog/developers/2026-10-15_documentation.md` | written | 2026-10-15 | Claude Opus 5.5 (`claude-opus-5-5`) | not yet reviewed |
 | `docs/changelog/developers/2026-10-16_documentation.md` | written | 2026-10-16 | Claude Opus 5.5 (`claude-opus-5-5`) | not yet reviewed |
 | `docs/changelog/developers/2026-10-19_new_feature_bugfix_refactor_documentation.md` | written | 2026-10-19 | Claude Opus 5.5 (`claude-opus-5-5`) | not yet reviewed |
+| `docs/changelog/developers/2026-10-20_new_feature_documentation.md` | written | 2026-10-20 | Claude Opus 5.5 (`claude-opus-5-5`) | not yet reviewed |
 | `docs/changelog/users/2026-09-21_new_feature_bugfix_refactor_removal_documentation.md` | written | 2026-10-06 | Claude Opus 5.5 (`claude-opus-5-5`); Claude Sonnet 5 (`claude-sonnet-5`) for the original entries | not yet reviewed |
 | `docs/changelog/users/2026-09-22_new_feature_optimisation.md` | written | 2026-10-06 | Claude Opus 5.5 (`claude-opus-5-5`); Claude Sonnet 5 (`claude-sonnet-5`) for the original entries | not yet reviewed |
 | `docs/changelog/users/2026-09-23_new_feature_bugfix_refactor_documentation.md` | written | 2026-10-06 | Claude Opus 5.5 (`claude-opus-5-5`) | not yet reviewed |
@@ -75,11 +76,12 @@ git history and may include later human edits.
 | `docs/changelog/users/2026-10-15_documentation.md` | written | 2026-10-15 | Claude Opus 5.5 (`claude-opus-5-5`) | not yet reviewed |
 | `docs/changelog/users/2026-10-16_documentation.md` | written | 2026-10-16 | Claude Opus 5.5 (`claude-opus-5-5`) | not yet reviewed |
 | `docs/changelog/users/2026-10-19_new_feature_bugfix_refactor_documentation.md` | written | 2026-10-19 | Claude Opus 5.5 (`claude-opus-5-5`) | not yet reviewed |
+| `docs/changelog/users/2026-10-20_new_feature_documentation.md` | written | 2026-10-20 | Claude Opus 5.5 (`claude-opus-5-5`) | not yet reviewed |
 | `docs/guides/running_and_troubleshooting.md` | written | 2026-10-14 | Claude Opus 5.5 (`claude-opus-5-5`) | not yet reviewed |
 | `docs/reference/brain_regions.md` | written | 2026-10-16 | Claude Opus 5.5 (`claude-opus-5-5`) | not yet reviewed |
 | `docs/reference/clean_run_duration.md` | written | 2026-10-12 | Claude Opus 5.5 (`claude-opus-5-5`) | not yet reviewed |
 | `docs/reference/fmri_preprocessing.md` | written | 2026-10-15 | Claude Opus 5.5 (`claude-opus-5-5`) | not yet reviewed |
-| `docs/reference/nature_stories_stimuli.md` | written | 2026-10-19 | Claude Opus 5.5 (`claude-opus-5-5`) | not yet reviewed |
+| `docs/reference/nature_stories_stimuli.md` | written | 2026-10-20 | Claude Opus 5.5 (`claude-opus-5-5`) | not yet reviewed |
 | `docs/reference/model_embeddings.md` | written | 2026-10-08 | Claude Opus 5.5 (`claude-opus-5-5`) | not yet reviewed |
 | `docs/reference/statistics.md` | written | 2026-10-14 | Claude Opus 5.5 (`claude-opus-5-5`) | not yet reviewed |
 | `.gitignore` | edited | 2026-10-02 | Claude Opus 5.5 (`claude-opus-5-5`) * | not yet reviewed |
@@ -98,10 +100,10 @@ git history and may include later human edits.
 | `workflow/dataset_processing/narratives_dataset/envs/narratives_dataset_processing_environment.yaml` | edited | 2026-10-01 | Claude Opus 5.5 (`claude-opus-5-5`) | not yet reviewed |
 | `workflow/dataset_processing/narratives_dataset/scripts/compute_narratives_isc.py` | edited | 2026-10-02 | Claude Opus 5.5 (`claude-opus-5-5`) | not yet reviewed |
 | `workflow/dataset_processing/narratives_dataset/scripts/extract_narratives_parcels.py` | edited | 2026-10-09 | Claude Opus 5.5 (`claude-opus-5-5`) | not yet reviewed |
-| `workflow/dataset_processing/nature_stories_dataset/Snakefile` | edited | 2026-10-19 | Claude Opus 5.5 (`claude-opus-5-5`) | not yet reviewed |
+| `workflow/dataset_processing/nature_stories_dataset/Snakefile` | edited | 2026-10-20 | Claude Opus 5.5 (`claude-opus-5-5`) | not yet reviewed |
 | `workflow/dataset_processing/nature_stories_dataset/envs/nature_stories_dataset_processing_environment.yaml` | edited | 2026-10-01 | Claude Opus 5.5 (`claude-opus-5-5`) | not yet reviewed |
 | `workflow/dataset_processing/nature_stories_dataset/scripts/compute_nature_stories_isc.py` | edited | 2026-10-02 | Claude Opus 5.5 (`claude-opus-5-5`) | not yet reviewed |
-| `workflow/dataset_processing/nature_stories_dataset/scripts/check_nature_stories_textgrids.py` | written | 2026-10-19 | Claude Opus 5.5 (`claude-opus-5-5`) | not yet reviewed |
+| `workflow/dataset_processing/nature_stories_dataset/scripts/check_nature_stories_textgrids.py` | written | 2026-10-20 | Claude Opus 5.5 (`claude-opus-5-5`) | not yet reviewed |
 | `workflow/dataset_processing/nature_stories_dataset/scripts/convert_nature_stories_textgrids.py` | edited | 2026-10-19 | Claude Opus 5.5 (`claude-opus-5-5`) | not yet reviewed |
 | `workflow/dataset_processing/nature_stories_dataset/scripts/extract_nature_stories_parcels.py` | edited | 2026-10-14 | Claude Opus 5.5 (`claude-opus-5-5`) | not yet reviewed |
 | `workflow/dataset_processing/nsd_data_dataset/Snakefile` | edited | 2026-10-08 | Claude Opus 5.5 (`claude-opus-5-5`) | not yet reviewed |

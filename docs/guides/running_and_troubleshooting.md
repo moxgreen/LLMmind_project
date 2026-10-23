@@ -51,7 +51,7 @@ snakemake --use-conda --cores <N> --rerun-triggers mtime \
                plot_similarity_comparison_spearman_lineplot
 ```
 
-A clean run of everything takes about 31 h on node5; see
+A clean run of everything takes about 33 h on node5; see
 [`clean_run_duration.md`](../reference/clean_run_duration.md).
 
 **Parallelism.** No rule declares `threads:`, so Snakemake counts every job as one core and
@@ -319,7 +319,7 @@ code no longer produces or reads. They are safe to delete:
 If `plot_spearman_alignment` stops with a missing
 `empirical_null_standard_deviation_spearman_coefficient` column, the model-level Spearman TSVs
 predate that column. Rebuild them once with
-`--forcerun compute_spearman_alignmentwith_empirical_p_value`.
+`--forcerun compute_spearman_alignment_with_empirical_p_value`.
 
 ## Changes
 
@@ -418,3 +418,10 @@ The summary tables (`all_*.tsv`) are now written to `results/tsv_summaries/` ins
 
 `results/mind/nature_stories/qc/valid_voxel_counts.tsv` is no longer written, because nothing
 used it, and is now listed under "Leftover outputs from older versions".
+
+### 2026-10-22 18:05 — clean-run duration and Spearman rule name updated
+
+The clean-run duration in section 1 went from about 31 h to about 33 h, now that the estimate
+counts the jobs of the region analyses. The rebuild command under "Leftover outputs from older
+versions" named the Spearman rule by its old name, `compute_spearman_alignmentwith_empirical_p_value`,
+which no longer exists; it now uses `compute_spearman_alignment_with_empirical_p_value`.

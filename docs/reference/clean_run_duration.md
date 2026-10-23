@@ -10,14 +10,14 @@ e.g. `snakemake --forceall`). It assumes the usual command on **node5** (1× RTX
 snakemake --use-conda --cores 4 --resources gpu=1
 ```
 
-**Short answer: about 31 hours (29–34 h) if the models are already in `resources/models/`, and
+**Short answer: about 33 hours (31–36 h) if the models are already in `resources/models/`, and
 about 1.5 h more if they have to be downloaded.** Almost every figure is measured on node5; the
 critical path is `assemble_nsd_bold` (18.6 h) running next to the Caption Scene per-run
 extraction (about 50 job-hours).
 
 ## 1. Where the numbers come from
 
-- **Job counts**: dry run of the workflow, `snakemake -n --forceall` (about 40,900 jobs before
+- **Job counts**: dry run of the workflow, `snakemake -n --forceall` (about 36,000 jobs before
   checkpoints), plus the jobs added by the caption_scene checkpoint (8 subjects, 795 runs with
   retained events, 1,000 stimuli).
 - **Durations**: the start and `Finished jobid` timestamps of every job in the two node5 runs
@@ -100,7 +100,8 @@ and the smaller models take at most about 2 min.
 | **ISC nearest neighbours (all 4 datasets)** | | | | | |
 | `create_isc_manifest` (checkpoint) | 4 | 1 s | 8 s | 11 s | 10-05, 10-06 |
 | `create_isc_dataframe` | 4 | 1 s | 4 s | 7 s | 10-05, 10-06 |
-| `compute_isc_nearest_neighbours` | 4 | 2 s | 3 s | 9 s | 10-05, 10-06 |
+| `compute_isc_nearest_neighbours` | 9 | 2 s | 3 s | ~20 s | 10-05, 10-06 (4 jobs) |
+| `extract_region_isc_dataframe` | 5 | not measured | | <1 min (guess) | — |
 
 `assemble_nsd_bold` took 11.4 h when it ran alone on all 4 cores (2026-09-24) and 18.6 h on
 10-06, when no rule reserved cores any more and 3 `extract_caption_scene_run_parcels` jobs ran
@@ -111,15 +112,18 @@ rules marked "guess" only read or write small tables.
 
 | Rule | Jobs | Median | Max | Total | Measured in |
 |---|---:|---:|---:|---:|---|
-| `compute_llm_mind_alignment_score` | 612 | 2 s | 7 s | 22 min | 10-05, 10-06 |
-| `relabel_llm_similarity_and_compute_relabelled_llm_alignment_score` | 300 | 13 s | 2.3 min | 52 min | 10-05, 10-06 |
-| `compute_empirical_p_value` | 612 | 4 s | 35 s | 36 min | 10-05, 10-06 |
-| `compute_hypergeometric_p_value` | 612 | 2 s | 6 s | 16 min | 10-05, 10-06 |
-| `aggregate_all_p_value_outputs` | 1 | 4.1 min | | 4.1 min | 10-06 |
-| `compute_spearman_alignmentwith_empirical_p_value` | 300 | 1.7 min | 3.9 min | 6.1 h | 10-05, 10-06 |
-| `aggregate_all_spearman_alignment_scores` | 1 | 3 s | | 3 s | 10-06 |
+| `compute_llm_mind_alignment_score` | 1,224 | 2 s | 7 s | 44 min | 10-05, 10-06 (612 jobs) |
+| `relabel_llm_similarity_and_compute_relabelled_llm_alignment_score` | 600 | 13 s | 2.3 min | 1.7 h | 10-05, 10-06 (300 jobs) |
+| `compute_empirical_p_value` | 1,224 | 4 s | 35 s | 1.2 h | 10-05, 10-06 (612 jobs) |
+| `compute_hypergeometric_p_value` | 1,224 | 2 s | 6 s | 32 min | 10-05, 10-06 (612 jobs) |
+| `aggregate_all_p_value_outputs` | 3 | 4.1 min | | ~8 min | 10-06 (1 job) |
+| `compute_spearman_alignment_with_empirical_p_value` | 600 | 1.7 min | 3.9 min | 12.2 h | 10-05, 10-06 (300 jobs) |
+| `aggregate_all_spearman_alignment_scores` | 3 | 3 s | | ~9 s | 10-06 (1 job) |
 
-The NSD and Caption Scene jobs (1,000 stimuli) take most of this time: their Spearman jobs take
+Half of the jobs of each rule are the language- and visual-region analyses, which the measured
+runs did not include; their totals assume the per-job durations of the whole-cortex jobs (the
+region summary tables are smaller, so ~8 min is a guess). The NSD and Caption Scene jobs (1,000
+stimuli) take most of this time: their Spearman jobs take
 about 2 min each, against a few seconds for narratives and nature_stories.
 
 ### 2d. Model–model alignment and statistics
@@ -139,26 +143,27 @@ about 2 min each, against a few seconds for narratives and nature_stories.
 
 | Rule | Jobs | Median | Max | Total | Measured in |
 |---|---:|---:|---:|---:|---|
-| `plot_concept_alignment_scatterplot` | 24 | 2 s | 3 s | 1 min | 10-06 |
-| `plot_concept_alignment_enrichment_scatterplot` | 24 | 10 s | 27 s | 6 min | 10-06 |
-| `plot_brain_model_alignment_lineplot` | 24 | 2 s | 3 s | 1 min | 10-06 |
-| `plot_brain_model_alignment_enrichment_lineplot` | 24 | 10 s | 26 s | 6 min | 10-06 |
+| `plot_concept_alignment_scatterplot` | 57 | 2 s | 3 s | ~2 min | 10-06 (24 jobs) |
+| `plot_concept_alignment_enrichment_scatterplot` | 57 | 10 s | 27 s | ~14 min | 10-06 (24 jobs) |
+| `plot_brain_model_alignment_lineplot` | 57 | 2 s | 3 s | ~2 min | 10-06 (24 jobs) |
+| `plot_brain_model_alignment_enrichment_lineplot` | 57 | 10 s | 26 s | ~14 min | 10-06 (24 jobs) |
 | `plot_alignment_heatmap` | 24 | 4 s | 21 s | 4 min | 10-05, 10-06 |
 | `plot_empirical_p_value_heatmap` | 24 | 4 s | 8 s | 2 min | 10-06 |
-| `plot_spearman_alignment` | 12 | 4 s | 7 s | 1 min | 10-05, 10-06 |
-| `plot_similarity_comparison_alignment_lineplot` | 8 | not measured | | ~1 min (guess) | — |
-| `plot_similarity_comparison_enrichment_lineplot` | 8 | not measured | | ~5 min (guess) | — |
-| `plot_similarity_comparison_spearman_lineplot` | 4 | not measured | | <1 min (guess) | — |
+| `plot_spearman_alignment` | 27 | 4 s | 7 s | ~2 min | 10-05, 10-06 (12 jobs) |
+| `plot_similarity_comparison_alignment_lineplot` | 19 | not measured | | ~2 min (guess) | — |
+| `plot_similarity_comparison_enrichment_lineplot` | 19 | not measured | | ~12 min (guess) | — |
+| `plot_similarity_comparison_spearman_lineplot` | 9 | not measured | | ~2 min (guess) | — |
 
-The three similarity-comparison rules were added after the measured runs. Each job reads the
+The region plots and the three similarity-comparison rules were added after the measured runs;
+the region plots are scaled from the per-job durations of the whole-cortex ones. Each job reads the
 inputs of the matching per-similarity plots for all three similarity types, so the guesses are
-three times the per-job time of those plots; the enrichment one reads the relabelled files. They
-do not change the totals of section 3.
+three times the per-job time of those plots; the enrichment one reads the relabelled files. Together
+they add less than half an hour of work to section 3.
 
 ## 3. From job-hours to elapsed time
 
-The whole run is about **115 job-hours** of work (about 121 with downloads): 18.6 h of
-`assemble_nsd_bold` and about 96 job-hours of everything else, half of it the Caption Scene
+The whole run is about **124 job-hours** of work (about 130 with downloads): 18.6 h of
+`assemble_nsd_bold` and about 105 job-hours of everything else, half of it the Caption Scene
 per-run extraction. With 4 job slots, it cannot take less than about 30 h:
 
 1. **`assemble_nsd_bold` runs 4 worker processes** for 18.6 h but counts as one job, so 3 other
@@ -174,10 +179,10 @@ per-run extraction. With 4 job slots, it cannot take less than about 30 h:
 |---|---:|
 | Model downloads (only if `resources/models/` is empty; 4 at a time) | ~1.5 h |
 | `assemble_nsd_bold`, with 3 other jobs next to it (Caption Scene extraction, embeddings, narratives, nature_stories, part of the model–model statistics) | 18.6 h |
-| Remaining alignment, statistics and plots (~40 job-h at ~3.8 in parallel) | ~11 h |
+| Remaining alignment, statistics and plots (~49 job-h at ~3.8 in parallel) | ~13 h |
 | Final aggregation steps (one job at a time at the end) | ~0.5–2 h |
-| **Total, models already downloaded** | **~31 h (29–34 h)** |
-| **Total, models downloaded too** | **~32.5 h** |
+| **Total, models already downloaded** | **~33 h (31–36 h)** |
+| **Total, models downloaded too** | **~34.5 h** |
 
 As a check against real runs: the 10-05 run did 38.5 job-hours in 15.3 h (from 17:17, three hung
 jobs held cores, so it averaged only 1.9 jobs in parallel after the embeddings), and the 10-06 run
@@ -326,3 +331,16 @@ The three similarity-comparison plot rules, added on 2026-10-09, were missing fr
 They now have rows with guessed durations (20 jobs, a few minutes in all), until a run measures
 them. The totals did not change. The heading of this section lost its number, like the other
 living documents.
+
+### 2026-10-22 18:05 — region analyses counted: ~33 h
+
+The job counts still described the workflow before the language- and visual-region analyses of
+2026-10-14, which doubled every brain-model rule. They now come from a dry run of the current
+workflow (`snakemake -n --forceall`, about 36,000 jobs before checkpoints instead of about 40,900):
+`compute_llm_mind_alignment_score` and its two p-value rules 612 → 1,224, the relabelling and
+Spearman rules 300 → 600, each summary-table rule 1 → 3, `compute_isc_nearest_neighbours` 4 → 9,
+the new `extract_region_isc_dataframe` (5 jobs), and the brain-model plot rules 24 → 57 (Spearman
+12 → 27, similarity comparison 8/8/4 → 19/19/9). The region jobs have not been timed; their totals
+use the measured per-job durations of the whole-cortex jobs. The work grows by about 9 job-hours,
+almost all after `assemble_nsd_bold`: ~33 h (31–36 h) instead of ~31 h. The Spearman rule is now
+listed under its current name, `compute_spearman_alignment_with_empirical_p_value`.

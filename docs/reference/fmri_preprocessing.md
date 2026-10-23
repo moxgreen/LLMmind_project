@@ -134,8 +134,7 @@ representation.
   averaging and 0.043 with every presentation as a separate observation, and the two parcel
   patterns correlate 0.83 (median).
 - Narratives: in `pieman`, 11 of the 75 subjects heard the story twice (86 scans). Their two runs
-  are averaged in the same way, after the truncation of step 5. The median ISC is 0.133 with
-  averaging and 0.125 without, and the two parcel patterns correlate 0.999.
+  are averaged in the same way, after the truncation of step 5.
 
 The average over subjects is the arithmetic mean of r, without a Fisher z-transform. This is on
 purpose:
@@ -308,3 +307,11 @@ Scene windows start at the stimulus onset; for NSD, whose trials come every 4 s,
 mostly holds the response to earlier trials. The developer decided to report this as a
 limitation rather than correct it, since the delay of each response cannot be known exactly. The
 processing did not change.
+
+### 2026-10-22 18:05 — outdated `pieman` measurement removed
+
+Step 6 quoted the effect of averaging the repeated `pieman` runs (median ISC 0.133 with averaging,
+0.125 without, parcel patterns correlated 0.999). It was measured on 2026-10-02 with the
+nilearn atlas, before Narratives moved to the TemplateFlow atlas in its own template (entry of
+2026-10-09), so it no longer describes the current ISC and was removed. The averaging itself did
+not change.

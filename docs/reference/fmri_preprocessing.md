@@ -121,11 +121,11 @@ sherlock (724–746), shapesphysical (309–321), shapessocial (309–316) and s
 error otherwise.
 
 **6. ISC.** For each stimulus and parcel: the Pearson correlation between each subject and the
-mean of all other subjects, averaged over subjects (leave-one-subject-out ISC). It is set to 0 when
-either time series is constant, that is, when its range over time is at most about 1e-6 of its
-magnitude (`is_constant_signal()` in `libraries/compute_isc.py`). This is a small tolerance, not an
-exact test, so a real but tiny fluctuation is zeroed too. The 200 values form the stimulus's brain
-representation.
+mean of all other subjects, averaged over subjects (leave-one-subject-out ISC). Every r is
+computed as is, with no tolerance and no replacement value. If a time series is exactly constant,
+r is undefined (0/0) and `compute_leave_one_out_isc()` in `libraries/compute_isc.py` stops with an
+error naming the parcels. No current stimulus has a constant parcel (checked on 2026-10-27 on all
+four datasets). The 200 values form the stimulus's brain representation.
 
 - NSD and Caption Scene show the same image to a subject several times (NSD: up to 3, Caption
   Scene: about 2). Each subject's presentations are first **averaged time point by time point**
@@ -315,3 +315,13 @@ Step 6 quoted the effect of averaging the repeated `pieman` runs (median ISC 0.1
 nilearn atlas, before Narratives moved to the TemplateFlow atlas in its own template (entry of
 2026-10-09), so it no longer describes the current ISC and was removed. The averaging itself did
 not change.
+
+### 2026-10-27 11:09 — near-constant tolerance removed from the ISC
+
+Step 6 used to set r to 0 when either time series varied by at most about 1e-6 of its magnitude,
+and any non-finite r to 0. The developer chose to compute every r without manipulation. A check
+on all stored parcel time series found no exactly constant signal and only 2 zeroed values, both
+in NSD 3-volume windows where the mean of the other subjects varied by less than 0.001 around
+1000: `nsd-06445` parcel 39 (r = −0.53) and `nsd-43747` parcel 26 (r = −0.61). Their ISC
+changes by 0.067 and 0.076; every other ISC is unchanged. A constant signal now stops the run
+instead of giving 0.

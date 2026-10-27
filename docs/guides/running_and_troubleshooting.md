@@ -305,6 +305,9 @@ code no longer produces or reads. They are safe to delete:
 - NSD parcel files without a repetition in their name
   (`results/mind/nsd_data/parcels/task-*/sub-<NN>_task-*_parcel_ts.npy`): the current files are
   named `sub-<NN>_rep-<NN>_task-*_parcel_ts.npy`;
+- Caption Scene parcel files with unpadded numbers
+  (`results/mind/caption_scene/parcels/task-*/sub-1_ses-13_run-50_*_parcel_ts.npy`): the current
+  files are named `sub-01_ses-13_run-050_*_parcel_ts.npy`, as in `csd_events_manifest.tsv`;
 - `isc_reliability.tsv` in each `results/mind/<dataset>/` folder and
   `results/mind/all_isc_reliability.tsv` (the ISC reliability is no longer computed), and
   `results/mind/caption_scene/manifests/isc_manifest.tsv` (written only for that analysis);
@@ -425,3 +428,9 @@ The clean-run duration in section 1 went from about 31 h to about 33 h, now that
 counts the jobs of the region analyses. The rebuild command under "Leftover outputs from older
 versions" named the Spearman rule by its old name, `compute_spearman_alignmentwith_empirical_p_value`,
 which no longer exists; it now uses `compute_spearman_alignment_with_empirical_p_value`.
+
+### 2026-10-27 11:09 — Caption Scene parcel files with unpadded numbers listed
+
+"Leftover outputs from older versions" now lists the Caption Scene parcel files named with
+unpadded subject, session and run numbers. 15,900 of them, written on 2026-09-24, were found next
+to the 15,900 files the manifest uses, checked against `csd_events_manifest.tsv`, and deleted.

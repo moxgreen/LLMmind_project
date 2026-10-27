@@ -1,18 +1,6 @@
 # written with AI assistance: Claude Code, Claude Opus 5.5 (claude-opus-5-5)
-# last AI edit: 2026-10-08, see docs/changelog/developers/ for details
+# last AI edit: 2026-10-27, see docs/changelog/developers/ for details
 import numpy as np
-
-# a float32 signal whose range is within a few ulps of its magnitude is only rounding noise.
-# np.isclose() defaults (rtol=1e-5) were too loose: they flagged real low-amplitude signals
-# (e.g. < ~0.01 variation on BOLD values around 1000) as constant
-CONSTANT_SIGNAL_RTOL = 8*np.finfo(np.float32).eps
-
-def is_constant_signal(x, axis = 0):
-    x = np.asarray(x, dtype = np.float64,)
-    signal_range = np.ptp(x, axis = axis,)
-    magnitude = np.max(np.abs(x), axis = axis,)
-
-    return signal_range <= CONSTANT_SIGNAL_RTOL*magnitude
 
 def compute_leave_one_out_isc(data):
     """
@@ -20,7 +8,7 @@ def compute_leave_one_out_isc(data):
 
         For every parcel, the mean over subjects of the Pearson r between each subject's
         time course and the mean time course of the other subjects. A constant signal
-        gives r = 0.
+        has no r and raises an error.
     """
     n_subjects = data.shape[0]
     n_parcels = data.shape[2]
@@ -43,12 +31,16 @@ def compute_leave_one_out_isc(data):
         with np.errstate(invalid = "ignore", divide = "ignore",):
             r = numerator/denominator
 
-        is_constant_x = is_constant_signal(x, axis = 0,)
-        is_constant_y = is_constant_signal(y, axis = 0,)
+        # a constant time course makes r 0/0: stop instead of replacing it
+        bad_parcels = np.flatnonzero(~np.isfinite(r))
 
-        r = np.where(is_constant_x | is_constant_y, 0.0, r,)
+        if bad_parcels.size:
+            raise ValueError(
+                f"Pearson r is undefined (constant time course) for subject index "
+                f"{subject_idx}, parcels {bad_parcels.tolist()}"
+            )
 
-        isc[subject_idx] = np.nan_to_num(r, nan = 0.0, posinf = 0.0, neginf = 0.0,)
+        isc[subject_idx] = r
 
     return isc.mean(axis = 0).astype(np.float32)
 

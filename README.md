@@ -311,7 +311,7 @@ corrected by hand:
   GIN, DOI `10.12751/g-node.t4wew2`). The dataset README states that each
   story in `zRresp` was z-scored on its own before concatenation, but with the
   original boundaries 7 of the 10 training stories are not z-scored. The
-  corrected file shifts six boundaries by 1–2 TRs (the total, 3737 TRs, is
+  corrected file shifts five boundaries by 1–2 TRs (the total, 3737 TRs, is
   unchanged):
 
   | Story | Original onset, length | Corrected onset, length |

@@ -218,6 +218,91 @@ Layout, shared by all plots (constants and helpers in `libraries/visualisation_u
   symmetric around 0, and the enrichment plot keeps the symlog axis, fitted on the axis positions
   and starting at 0 at the lowest.
 
+## 8. Robustness checks of the whole-cortex results
+
+One-off checks made on 2026-11-05, from the existing summary tables, ISC tables and embeddings;
+they are not pipeline rules and change no result. Unless stated, each permutation null uses
+*N* = 10,000 and seed 37, and Benjamini-Hochberg (BH) q-values use the families given below. Every
+RSA check first reproduced the published coefficients to within 10⁻⁵. Numbers below give cosine /
+Pearson / Spearman.
+
+### Model size
+
+Spearman's ρ between log10(`parameters_millions`) and the outcome (RSA coefficient or
+nearest-neighbour enrichment) for each configuration: 24 per modality. The test is two-sided around
+the null mean, permuting parameter counts within families (`model_family()`; CLIP and fine-tuned
+CLIP are separate). BH runs across the 24 configurations of a modality.
+
+| Analysis | Models | Configurations with q < 0.05 | Smallest q |
+|---|---|---|---|
+| Language | 24 | 0/24 | 0.396 |
+| Vision | 14 | 0/24 | 0.456 |
+| Language, without the 7 quantised models | 17 | 0/24 | 0.698 |
+
+Exact tests inside a family (120 orderings, smallest p = 2/120 ≈ 0.017, uncorrected and descriptive)
+reach that minimum in 2 of 24 BLOOMZ configurations (both ρ = +1) and 1 of 24 Gemma 3 configurations
+(ρ = −1, where size and quantisation coincide). With 14–24 models a modest trend cannot be excluded.
+This measures size, not capability.
+
+### Dependencies between the Narratives units
+
+Units sharing a story, speaker or production source form four blocks: {`pieman`, `piemanpni`,
+`bronx`, `slumlordreach`, `notthefallintact`, `black`}, Milky Way (3 units), {`merlin`, `sherlock`}
+and Shapes (2 units). Five units have no listed relation.
+
+| Check | ρ, median over models | Models with q < 0.05 |
+|---|---|---|
+| All 18 units (published) | 0.395 / 0.469 / 0.550 | 24 / 24 / 24 |
+| Without the 20 pairs inside a block (133 pairs) | 0.378 / 0.498 / 0.542 | not tested |
+| One unit per block, 72 subsets of 9 units | 0.392 / 0.489 / 0.499 | 0.8% / 12.0% / 8.9% of model-subset tests |
+| Without any one non-Shapes unit (17 units) | 0.388–0.478 / 0.461–0.530 / 0.545–0.614 | 24 / 24 / 23–24 |
+| Without `shapesphysical` (17 units) | 0.212 / 0.287 / 0.381 | 0 / 0 / 22 |
+| Without `shapessocial` (17 units) | 0.281 / 0.324 / 0.418 | 0 / 0 / 23 |
+| **Without both Shapes units (16 units)** | **−0.008 / 0.030 / 0.156** | **0 / 0 / 0** |
+| Without `merlin` and `sherlock` (16 units) | 0.459 / 0.561 / 0.645 | 24 / 24 / 24 |
+| Without the Shapes units, `merlin` and `sherlock` (14 units) | 0.079 / 0.129 / 0.268 | 0 / 0 / 19 |
+| Without Milky Way (15 units) | 0.427 / 0.515 / 0.540 | 24 / 24 / 24 |
+| Without the 6-unit block (12 units) | 0.494 / 0.549 / 0.613 | 23 / 24 / 23 |
+
+BH runs across the 24 models for each similarity type and unit set. The Shapes units have the lowest
+mean similarity rank to the other units in the model geometry, and among the lowest in the brain
+geometry (only `lucy` falls between them under cosine), so the RSA largely reflects them standing
+apart in both. Every 72-subset test keeps one Shapes unit, so its stable coefficient does not show
+independence from them. Its low significance rates also reflect its 36 pairs. Keeping 16 units leaves
+120 pairs, so the loss without Shapes is a fall in the coefficient, not only a loss of power. The
+exclusions were chosen after seeing the restricted-permutation result below, so they are exploratory.
+The nearest-neighbour results were not repeated without Shapes. The transcripts describe a moving-shapes
+animation in physical or in social terms (`stimuli/transcripts_renamed/shapes*.txt`); what makes
+these units stand apart has not been tested.
+
+**Restricted permutations** on all 18 units use the 240 permutations that permute the five unrelated
+units and optionally swap {`merlin`, `sherlock`} with the Shapes block; the other two blocks stay
+fixed, so 36 of the 153 pairs never change. No model reaches q < 0.05 (uncorrected p < 0.05: 2 / 1 / 1
+of 24), and the smallest attainable p is 1/240 ≈ 0.004. Both ways of pairing the swapped units give
+the same p-values. No swapped permutation reaches the observed ρ (null mean about 0.0–0.1), whereas
+the unswapped ones have about the observed ρ (null mean 0.43 / 0.48 / 0.57, median 60–70 of 120 at
+least as large), which is what the Shapes dependence predicts.
+
+### Duration and length
+
+For Narratives (scan length 7.35–56.2 min, 18 units) and Nature Stories (9.70–14.33 min, 11 units).
+Duration is the shortest scan length entering a story's ISC × TR; the covariate is −|Δlog duration|,
+or −|Δlog `n_tokens`| for each model's own token counts. Partial RSA removes the covariate from the
+rank-transformed brain and model similarities and relabels the model residuals; BH runs across the
+24 models of each similarity type.
+
+| Dataset | Published ρ | ρ controlling for duration | ρ controlling for tokens | Models with q < 0.05: published, duration, tokens |
+|---|---|---|---|---|
+| Narratives | 0.395 / 0.469 / 0.550 | 0.395 / 0.469 / 0.549 | 0.403 / 0.475 / 0.555 | 24 / 24 / 24 in all three |
+| Nature Stories | 0.099 / 0.168 / 0.196 | 0.106 / 0.181 / 0.242 | 0.073 / 0.143 / 0.195 | 0 / 0 / 1; 0 / 0 / 2; 0 / 0 / 1 |
+
+Duration similarity does not predict brain geometry (one-sided upper-tail p ≥ 0.79 in Narratives,
+≥ 0.17 in Nature Stories) or any model's geometry (no q < 0.05). Mean ISC per story is not associated
+with duration (ρ = 0.18, p = 0.48 and ρ = −0.12, p = 0.73) or with mean tokens (ρ = −0.003, p = 0.99
+and ρ = 0.15, p = 0.66); in Narratives its association with the number of subjects is ρ = 0.43,
+p = 0.075. Duration and length therefore do not explain the Narratives RSA or its contrast with
+Nature Stories. This is a pairwise control: it does not exclude every effect of duration on the ISC.
+
 ## Changes
 
 Changes to the methods described above, oldest first. Each entry gives when the change happened,
@@ -300,3 +385,9 @@ similarity-comparison enrichment plots, whose range is fitted to the data and ca
 0.97–1.05, this left only the tick at 1, hidden under the reference line, so the scale could not
 be read. When fewer than four fixed ticks fall in the range, evenly spaced round ticks are now
 used.
+
+### 2026-11-05 18:20 — robustness checks recorded
+
+New section 8 records one-off checks of model size, dependencies between the Narratives units,
+and story duration and length. They change no pipeline result. The main finding is that the
+Narratives RSA depends on the two Shapes units.

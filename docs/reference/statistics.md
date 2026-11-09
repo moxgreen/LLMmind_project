@@ -278,9 +278,16 @@ This measures size, not capability.
 
 ### Dependencies between the Narratives units
 
-Units sharing a story, speaker or production source form four blocks: {`pieman`, `piemanpni`,
-`bronx`, `slumlordreach`, `notthefallintact`, `black`}, Milky Way (3 units), {`merlin`, `sherlock`}
-and Shapes (2 units). Five units have no listed relation.
+The relabelling null treats the 18 Narratives units as exchangeable, but several of them share a
+story, a speaker or a source, and dependent units can inflate an RSA coefficient. A permutation test
+that respects these dependencies leaves no model significant, and leaving units out shows why: the
+Narratives RSA rests on the two Shapes units, which stand apart from the other units in both the
+brain and the model geometries. Without them no model survives correction. The leave-out checks were
+chosen after seeing the restricted-permutation result, so they are exploratory.
+
+**Blocks.** Units sharing a story, speaker or production source form four blocks: {`pieman`,
+`piemanpni`, `bronx`, `slumlordreach`, `notthefallintact`, `black`}, Milky Way (3 units),
+{`merlin`, `sherlock`} and Shapes (2 units). Five units have no listed relation.
 
 Speakers and sources of the 18 units, from Nastase et al. (2021), *Scientific Data* 8:250,
 "Stimuli" section ([PMC8479122](https://pmc.ncbi.nlm.nih.gov/articles/PMC8479122/)). "Not named"
@@ -312,6 +319,23 @@ speaker, and `pieman`, `slumlordreach`, `notthefallintact` and `black` share The
 source. The paper does not say whether one participant recalled both `merlin` and `sherlock`;
 they are grouped as spoken recalls from the same lab and procedure.
 
+**The Shapes units** are not stories: `shapesphysical` and `shapessocial` describe the same
+moving-shapes animation ("When Heider Met Simmel") in physical or in social terms
+(`stimuli/transcripts_renamed/shapes*.txt`). They have the lowest mean similarity rank to the other
+units in the model geometry, and among the lowest in the brain geometry (only `lucy` falls between
+them under cosine). What makes them stand apart in the brain has not been tested.
+
+**Restricted permutations** on all 18 units use the 240 permutations that permute the five unrelated
+units and optionally swap {`merlin`, `sherlock`} with the Shapes block; the other two blocks stay
+fixed, so 36 of the 153 pairs never change. No model reaches q < 0.05 (uncorrected p < 0.05: 2 / 1 / 1
+of 24), and the smallest attainable p is 1/240 ≈ 0.004. Both ways of pairing the swapped units give
+the same p-values. No swapped permutation reaches the observed ρ (null mean about 0.0–0.1), whereas
+the unswapped ones have about the observed ρ (null mean 0.43 / 0.48 / 0.57, median 60–70 of 120 at
+least as large), which is what the Shapes dependence predicts.
+
+**Leave-out checks.** To find which units drive the result, the published RSA was recomputed without
+single units and blocks:
+
 | Check | ρ, median over models | Models with q < 0.05 |
 |---|---|---|
 | All 18 units (published) | 0.395 / 0.469 / 0.550 | 24 / 24 / 24 |
@@ -326,24 +350,12 @@ they are grouped as spoken recalls from the same lab and procedure.
 | Without Milky Way (15 units) | 0.427 / 0.515 / 0.540 | 24 / 24 / 24 |
 | Without the 6-unit block (12 units) | 0.494 / 0.549 / 0.613 | 23 / 24 / 23 |
 
-BH runs across the 24 models for each similarity type and unit set. The Shapes units have the lowest
-mean similarity rank to the other units in the model geometry, and among the lowest in the brain
-geometry (only `lucy` falls between them under cosine), so the RSA largely reflects them standing
-apart in both. Every 72-subset test keeps one Shapes unit, so its stable coefficient does not show
-independence from them. Its low significance rates also reflect its 36 pairs. Keeping 16 units leaves
-120 pairs, so the loss without Shapes is a fall in the coefficient, not only a loss of power. The
-exclusions were chosen after seeing the restricted-permutation result below, so they are exploratory.
-The nearest-neighbour results were not repeated without Shapes. The transcripts describe a moving-shapes
-animation in physical or in social terms (`stimuli/transcripts_renamed/shapes*.txt`); what makes
-these units stand apart has not been tested.
-
-**Restricted permutations** on all 18 units use the 240 permutations that permute the five unrelated
-units and optionally swap {`merlin`, `sherlock`} with the Shapes block; the other two blocks stay
-fixed, so 36 of the 153 pairs never change. No model reaches q < 0.05 (uncorrected p < 0.05: 2 / 1 / 1
-of 24), and the smallest attainable p is 1/240 ≈ 0.004. Both ways of pairing the swapped units give
-the same p-values. No swapped permutation reaches the observed ρ (null mean about 0.0–0.1), whereas
-the unswapped ones have about the observed ρ (null mean 0.43 / 0.48 / 0.57, median 60–70 of 120 at
-least as large), which is what the Shapes dependence predicts.
+BH runs across the 24 models for each similarity type and unit set. Removing any other unit or block
+leaves the result in place; removing both Shapes units removes it, so the RSA largely reflects the
+Shapes units standing apart in both geometries. Every 72-subset test keeps one Shapes unit, so its
+stable coefficient does not show independence from them. Its low significance rates also reflect its
+36 pairs. Keeping 16 units leaves 120 pairs, so the loss without Shapes is a fall in the coefficient,
+not only a loss of power. The nearest-neighbour results were not repeated without Shapes.
 
 ### Duration and length
 
@@ -507,3 +519,11 @@ coarse. Section 5 records how many corrected effects survive Benjamini-Yekutieli
 any dependence between the tests. Section 8 gains a subsection testing why Narratives local
 alignment depends on the similarity type: mostly the skew of the ISC vectors, and for cosine also
 the unequal numbers of subjects.
+
+### 2026-11-09 16:06 — Narratives dependency check reordered
+
+The subsection on dependencies between the Narratives units listed the leave-out results before the
+restricted-permutation result that motivated them, and did not say why dependent units matter. It
+now opens with the reason for the check, its finding and its exploratory status, describes the
+Shapes units in their own paragraph, and gives the restricted permutations before the leave-out
+checks. No number changed.

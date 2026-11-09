@@ -7,6 +7,7 @@ Changes made on this day, in order:
 - Speaker and source table for the Narratives units (documentation)
 - AI usage record corrected (documentation)
 - Three robustness checks recorded, and a flaw in some p-values described (documentation)
+- Narratives dependency check easier to follow (documentation)
 
 ---
 
@@ -47,3 +48,14 @@ Kind: documentation
   score are sometimes not counted, so some p-values are too small, mostly for Narratives and Nature
   Stories. The statistics page, section 3, describes it. A fix has been approved but not yet
   applied; no result changed today.
+
+---
+
+## 16:06 — Narratives dependency check easier to follow
+
+Kind: documentation
+
+The statistics page, section 8, "Dependencies between the Narratives units", now starts by saying why
+the check was made (several Narratives stories share a speaker or source, which the significance test
+does not account for) and what it found (the Narratives result rests on the two Shapes descriptions).
+The steps then follow in the order they were done. No result changed.

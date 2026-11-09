@@ -7,6 +7,7 @@ Changes made on this day, in order:
 - Speaker and source table for the Narratives units (documentation)
 - Own row of `AI_USAGE.md` brought up to date (documentation)
 - One-off checks recorded: Narratives similarity types, Benjamini-Yekutieli, COCO overlap; tie defect of the model-level p-value documented (documentation)
+- Narratives dependency check reordered in `statistics.md` (documentation)
 
 ---
 
@@ -87,3 +88,22 @@ results; no pipeline code or output changed.
   pipeline's float comparison. The tie counts for Narratives and Nature Stories were recomputed from
   every stored relabelled file of those datasets. NSD's `shared1000` claim was checked on
   `nsd_stim_info_merged.csv` (72,000 images seen by one subject, 1000 by all eight).
+
+---
+
+## 16:06 — Narratives dependency check reordered
+
+Kind: documentation
+
+`docs/reference/statistics.md`, section 8, "Dependencies between the Narratives units": new opening
+paragraph (exchangeability assumption of the relabelling null, finding, exploratory status), a
+separate paragraph on the Shapes units (moved from the end of the leave-out discussion), and the
+restricted-permutation paragraph moved before the leave-out table, which now has a one-line lead.
+Content and numbers unchanged.
+
+### Context
+
+- Request: the user asked why the Shapes units received so much attention and whether the docs
+  explain it; on the assessment that the reasoning was hard to follow, asked for the edit.
+- Files: `docs/reference/statistics.md`, both 2026-11-09 changelogs.
+- Verification: every table row and number of the subsection compared before and after the edit.

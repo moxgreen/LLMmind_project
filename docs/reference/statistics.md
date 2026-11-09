@@ -53,6 +53,18 @@ The (*b* + 1)/(*N* + 1) form (`compute_statistics.empirical_upper_tail_p_value()
 observed value as one draw of the null, so a p-value is never 0; with *N* = 10,000 the smallest
 possible value is about 1 × 10⁻⁴.
 
+**Known defect: the model-level test misses ties.** The null of the alignment score is discrete
+(every concept score is a multiple of 1/*k*), so many relabellings reach exactly the observed
+mean, and they should count towards *b*. `aggregate_alignment_scores.compute_model_level_empirical_p_value()`
+compares the two means as floating-point numbers, summed in a different order, so an exact tie
+can round below the observed mean and is then not counted. The model-level p-values in the summary
+TSVs are therefore too small where ties are frequent, mostly on the datasets with few concepts. For
+example, on Narratives (cosine, *k* = 5, `bloom_1b1`) 1303 relabellings reach the observed mean but
+only 915 are counted, giving p = 0.092 instead of 0.130. On the whole cortex this changes the
+models with p < 0.05 from 11 to 3 (Narratives, Pearson) and the models with BH q < 0.05 from 6 to
+3 (Nature Stories, Spearman). The concept-level test is not affected, because it compares
+identically computed values. Counting on the integer sums of common neighbours fixes it.
+
 The **hypergeometric expectation** of every concept's alignment score is *k*/(*n* − 1): two random
 *k*-subsets of *n* − 1 concepts share *k*²/(*n* − 1) elements on average. It is the dashed
 reference line of the alignment-score line plot and concept scatterplot, and the subtitle of the
@@ -100,6 +112,31 @@ uncorrected p-values only. The per-concept p-values are not corrected and not sh
 The region analyses (language and visual region, see [`brain_regions.md`](brain_regions.md)) form
 families of their own: a region's brain-model and Spearman families hold only the models of its
 modality.
+
+**Check under arbitrary dependence.** The tests of a family share the brain geometry and the
+permutation stream. Benjamini-Hochberg assumes independent or positively dependent tests, which is
+plausible here but not shown. Benjamini-Yekutieli (BY) holds under any dependence: its q-values are
+the BH q-values multiplied by Σ 1/*i* over *i* = 1…*m*, capped at 1 (3.78 for *m* = 24, 4.21 for
+*m* = 38). A one-off computation on 2026-11-09, from the p-values of the summary TSVs (before the fix
+of the tie defect in section 3), counted the tests with q < 0.05:
+
+| Family | Tests | BH | BY |
+|---|---|---|---|
+| All whole-cortex nearest-neighbour tests | 612 | 292 | 244 |
+| All whole-cortex Spearman tests | 300 | 63 | 8 |
+| All language-region nearest-neighbour tests | 360 | 38 | 0 |
+| All visual-region nearest-neighbour tests | 252 | 126 | 104 |
+| All language-region Spearman tests | 216 | 73 | 31 |
+| All visual-region Spearman tests | 84 | 11 | 0 |
+
+In the per-configuration families of the figures, BY removes few of the strong effects (Caption
+Scene at *k* = 25 and 125: 36–38 of 38 under both; Narratives nearest neighbours under Spearman
+similarity: 23 → 22; Narratives Spearman alignment under Pearson and Spearman similarity: 24 → 22
+and 24 → 23). It removes the uniform, moderate ones: Narratives Spearman alignment under cosine
+similarity goes from 24/24 to 0/24, because all 24 p-values lie between 0.0012 and 0.041. Caption
+Scene at *k* = 5 goes from 6 to 0 (cosine) and 13 to 4 (Pearson), Nature Stories nearest neighbours
+under Spearman similarity from 6 to 3, and the language-region Narratives nearest neighbours under
+cosine similarity from 20 to 0.
 
 ## 6. Spearman alignment
 
@@ -333,6 +370,45 @@ and ρ = 0.15, p = 0.66); in Narratives its association with the number of subje
 p = 0.075. Duration and length therefore do not explain the Narratives RSA or its contrast with
 Nature Stories. This is a pairwise control: it does not exclude every effect of duration on the ISC.
 
+### Why the similarity types differ on Narratives
+
+On Narratives at *k* = 5, local alignment is significant for almost every model under Spearman
+similarity but for few under cosine or Pearson. Two explanations were tested on 2026-11-09, both
+from the existing parcel time series and model neighbours: the number of subjects per story (14–75;
+the leave-one-out ISC grows with it, and only Spearman similarity is insensitive to a monotonic
+change of scale), and the skew of the ISC vectors across parcels (median skewness 1.74; the 17
+parcels with the highest mean ISC carry a median 57% of each story's variance around its mean). For
+each condition the brain neighbours and the model-level alignment of the 24 language models were
+recomputed, and tested with the pipeline's relabelling null (same seed and permutations,
+*N* = 10,000, ties counted exactly; see section 3), BH across the 24 models:
+
+| Condition | Models with p < 0.05 (cosine / Pearson / Spearman) | Models with q < 0.05 |
+|---|---|---|
+| Published ISC | 4 / 3 / 23 | 0 / 0 / 23 |
+| Every story subsampled to 14 subjects (20 seeded draws; median, range) | 18 (8–22) / 11.5 (2–22) / 23 (20–24) | 16 (0–22) / 2 (0–22) / 23 (20–24) |
+| Without the 17 highest-ISC parcels | 17 / 20 / 23 | 11 / 20 / 23 |
+| log(ISC + 0.05) | 16 / 21 / 23 | 3 / 21 / 23 |
+
+The subsampled ISC was recomputed with `compute_leave_one_out_isc()`, after the same truncation to
+the shortest run and averaging of repeated runs as the pipeline (the full recomputation reproduces
+the published ISC exactly). The offset 0.05 makes every value positive (23 of the 3600 ISC values
+are ≤ 0, the smallest −0.041); it reduces the median skewness to 0.30. The 17 parcels (label IDs 15,
+16, 44, 74, 76, 77, 78, 79, 81, 116, 117, 148, 149, 183, 187, 188, 189) include 9 of the language
+region: 7 of its 9 auditory parcels and 2 of its 8 language parcels.
+
+- **Skew is the main cause for Pearson similarity.** Removing the 17 parcels or log-transforming
+  brings Pearson to 20–21 of 24 corrected models, close to Spearman. These parcels, mostly auditory,
+  have high ISC in every story, so they dominate every story's vector and make the stories look
+  alike.
+- **The number of subjects also matters for cosine similarity.** With equal numbers, cosine reaches
+  a median of 18 nominally significant models, but the result varies widely between draws. Why
+  cosine is more sensitive to it than Pearson was not tested; cosine does not centre the vectors,
+  so a pattern shared by all stories weighs on it more.
+- **Spearman similarity is stable under every condition** (23 of 24 models).
+
+So the gap between the similarity types comes from a few high-ISC, mostly auditory parcels and, for
+cosine, from the unequal numbers of subjects. One-off check; no pipeline result changed.
+
 ## Changes
 
 Changes to the methods described above, oldest first. Each entry gives when the change happened,
@@ -427,3 +503,12 @@ Narratives RSA depends on the two Shapes units.
 The section on dependencies between the Narratives units named its four blocks but did not say
 which speaker or source links the units in each block. A table now lists the speaker and source
 of each of the 18 units, taken from the Narratives data paper, and the block it belongs to.
+
+### 2026-11-09 14:30 — ties in the model-level test, Benjamini-Yekutieli check, Narratives similarity types
+
+Section 3 now describes a defect found during the Narratives check below: the model-level
+nearest-neighbour p-value misses ties with the observed mean, so it is too small where the null is
+coarse. Section 5 records how many corrected effects survive Benjamini-Yekutieli, which holds under
+any dependence between the tests. Section 8 gains a subsection testing why Narratives local
+alignment depends on the similarity type: mostly the skew of the ISC vectors, and for cosine also
+the unequal numbers of subjects.

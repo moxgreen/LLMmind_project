@@ -90,7 +90,7 @@ git history and may include later human edits.
 | `docs/guides/running_and_troubleshooting.md` | written | 2026-10-27 | Claude Opus 5.5 (`claude-opus-5-5`) | not yet reviewed |
 | `docs/reference/brain_regions.md` | written | 2026-10-16 | Claude Opus 5.5 (`claude-opus-5-5`) | not yet reviewed |
 | `docs/reference/clean_run_duration.md` | written | 2026-10-22 | Claude Opus 5.5 (`claude-opus-5-5`) | not yet reviewed |
-| `docs/reference/fmri_preprocessing.md` | written | 2026-10-27 | Claude Opus 5.5 (`claude-opus-5-5`) | not yet reviewed |
+| `docs/reference/fmri_preprocessing.md` | written | 2026-11-09 | Claude Opus 5.5 (`claude-opus-5-5`) | not yet reviewed |
 | `docs/reference/nature_stories_stimuli.md` | written | 2026-10-20 | Claude Opus 5.5 (`claude-opus-5-5`) | not yet reviewed |
 | `docs/reference/model_embeddings.md` | written | 2026-10-08 | Claude Opus 5.5 (`claude-opus-5-5`) | not yet reviewed |
 | `docs/reference/statistics.md` | written | 2026-11-09 | Claude Opus 5.5 (`claude-opus-5-5`) | not yet reviewed |

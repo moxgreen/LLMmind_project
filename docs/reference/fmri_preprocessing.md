@@ -216,6 +216,25 @@ The NSD numbers were computed on 2026-10-15 from `nsd_occurrence_manifest.tsv` a
 files (the trial 3 volumes before each retained onset). The methods section should state this
 limitation.
 
+### Overlap between the Caption Scene and NSD images
+
+Both image datasets draw on COCO. Counted on 2026-11-09 by COCO image ID, over the 1000 retained
+images of each (the concepts of `results/mind/{caption_scene,nsd_data}/isc_dataframe.parquet`):
+
+- **13 images are retained in both datasets** (COCO IDs 39196, 61174, 71429, 92001, 100599, 122964,
+  283678, 346583, 438751, 449914, 544060, 558788, 579906). The two vision results are therefore
+  almost independent in their images.
+- All 1000 retained NSD images are NSD's `shared1000` images: the rule of step 1 (at least 2
+  subjects) does not restrict to them, but only they are seen by more than one subject.
+- Over the full stimulus sets, 7497 of the 9494 Caption Scene images are among NSD's 73,000;
+  797 retained Caption Scene images are in NSD, and 111 retained NSD images are in Caption Scene.
+
+IDs: NSD from the `cocoId` column of `nsddata/experiments/nsd/nsd_stim_info_merged.csv`, matched
+by `nsdId` = 73k ID − 1 (concept `nsd-NNNNN` holds the 1-based 73k ID of the design files);
+Caption Scene from the image file names (`COCO_train2014_000000107885` → 107885). COCO IDs are
+unique across the 2014 and 2017 splits. The images may have been cropped differently by each
+dataset; only the identity of the source image was compared.
+
 ## Changes
 
 Changes to the processing described above, oldest first. The sections above always describe the
@@ -325,3 +344,9 @@ in NSD 3-volume windows where the mean of the other subjects varied by less than
 1000: `nsd-06445` parcel 39 (r = −0.53) and `nsd-43747` parcel 26 (r = −0.61). Their ISC
 changes by 0.067 and 0.076; every other ISC is unchanged. A constant signal now stops the run
 instead of giving 0.
+
+### 2026-11-09 14:30 — overlap between the Caption Scene and NSD images
+
+New subsection with the number of COCO images shared by the retained Caption Scene and NSD
+stimuli (13 of 1000), counted by COCO image ID, for the methods' comparison of the two vision
+datasets. No processing changed.

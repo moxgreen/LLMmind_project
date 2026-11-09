@@ -47,23 +47,18 @@ All tests are one-sided (upper tail): they ask whether the alignment is larger t
 |---|---|---|---|---|
 | Empirical | concept | the concept's alignment score | (*b* + 1)/(*N* + 1), *b* = number of relabellings whose score for that concept is ≥ the observed one | `empirical_upper_tail_p_value` (per-concept TSV) |
 | Hypergeometric | concept | the concept's number of common neighbours *x* | P(*X* ≥ *x*), *X* ~ Hypergeometric(population *n* − 1, *k* successes, *k* draws) | `hypergeometric_upper_tail_p_value` (per-concept TSV) |
-| Empirical | model | the mean alignment score over concepts | (*b* + 1)/(*N* + 1), *b* = number of relabellings whose mean score is ≥ the observed mean | `model_level_empirical_p_value` (summary TSVs) |
+| Empirical | model | the mean alignment score over concepts | (*b* + 1)/(*N* + 1), *b* = number of relabellings whose mean score is ≥ the observed mean, ties included | `model_level_empirical_p_value` (summary TSVs) |
 
 The (*b* + 1)/(*N* + 1) form (`compute_statistics.empirical_upper_tail_p_value()`) counts the
 observed value as one draw of the null, so a p-value is never 0; with *N* = 10,000 the smallest
 possible value is about 1 × 10⁻⁴.
 
-**Known defect: the model-level test misses ties.** The null of the alignment score is discrete
-(every concept score is a multiple of 1/*k*), so many relabellings reach exactly the observed
-mean, and they should count towards *b*. `aggregate_alignment_scores.compute_model_level_empirical_p_value()`
-compares the two means as floating-point numbers, summed in a different order, so an exact tie
-can round below the observed mean and is then not counted. The model-level p-values in the summary
-TSVs are therefore too small where ties are frequent, mostly on the datasets with few concepts. For
-example, on Narratives (cosine, *k* = 5, `bloom_1b1`) 1303 relabellings reach the observed mean but
-only 915 are counted, giving p = 0.092 instead of 0.130. On the whole cortex this changes the
-models with p < 0.05 from 11 to 3 (Narratives, Pearson) and the models with BH q < 0.05 from 6 to
-3 (Nature Stories, Spearman). The concept-level test is not affected, because it compares
-identically computed values. Counting on the integer sums of common neighbours fixes it.
+**Ties in the model-level test.** The null of the alignment score is discrete (every concept
+score is a multiple of 1/*k*), so with few concepts many relabellings reach exactly the observed
+mean, and they count towards *b*. `aggregate_alignment_scores.compute_model_level_empirical_p_value()`
+therefore compares the integer sums of common neighbours over concepts, which is the same test as
+comparing the means (both sides have the same concepts) but counts ties exactly. The concept-level
+test compares identically computed values and counts ties as well.
 
 The **hypergeometric expectation** of every concept's alignment score is *k*/(*n* − 1): two random
 *k*-subsets of *n* − 1 concepts share *k*²/(*n* − 1) elements on average. It is the dashed

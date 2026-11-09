@@ -1,5 +1,5 @@
 # edited with AI assistance: Claude Code, Claude Opus 5.5 (claude-opus-5-5)
-# last AI edit: 2026-10-02, see docs/changelog/developers/ for details
+# last AI edit: 2026-11-09, see docs/changelog/developers/ for details
 from concurrent.futures import ProcessPoolExecutor
 from pathlib import Path
 
@@ -175,14 +175,16 @@ def compute_model_level_empirical_p_value(
             f"relabelled: {only_relabelled[:10]}"
         )
 
-    observed_model_alignment_score = empirical_df["observed_alignment_score"].mean()
+    # compare integer sums of common neighbours, not float means: both sides have the same
+    # concepts, so this is the same test, and exact ties are counted
+    observed_total_common_neighbours = empirical_df["observed_common_neighbours"].sum()
 
-    null_model_alignment_scores = relabelled_df.groupby(
-        "shuffle_id", 
-        sort = True, 
-    )["alignment_score"].mean().to_numpy(dtype = float)
+    null_total_common_neighbours = relabelled_df.groupby(
+        "shuffle_id",
+        sort = True,
+    )["common_neighbours"].sum().to_numpy(dtype = np.int64)
 
-    number_of_relabellings = len(null_model_alignment_scores)
+    number_of_relabellings = len(null_total_common_neighbours)
 
     if number_of_relabellings == 0:
         raise ValueError(
@@ -190,7 +192,7 @@ def compute_model_level_empirical_p_value(
         )
 
     number_of_null_scores_at_least_as_large = np.sum(
-        null_model_alignment_scores >= observed_model_alignment_score
+        null_total_common_neighbours >= observed_total_common_neighbours
     )
 
     model_level_empirical_p_value = empirical_upper_tail_p_value(

@@ -59,7 +59,7 @@ git history and may include later human edits.
 | `docs/changelog/developers/2026-10-27_removal_documentation.md` | written | 2026-10-27 | Claude Opus 5.5 (`claude-opus-5-5`) | not yet reviewed |
 | `docs/changelog/developers/2026-11-02_documentation.md` | written | 2026-11-02 | Claude Opus 5.5 (`claude-opus-5-5`) | not yet reviewed |
 | `docs/changelog/developers/2026-11-05_documentation.md` | written | 2026-11-05 | Claude Opus 5.5 (`claude-opus-5-5`) | not yet reviewed |
-| `docs/changelog/developers/2026-11-09_documentation.md` | written | 2026-11-09 | Claude Opus 5.5 (`claude-opus-5-5`) | not yet reviewed |
+| `docs/changelog/developers/2026-11-09_bugfix_documentation.md` | written | 2026-11-09 | Claude Opus 5.5 (`claude-opus-5-5`) | not yet reviewed |
 | `docs/changelog/users/2026-09-21_new_feature_bugfix_refactor_removal_documentation.md` | written | 2026-10-06 | Claude Opus 5.5 (`claude-opus-5-5`); Claude Sonnet 5 (`claude-sonnet-5`) for the original entries | not yet reviewed |
 | `docs/changelog/users/2026-09-22_new_feature_optimisation.md` | written | 2026-10-06 | Claude Opus 5.5 (`claude-opus-5-5`); Claude Sonnet 5 (`claude-sonnet-5`) for the original entries | not yet reviewed |
 | `docs/changelog/users/2026-09-23_new_feature_bugfix_refactor_documentation.md` | written | 2026-10-06 | Claude Opus 5.5 (`claude-opus-5-5`) | not yet reviewed |
@@ -86,7 +86,7 @@ git history and may include later human edits.
 | `docs/changelog/users/2026-10-27_removal_documentation.md` | written | 2026-10-27 | Claude Opus 5.5 (`claude-opus-5-5`) | not yet reviewed |
 | `docs/changelog/users/2026-11-02_documentation.md` | written | 2026-11-02 | Claude Opus 5.5 (`claude-opus-5-5`) | not yet reviewed |
 | `docs/changelog/users/2026-11-05_documentation.md` | written | 2026-11-05 | Claude Opus 5.5 (`claude-opus-5-5`) | not yet reviewed |
-| `docs/changelog/users/2026-11-09_documentation.md` | written | 2026-11-09 | Claude Opus 5.5 (`claude-opus-5-5`) | not yet reviewed |
+| `docs/changelog/users/2026-11-09_bugfix_documentation.md` | written | 2026-11-09 | Claude Opus 5.5 (`claude-opus-5-5`) | not yet reviewed |
 | `docs/guides/running_and_troubleshooting.md` | written | 2026-10-27 | Claude Opus 5.5 (`claude-opus-5-5`) | not yet reviewed |
 | `docs/reference/brain_regions.md` | written | 2026-10-16 | Claude Opus 5.5 (`claude-opus-5-5`) | not yet reviewed |
 | `docs/reference/clean_run_duration.md` | written | 2026-10-22 | Claude Opus 5.5 (`claude-opus-5-5`) | not yet reviewed |
@@ -129,7 +129,7 @@ git history and may include later human edits.
 | `workflow/isc_nearest_neighbours/scripts/create_isc_dataframe.py` | edited | 2026-10-02 | Claude Opus 5.5 (`claude-opus-5-5`) | not yet reviewed |
 | `workflow/isc_nearest_neighbours/scripts/create_isc_manifest.py` | edited | 2026-10-02 | Claude Opus 5.5 (`claude-opus-5-5`) | not yet reviewed |
 | `workflow/isc_nearest_neighbours/scripts/extract_region_isc_dataframe.py` | written | 2026-10-14 | Claude Opus 5.5 (`claude-opus-5-5`) | not yet reviewed |
-| `workflow/libraries/aggregate_alignment_scores.py` | edited | 2026-10-02 | Claude Opus 5.5 (`claude-opus-5-5`) | not yet reviewed |
+| `workflow/libraries/aggregate_alignment_scores.py` | edited | 2026-11-09 | Claude Opus 5.5 (`claude-opus-5-5`) | not yet reviewed |
 | `workflow/libraries/code_version.py` | written | 2026-10-05 | Claude Opus 5.5 (`claude-opus-5-5`) | not yet reviewed |
 | `workflow/libraries/compute_alignment.py` | edited | 2026-10-09 | Claude Opus 5.5 (`claude-opus-5-5`) | not yet reviewed |
 | `workflow/libraries/compute_alignment_enrichment.py` | edited | 2026-10-14 | Claude Opus 5.5 (`claude-opus-5-5`) | not yet reviewed |

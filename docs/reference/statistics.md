@@ -250,6 +250,36 @@ Units sharing a story, speaker or production source form four blocks: {`pieman`,
 `bronx`, `slumlordreach`, `notthefallintact`, `black`}, Milky Way (3 units), {`merlin`, `sherlock`}
 and Shapes (2 units). Five units have no listed relation.
 
+Speakers and sources of the 18 units, from Nastase et al. (2021), *Scientific Data* 8:250,
+"Stimuli" section ([PMC8479122](https://pmc.ncbi.nlm.nih.gov/articles/PMC8479122/)). "Not named"
+means the paper does not name the speaker.
+
+| Unit | Story | Speaker | Source | Block |
+|---|---|---|---|---|
+| `pieman` | Pie Man | Jim O'Grady | live at The Moth | Moth / O'Grady |
+| `piemanpni` | Pie Man (PNI) | Jim O'Grady | recorded in the scanner at PNI | Moth / O'Grady |
+| `bronx` | Running from the Bronx | Jim O'Grady | recorded in the scanner at PNI | Moth / O'Grady |
+| `slumlordreach` | Slumlord + Reach for the Stars | Jack Hitt; Richard Garriott | live at The Moth (one run, two stories) | Moth / O'Grady |
+| `notthefallintact` | It's Not the Fall that Gets You | Andy Christie | live at The Moth | Moth / O'Grady |
+| `black` | I Knew You Were Black | Carol Daniel | live at The Moth | Moth / O'Grady |
+| `milkywayoriginal` | Milky Way | not named (one PNI member) | written by an affiliate of the experimenters | Milky Way |
+| `milkywaysynonyms` | Milky Way, synonyms version | as above | as above | Milky Way |
+| `milkywayvodka` | Milky Way, vodka version | as above | as above | Milky Way |
+| `merlin` | Merlin | a participant's spoken recall | recall of a TV episode | Merlin / Sherlock |
+| `sherlock` | Sherlock | a participant's spoken recall | recall of a TV episode | Merlin / Sherlock |
+| `shapesphysical` | Shapes, physical description | not named | describes the animation "When Heider Met Simmel" | Shapes |
+| `shapessocial` | Shapes, social description | not named | describes the same animation | Shapes |
+| `21styear` | The 21st Year | Christina Lazaridi (author) | written for the study | none |
+| `forgot` | The Man Who Forgot Ray Bradbury | Neil Gaiman (author) | live reading, Aladdin Theater, Portland | none |
+| `lucy` | Lucy | not named | WNYC public radio (2010) | none |
+| `prettymouth` | Pretty Mouth and Green My Eyes | a professional actor | J. D. Salinger, *The New Yorker* (1951) | none |
+| `tunnel` | Tunnel Under the World | not named | Frederik Pohl, *X Minus One* radio (1956) | none |
+
+The Moth / O'Grady block joins two kinds of link: `pieman`, `piemanpni` and `bronx` share a
+speaker, and `pieman`, `slumlordreach`, `notthefallintact` and `black` share The Moth as their
+source. The paper does not say whether one participant recalled both `merlin` and `sherlock`;
+they are grouped as spoken recalls from the same lab and procedure.
+
 | Check | ρ, median over models | Models with q < 0.05 |
 |---|---|---|
 | All 18 units (published) | 0.395 / 0.469 / 0.550 | 24 / 24 / 24 |
@@ -391,3 +421,9 @@ used.
 New section 8 records one-off checks of model size, dependencies between the Narratives units,
 and story duration and length. They change no pipeline result. The main finding is that the
 Narratives RSA depends on the two Shapes units.
+
+### 2026-11-09 10:00 — speakers of the Narratives units
+
+The section on dependencies between the Narratives units named its four blocks but did not say
+which speaker or source links the units in each block. A table now lists the speaker and source
+of each of the 18 units, taken from the Narratives data paper, and the block it belongs to.

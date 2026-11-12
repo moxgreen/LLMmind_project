@@ -7,6 +7,7 @@ Changes made on this day, in order:
 - Speaker and source table for the Narratives units (documentation)
 - AI usage record corrected (documentation)
 - Three robustness checks recorded, and a flaw in some p-values described (documentation)
+- Model-level p-values of the nearest-neighbour test fixed (bugfix)
 - Narratives dependency check easier to follow (documentation)
 
 ---
@@ -48,6 +49,26 @@ Kind: documentation
   score are sometimes not counted, so some p-values are too small, mostly for Narratives and Nature
   Stories. The statistics page, section 3, describes it. A fix has been approved but not yet
   applied; no result changed today.
+
+---
+
+## 14:32 — Model-level p-values of the nearest-neighbour test fixed
+
+Kind: bugfix
+
+The flaw described above is fixed: shuffles whose score exactly equals the observed score now always
+count against it, so the model-level p-values are correct. The summary tables in
+`results/tsv_summaries/` and every figure that shows these p-values or their significance asterisks
+were rebuilt. Some p-values are larger than before, so fewer results are significant in a few
+places:
+
+- Narratives, whole cortex: cosine 5 → 4 and Pearson 11 → 3 models with p < 0.05 (none survived
+  correction before or after).
+- Nature Stories, Spearman similarity: 13 → 12 models with p < 0.05, and 6 → 3 after correction.
+- Narratives, language region: cosine 20 → 18 and Pearson 21 → 20 models after correction.
+
+Caption Scene and NSD results do not change. If a manuscript or slide quotes these numbers, update
+it from the new summary tables.
 
 ---
 

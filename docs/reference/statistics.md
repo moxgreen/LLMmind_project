@@ -112,15 +112,15 @@ modality.
 permutation stream. Benjamini-Hochberg assumes independent or positively dependent tests, which is
 plausible here but not shown. Benjamini-Yekutieli (BY) holds under any dependence: its q-values are
 the BH q-values multiplied by Σ 1/*i* over *i* = 1…*m*, capped at 1 (3.78 for *m* = 24, 4.21 for
-*m* = 38). A one-off computation on 2026-11-09, from the p-values of the summary TSVs (before the fix
-of the tie defect in section 3), counted the tests with q < 0.05:
+*m* = 38). A one-off computation from the p-values of the summary TSVs counted the tests with
+q < 0.05:
 
 | Family | Tests | BH | BY |
 |---|---|---|---|
-| All whole-cortex nearest-neighbour tests | 612 | 292 | 244 |
+| All whole-cortex nearest-neighbour tests | 612 | 286 | 241 |
 | All whole-cortex Spearman tests | 300 | 63 | 8 |
-| All language-region nearest-neighbour tests | 360 | 38 | 0 |
-| All visual-region nearest-neighbour tests | 252 | 126 | 104 |
+| All language-region nearest-neighbour tests | 360 | 37 | 0 |
+| All visual-region nearest-neighbour tests | 252 | 125 | 104 |
 | All language-region Spearman tests | 216 | 73 | 31 |
 | All visual-region Spearman tests | 84 | 11 | 0 |
 
@@ -130,8 +130,8 @@ similarity: 23 → 22; Narratives Spearman alignment under Pearson and Spearman 
 and 24 → 23). It removes the uniform, moderate ones: Narratives Spearman alignment under cosine
 similarity goes from 24/24 to 0/24, because all 24 p-values lie between 0.0012 and 0.041. Caption
 Scene at *k* = 5 goes from 6 to 0 (cosine) and 13 to 4 (Pearson), Nature Stories nearest neighbours
-under Spearman similarity from 6 to 3, and the language-region Narratives nearest neighbours under
-cosine similarity from 20 to 0.
+under Spearman similarity from 3 to 1, and the language-region Narratives nearest neighbours under
+cosine similarity from 18 to 0.
 
 ## 6. Spearman alignment
 
@@ -527,3 +527,14 @@ restricted-permutation result that motivated them, and did not say why dependent
 now opens with the reason for the check, its finding and its exploratory status, describes the
 Shapes units in their own paragraph, and gives the restricted permutations before the leave-out
 checks. No number changed.
+
+### 2026-11-10 19:07 — model-level test counts ties; dependence check recomputed
+
+The model-level nearest-neighbour test compared float means of the observed and relabelled scores,
+summed in different orders, so null means exactly equal to the observed mean could fall just below
+it and were not counted: where the null is coarse (Narratives, Nature Stories), p-values were too
+small. The test now compares integer sums of common neighbours (section 3), and the pipeline results
+were rebuilt. Section 5's Benjamini-Yekutieli check was recomputed from the new p-values: whole
+cortex 292 → 286 (BH) and 244 → 241 (BY), language region 38 → 37 (BH), visual region 126 → 125
+(BH); Nature Stories under Spearman similarity 6 → 3 (BH) and 3 → 1 (BY); language-region Narratives
+under cosine similarity 20 → 18 (BH).

@@ -50,6 +50,10 @@ the pipeline:
   — alignment scores, the relabelling and Spearman nulls, the empirical and
   hypergeometric tests, enrichment, the Benjamini-Hochberg families, and what
   every figure shows and how it is laid out (a source for the methods section)
+- [`docs/reference/regional_crossover.md`](docs/reference/regional_crossover.md)
+  — a collaborator's one-off analysis, outside the workflow: every model class
+  in every brain region on Caption Scene, and language region vs whole cortex
+  on Narratives, with its limits
 - [`docs/reference/clean_run_duration.md`](docs/reference/clean_run_duration.md)
   — how long a clean run takes on node5 (about 33 h), rule by rule
 - [`docs/changelog/developers/`](docs/changelog/developers/) and

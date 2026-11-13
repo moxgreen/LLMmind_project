@@ -108,31 +108,6 @@ The region analyses (language and visual region, see [`brain_regions.md`](brain_
 families of their own: a region's brain-model and Spearman families hold only the models of its
 modality.
 
-**Check under arbitrary dependence.** The tests of a family share the brain geometry and the
-permutation stream. Benjamini-Hochberg assumes independent or positively dependent tests, which is
-plausible here but not shown. Benjamini-Yekutieli (BY) holds under any dependence: its q-values are
-the BH q-values multiplied by Σ 1/*i* over *i* = 1…*m*, capped at 1 (3.78 for *m* = 24, 4.21 for
-*m* = 38). A one-off computation from the p-values of the summary TSVs counted the tests with
-q < 0.05:
-
-| Family | Tests | BH | BY |
-|---|---|---|---|
-| All whole-cortex nearest-neighbour tests | 612 | 286 | 241 |
-| All whole-cortex Spearman tests | 300 | 63 | 8 |
-| All language-region nearest-neighbour tests | 360 | 37 | 0 |
-| All visual-region nearest-neighbour tests | 252 | 125 | 104 |
-| All language-region Spearman tests | 216 | 73 | 31 |
-| All visual-region Spearman tests | 84 | 11 | 0 |
-
-In the per-configuration families of the figures, BY removes few of the strong effects (Caption
-Scene at *k* = 25 and 125: 36–38 of 38 under both; Narratives nearest neighbours under Spearman
-similarity: 23 → 22; Narratives Spearman alignment under Pearson and Spearman similarity: 24 → 22
-and 24 → 23). It removes the uniform, moderate ones: Narratives Spearman alignment under cosine
-similarity goes from 24/24 to 0/24, because all 24 p-values lie between 0.0012 and 0.041. Caption
-Scene at *k* = 5 goes from 6 to 0 (cosine) and 13 to 4 (Pearson), Nature Stories nearest neighbours
-under Spearman similarity from 3 to 1, and the language-region Narratives nearest neighbours under
-cosine similarity from 18 to 0.
-
 ## 6. Spearman alignment
 
 `spearman_alignment/scripts/compute_spearman_alignment_with_empirical_p_value.py` compares the
@@ -538,3 +513,10 @@ were rebuilt. Section 5's Benjamini-Yekutieli check was recomputed from the new 
 cortex 292 → 286 (BH) and 244 → 241 (BY), language region 38 → 37 (BH), visual region 126 → 125
 (BH); Nature Stories under Spearman similarity 6 → 3 (BH) and 3 → 1 (BY); language-region Narratives
 under cosine similarity 20 → 18 (BH).
+
+### 2026-11-13 12:20 — Benjamini-Yekutieli check removed
+
+Section 5 no longer has the "check under arbitrary dependence", a one-off count of the tests that
+survive Benjamini-Yekutieli as well as Benjamini-Hochberg. The developer decided that BH is the
+correction of the project and that BY is too conservative for this experiment; the check would be
+redone only if a reviewer asks about the dependence between the tests.

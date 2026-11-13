@@ -1,0 +1,18 @@
+# written with AI assistance: Claude Code, Claude Opus 5.5 (claude-opus-5-5)
+# last AI edit: 2026-11-13, see docs/changelog/developers/ for details
+
+# overlay on config/config.yaml for the layer-depth pilot: the BLOOMZ models read at 75% of
+# their depth, on Narratives only; run it in its own working directory (see
+# docs/guides/running_and_troubleshooting.md), so its outputs never mix with the main results
+relative_depth: 0.75
+
+datasets:
+  - "narratives"
+
+# the only models run; their settings stay in config/config.yaml
+model_subset:
+  - "bloom_560m"
+  - "bloom_1b1"
+  - "bloom_1b7"
+  - "bloom_3b"
+  - "bloom_7b1"

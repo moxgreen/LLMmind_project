@@ -1,7 +1,8 @@
 # edited with AI assistance: Claude Code, Claude Opus 5.5 (claude-opus-5-5)
-# last AI edit: 2026-10-08, see docs/changelog/developers/ for details
+# last AI edit: 2026-11-13, see docs/changelog/developers/ for details
 import argparse
 import gc
+import math
 import os
 from pathlib import Path
 
@@ -117,11 +118,34 @@ def move_inputs_to_device(
         for key, value in inputs.items()
     }
 
+def hidden_state_at_relative_depth(output, relative_depth: float) -> torch.Tensor:
+    # hidden_states[0] is the token embeddings and hidden_states[L] the output of the last of
+    # the L blocks, so block k = relative_depth*L rounded to the nearest integer, halves up
+    hidden_states = getattr(output, "hidden_states", None,)
+
+    if hidden_states is None:
+        raise ValueError(
+            "--relative_depth needs the model's hidden states, but output of type "
+            f"{type(output).__name__} has none"
+        )
+
+    number_of_blocks = len(hidden_states) - 1
+
+    return hidden_states[math.floor(relative_depth*number_of_blocks + 0.5)]
+
 def extract_embedding_from_output(
     output, 
     pool: str, 
     attention_mask: torch.Tensor | None = None, 
+    relative_depth: float | None = None, 
 ) -> torch.Tensor:
+    if relative_depth is not None:
+        return pool_hidden_state(
+            hidden_state = hidden_state_at_relative_depth(output, relative_depth,), 
+            pool = pool, 
+            attention_mask = attention_mask
+        )
+
     last_hidden_state = getattr(output, "last_hidden_state", None,)
 
     if torch.is_tensor(last_hidden_state):
@@ -258,6 +282,7 @@ def embed_long_text(
     max_length: int, 
     overlap: int, 
     pool: str, 
+    relative_depth: float | None, 
 ) -> tuple[torch.Tensor, int, int]:
     """
         Embed a potentially long textual stimulus by splitting it into overlapping token
@@ -335,13 +360,15 @@ def embed_long_text(
                 input_ids = input_ids_tensor, 
                 attention_mask = attention_mask, 
                 return_dict = True, 
-                use_cache = False
+                use_cache = False, 
+                output_hidden_states = relative_depth is not None, 
             )
 
         pooled = extract_embedding_from_output(
             output = model_output, 
             pool = pool, 
-            attention_mask = attention_mask
+            attention_mask = attention_mask, 
+            relative_depth = relative_depth, 
         )
 
         chunk_embeddings.append(pooled.squeeze(0).detach().cpu().float())
@@ -378,6 +405,7 @@ def embed_image(
     model, 
     device: torch.device, 
     pool: str, 
+    relative_depth: float | None, 
 ) -> torch.Tensor:
     with Image.open(image_path) as image:
         image = image.convert("RGB")
@@ -387,12 +415,17 @@ def embed_image(
     inputs = move_inputs_to_device(inputs = inputs, device = device,)
 
     with torch.inference_mode():
-        model_output = model(**inputs, return_dict = True,)
+        model_output = model(
+            **inputs, 
+            return_dict = True, 
+            output_hidden_states = relative_depth is not None, 
+        )
 
     embedding = extract_embedding_from_output(
         output = model_output, 
         pool = pool, 
-        attention_mask = None
+        attention_mask = None, 
+        relative_depth = relative_depth, 
     )
 
     embedding = embedding.squeeze(0).detach().cpu().float()
@@ -476,6 +509,10 @@ def main():
                         type = int, 
                         required = True, 
                         help = "Number of overlapping tokens between textual chunks")
+    parser.add_argument("--relative_depth", 
+                        type = float, 
+                        default = None, 
+                        help = "Embed the output of the block at this fraction of the model's depth (default: the last hidden state)")
     parser.add_argument("--trust_remote_code", 
                         action = "store_true", 
                         help = "Allow custom Hugging Face model code")
@@ -537,7 +574,7 @@ def main():
 
     print(
         f"model_modality={args.modality}, input_type={input_type}, pool={args.pool}, "
-        f"number_of_stimuli={len(items)}"
+        f"relative_depth={args.relative_depth}, number_of_stimuli={len(items)}"
     )
 
     if input_type == "text":
@@ -558,6 +595,7 @@ def main():
                 max_length = max_length, 
                 overlap = args.chunk_overlap, 
                 pool = args.pool, 
+                relative_depth = args.relative_depth, 
             )
 
         else:
@@ -567,6 +605,7 @@ def main():
                 model = model, 
                 device = device, 
                 pool = args.pool, 
+                relative_depth = args.relative_depth, 
             )
 
             n_tokens = 0

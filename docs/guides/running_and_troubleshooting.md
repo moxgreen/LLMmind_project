@@ -64,6 +64,54 @@ does not reserve cores for these workers, so these steps never wait for free cor
 runs alongside other jobs the run briefly uses more CPUs than `--cores`. Lower
 `number_of_workers` if that is a problem.
 
+### Layer-depth pilot
+
+The pilot reads the five BLOOMZ models at 75% of their depth instead of their last layer, on
+Narratives only, and computes the brain-model nearest-neighbour alignment and the Spearman RSA
+(whole cortex and language region). Why and how the layer is chosen is in
+[`model_embeddings.md`](../reference/model_embeddings.md), section 3. Its settings are the overlay
+`config/layer_depth_pilot.yaml` (`relative_depth`, `datasets`, `model_subset`), which the command
+adds on top of `config/config.yaml` without changing it.
+
+It runs in its own working directory, `results/layer_depth_pilot/`, so all its outputs go to
+`results/layer_depth_pilot/results/` and no final-layer result is touched. The directory holds
+links to `config/`, `resources/` and `workflow/`, and a copy of the Narratives brain results, so
+the brain side is reused rather than recomputed. To create it (once, from the project root):
+
+```bash
+P=results/layer_depth_pilot
+mkdir -p $P/results/mind $P/results/language_mind
+ln -s ../../config $P/config
+ln -s ../../resources $P/resources
+ln -s ../../workflow $P/workflow
+cp -a results/mind/narratives $P/results/mind/
+cp -a results/language_mind/narratives $P/results/language_mind/
+```
+
+Then, from the project root on node5, dry-run first and run only if the job list holds nothing but
+the pilot jobs (`get_embeddings` ×5, `compute_llm_nearest_neighbours` ×5, the alignment,
+relabelling, p-value and Spearman jobs ×30 each, the four aggregations; 164 in all). Any ISC,
+stimulus, excluded-stimuli or download job would write into the main `resources/` through the
+link, so stop if one appears. The targets go before the options, because `--quiet` would read them
+as its own values:
+
+```bash
+snakemake \
+    results/tsv_summaries/all_model_brain_alignment_scores.tsv \
+    results/tsv_summaries/all_model_brain_alignment_scores_language.tsv \
+    results/tsv_summaries/all_spearman_alignment_scores.tsv \
+    results/tsv_summaries/all_spearman_alignment_scores_language.tsv \
+    --directory results/layer_depth_pilot \
+    --configfile "$PWD/config/layer_depth_pilot.yaml" \
+    --use-conda --conda-prefix "$PWD/.snakemake/conda" \
+    --cores 4 --resources gpu=1 \
+    -n --quiet rules
+```
+
+Drop `-n --quiet rules` to run it. `--conda-prefix` reuses the project's environments; without
+it Snakemake would build new ones inside the pilot directory. The summary tables land in
+`results/layer_depth_pilot/results/tsv_summaries/`.
+
 ## 2. When Snakemake reruns a job
 
 Snakemake reruns a job when its inputs, params or the rule's own code change. It does not see
@@ -93,6 +141,12 @@ to the rule's `data` list.
 
 This relies on the `params` rerun trigger, so a run with `--rerun-triggers mtime` misses such
 edits.
+
+**The `get_embeddings` command text.** Snakemake also reruns a job when the `shell:` text of
+its rule changes. `--relative_depth` (`relative_depth` in the config) is therefore appended after
+the end of that text in `workflow/llm_nearest_neighbours/Snakefile`, not written among the other
+options: with `relative_depth: null` the text is the one that built the current embeddings, so
+nothing reruns. Moving the option into the text reruns every embedding and everything downstream.
 
 **Not covered.** For every other rule, force the rerun yourself with `--forcerun <rule>` after
 changing its code. This includes:
@@ -434,3 +488,9 @@ which no longer exists; it now uses `compute_spearman_alignment_with_empirical_p
 "Leftover outputs from older versions" now lists the Caption Scene parcel files named with
 unpadded subject, session and run numbers. 15,900 of them, written on 2026-09-24, were found next
 to the 15,900 files the manifest uses, checked against `csd_events_manifest.tsv`, and deleted.
+
+### 2026-11-13 18:00 — layer-depth pilot and the `get_embeddings` command text
+
+Section 1 now explains how to set up and run the layer-depth pilot (BLOOMZ at 75% depth on
+Narratives, in its own working directory). Section 2 explains why the new `--relative_depth`
+option sits after the end of the `get_embeddings` command text.

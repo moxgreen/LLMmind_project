@@ -7,6 +7,7 @@ Changes made on this day, in order:
 - Tie fix verified on the model-model tests (documentation)
 - Benjamini-Yekutieli check removed from the statistics reference (documentation)
 - Regional crossover summary rewritten as a reference page (documentation)
+- Embeddings readable at a relative layer depth; layer-depth pilot for BLOOMZ on Narratives (new feature, documentation)
 
 ---
 
@@ -85,3 +86,57 @@ Kind: documentation
   parquets, the four Caption Scene cells at k = 125 (1.1465, 1.0115, 1.2080, 1.0010), the seven
   language-model family medians in the visual region and the Narratives values at k = 5 (1.5489,
   1.5678): all match the summary to four decimals. The bootstrap intervals were not recomputed.
+
+---
+
+## 18:00 — Embeddings readable at a relative layer depth; layer-depth pilot
+
+Kind: new feature, documentation
+
+Implements TODO S3 (approved 2026-11-12): read the BLOOMZ models at one relative depth fixed in
+advance (0.75) on Narratives, instead of the last layer, without changing any existing result.
+
+- `workflow/llm_nearest_neighbours/scripts/get_embeddings.py`: new optional `--relative_depth`
+  (float, default None). New `hidden_state_at_relative_depth(output, relative_depth)` returns
+  `hidden_states[floor(f*L + 0.5)]`, *L* = `len(hidden_states) - 1`, and raises if the output has no
+  `hidden_states`. `extract_embedding_from_output()` takes `relative_depth` and, when it is set,
+  pools that state with `pool_hidden_state()`. `embed_long_text()` and `embed_image()` take
+  `relative_depth` and call the model with `output_hidden_states = relative_depth is not None`. The
+  start-up line prints `relative_depth`. Without the option the output is unchanged.
+- `workflow/llm_nearest_neighbours/Snakefile`: `RELATIVE_DEPTH_ARG` (`""`, or
+  `" --relative_depth <f>"`) is concatenated after the closing line of the `get_embeddings` shell
+  text. Snakemake's `code` rerun trigger compares `rule.shellcmd` (`persistence.py`, `_code()`), so
+  with `relative_depth: null` the text is byte-identical and no embedding reruns. Moving the flag
+  into the shell block is TODO P4/S4.
+- `workflow/Snakefile`: start-up check that `relative_depth` is null or in (0, 1]; `MODEL_KEYS` is
+  `config.get("model_subset", <all models>)`, because a `--configfile` overlay is merged into the
+  config and cannot remove models.
+- `config/config.yaml`: new key `relative_depth: null`.
+- `config/layer_depth_pilot.yaml` (new): overlay with `relative_depth: 0.75`,
+  `datasets: ["narratives"]`, `model_subset` = the five `bloom_*` models.
+- Pilot working directory `results/layer_depth_pilot/` (not tracked): links `config`, `resources`,
+  `workflow` to the project; `results/mind/narratives` (305 MB) and `results/language_mind/narratives`
+  copied with `cp -a`. Run with `--directory`, the overlay and `--conda-prefix` on the project's
+  `.snakemake/conda`; targets: the brain-model and Spearman summary TSVs, whole cortex and language
+  region. The run itself has not been launched yet.
+- Docs: `docs/reference/model_embeddings.md` (section 3, "Which layer" and the large-dimension
+  caveat), `docs/guides/running_and_troubleshooting.md` (section 1, "Layer-depth pilot"; section 2,
+  the `get_embeddings` command text), `README.md` (layout line of `config/`).
+
+### Context
+
+- Request: the developer approved S3 on 2026-11-12 with Narratives as the pilot dataset, approved the
+  proposed implementation on 2026-11-13 and asked for `relative_depth` in `config/config.yaml`.
+- Files: the five code and config files above, the two docs pages, `README.md`, both 2026-11-13
+  changelogs (renamed from `2026-11-13_documentation.md`), `docs/AI_USAGE.md`. TODO P4/S4 added.
+- Verification:
+  - Main pipeline dry run (`-n --quiet rules`, Snakemake 9.27.0): "Nothing to be done".
+  - Pilot dry run: 164 jobs, only `get_embeddings` ×5, `compute_llm_nearest_neighbours` ×5,
+    `compute_llm_mind_alignment_score`, `relabel_llm_similarity_and_compute_relabelled_llm_alignment_score`,
+    `compute_empirical_p_value`, `compute_hypergeometric_p_value`,
+    `compute_spearman_alignment_with_empirical_p_value` ×30 each, the aggregations ×2 each; no ISC,
+    stimulus or download job.
+  - `bloom_560m` on `pieman` (frontend CPU): without the option and with `--relative_depth 1.0` the
+    vectors are identical (max abs difference 0); against the stored node5 GPU vector, cosine
+    0.99999999. With 0.75 the cosine to the last-layer vector is 0.133.
+  - Block counts from the local `config.json`: 24, 24, 24, 30, 30 (*k* = 18, 18, 18, 23, 23).

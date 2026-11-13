@@ -1,5 +1,5 @@
 # edited with AI assistance: Claude Code, Claude Opus 5.5 (claude-opus-5-5)
-# last AI edit: 2026-10-14, see docs/changelog/developers/ for details
+# last AI edit: 2026-11-13, see docs/changelog/developers/ for details
 configfile: "config/config.yaml"
 
 from itertools import combinations
@@ -28,8 +28,12 @@ for similarity_type in config["similarity_types"]:
 
 check_config_value("minimum_subjects_per_stimulus", config["minimum_subjects_per_stimulus"], list(range(2, 9)))
 
+if config["relative_depth"] is not None and not 0 < config["relative_depth"] <= 1:
+    raise ValueError(f"config: relative_depth is {config['relative_depth']!r}, expected null or a number in (0, 1]")
+
 DATASETS = list(config["datasets"])
-MODEL_KEYS = list(config["models"].keys())
+# model_subset, set only by a config overlay such as config/layer_depth_pilot.yaml, runs only these models
+MODEL_KEYS = config.get("model_subset", list(config["models"].keys()))
 SIMILARITY_TYPES = list(config["similarity_types"])
 
 NUMBER_OF_RELABELLINGS = config["number_of_relabellings"]

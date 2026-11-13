@@ -1,5 +1,5 @@
 # edited with AI assistance: Claude Code, Claude Opus 5.5 (claude-opus-5-5)
-# last AI edit: 2026-10-08, see docs/changelog/developers/ for details
+# last AI edit: 2026-11-13, see docs/changelog/developers/ for details
 from pathlib import Path
 
 def chunk_max_length_arg(model):
@@ -11,6 +11,12 @@ def chunk_max_length_arg(model):
     if max_chunk_length is None or str(max_chunk_length).strip().lower() in {"none", "null", ""}:
         return ""
     return f"--chunk_max_length {int(max_chunk_length)}"
+
+# the block every model is read at, as a fraction of its depth; empty for the last hidden state
+RELATIVE_DEPTH_ARG = (
+    "" if config["relative_depth"] is None
+    else f" --relative_depth {config['relative_depth']}"
+)
 
 rule all_llm_nearest_neighbours:
     input:
@@ -34,6 +40,8 @@ rule download_pretrained_llm:
         """
 
 rule get_embeddings:
+    # RELATIVE_DEPTH_ARG is appended outside the shell text: Snakemake's code rerun trigger compares
+    # that text, so with relative_depth null the rule is unchanged and no embedding is rerun
     input:
         stimuli_transcripts_done = lambda wc: config[wc.dataset]["stimuli_ready"], 
         excluded_stimuli = lambda wc: config[wc.dataset]["excluded_stimuli"], 
@@ -65,7 +73,7 @@ rule get_embeddings:
                 {params.chunk_max_length_arg} \
                 --chunk_overlap {params.chunk_overlap} \
                 --pool {params.pool:q} \
-                --excluded_stimuli {input.excluded_stimuli:q}
+                --excluded_stimuli {input.excluded_stimuli:q}""" + RELATIVE_DEPTH_ARG + r"""
         """
 
 rule compute_llm_nearest_neighbours:

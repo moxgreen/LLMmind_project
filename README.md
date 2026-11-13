@@ -67,7 +67,7 @@ the pipeline:
 ## Repository layout
 
 ```
-config/                     Snakemake configuration (config.yaml)
+config/                     Snakemake configuration (config.yaml; layer_depth_pilot.yaml, overlay for the layer-depth pilot)
 workflow/
   Snakefile                 Top-level Snakefile: wires up all modules and the `all` rule
   libraries/                Shared Python helper modules (similarity, alignment,

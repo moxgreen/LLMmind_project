@@ -37,15 +37,42 @@ section. For how to *configure* the chunk length, see section 3 of
 3. **BOS token.** If the tokenizer defines a beginning-of-sequence (BOS) token, it is added in
    front of every chunk, so each chunk has at most `max_chunk_length` tokens. All the configured
    tokenizers (BLOOMZ, Gemma 1–4, OpenLLaMA) define one.
-4. **Chunk vector.** The chunk is run through the model, and its vector is the **mean of the last
+4. **Chunk vector.** The chunk is run through the model, and its vector is the **mean of one
    layer's hidden states over all its tokens, including the BOS token** (`pooling: language: avg`
-   in the config).
+   in the config). The layer is the last one unless `relative_depth` is set (see "Which layer"
+   below).
 5. **Stimulus vector.** The mean of the chunk vectors, weighted by the number of text tokens in
    each chunk (the BOS token is not counted). Tokens in an overlap therefore contribute to two
    chunks.
 
 The number of tokens and chunks of each stimulus is stored in the `n_tokens` and `n_chunks`
 columns of the embeddings file.
+
+**Which layer.** By default (`relative_depth: null` in `config/config.yaml`) the vector comes from
+the model's last hidden state. For BLOOMZ, Gemma and OpenLLaMA this is the output of the last
+block after the final layer norm, i.e. the input of the next-token prediction head. When
+`relative_depth` is a fraction *f* in (0, 1], the `get_embeddings` rule passes
+`--relative_depth f`, the model also returns the hidden state after every block, and the vector
+comes from block *k* = *f*·*L* rounded to the nearest integer, halves up (*L* = number of blocks;
+block 0 is the token embeddings). The same applies to vision models. Pooling does not change.
+With *f* = 1 the vector is identical to the default one. Intermediate blocks come before the final
+layer norm, so their hidden states are not normalised.
+
+`relative_depth` is set to 0.75 only by the overlay `config/layer_depth_pilot.yaml`, which runs
+the five BLOOMZ models on Narratives (how to run it:
+[running guide](../guides/running_and_troubleshooting.md), section 1). The BLOOMZ models have
+24 blocks (560m, 1b1, 1b7; *k* = 18) or 30 (3b, 7b1; *k* = 23), read from their local
+`config.json`. The depth was fixed before any result was seen, from brain-encoding studies of
+GPT-like models (Caucheteux & King 2022; Antonello et al. 2023, OPT) that find the best layer near
+75% of the depth; those figures still have to be checked against the papers. A single depth fixed
+in advance is used, rather than the best of several layers, because the best of more layers is
+higher by chance alone and larger models have more layers, which would create a size trend by
+construction (Gröger et al., Sec. 4.2).
+
+**Caveat: a few very large dimensions.** In BLOOMZ-560m, on one Narratives story, the three
+largest of the 1024 dimensions hold 38% of the squared norm of the last-layer vector and 50% at
+75% depth. Such dimensions dominate cosine and Pearson similarity but not Spearman similarity,
+which uses ranks; the pilot compares the three similarity types for this reason.
 
 **Caveat: the BOS token is included in the mean.** In many decoder models, Gemma and
 Llama-style models in particular, the hidden state at the first position (here the BOS token) is
@@ -86,7 +113,10 @@ The content comes from the code (`get_embeddings.py`, `compute_similarity.py`,
 source (`modeling_timm_wrapper.py`, `modeling_dinov2.py`). The ImageNet-12k fine-tuning of the
 `clip_i21k_ft_*` models was checked on the Hugging Face model card of
 `timm/vit_base_patch16_clip_224.laion2b_ft_in12k` (an 11,821-class subset of ImageNet-22k).
-**Not verified:** the size of the BOS outlier in these specific models was not measured.
+**Not verified:** the size of the BOS outlier in these specific models was not measured. The
+large-dimension figures for BLOOMZ-560m come from a single story (`pieman`, run on CPU).
+`hidden_states[L]` equal to the last hidden state was checked for BLOOMZ-560m only (identical
+vectors with *f* = 1 and without the option).
 
 ## Changes
 
@@ -107,3 +137,10 @@ mentioned in section 4, and the chunk-length link points to the new guide.
 The chunk overlap (256) and the pooling (`avg` for text, `cls` for images) were hard-coded in
 `get_embeddings.py`; they are now the `chunk_overlap` and `pooling` keys of `config/config.yaml`,
 passed by the `get_embeddings` rule. The values did not change.
+
+### 2026-11-13 18:00 — layer read at a configurable relative depth
+
+Section 3 now says which layer the vector comes from and describes the `relative_depth` setting
+(null: last hidden state, as before; a fraction: the block at that depth), the layer-depth pilot
+that sets it to 0.75 for BLOOMZ on Narratives, and why one depth is fixed in advance. Added a
+caveat on the few very large dimensions of BLOOMZ vectors.

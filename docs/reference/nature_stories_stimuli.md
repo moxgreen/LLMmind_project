@@ -8,10 +8,10 @@ uses the transcripts, and the check that both releases describe the same stimuli
 
 ## 1. Sources
 
-| Files | Release | Downloaded by |
-|---|---|---|
-| `responses/S*_BOLD.hdf`, `responses/run_onsets.json`, `mappers/`, `stimuli/*.wav` | "Nature Story Listening 3T fMRI Data", Huth, de Heer, Deniz, Gong, Gallant, Theunissen (Gallant and Theunissen labs), 11 subjects; G-Node GIN, DOI `10.12751/g-node.t4wew2` | `public_datasets`, rule `download_nature_stories_dataset` |
-| `stimuli/textgrids/<story>.TextGrid` | "An fMRI dataset during a passive natural language listening task", LeBel, Wagner, Jain, … Huth, *Sci. Data* 10, 555 (2023); OpenNeuro `ds003020`, DOI `10.18112/openneuro.ds003020.v4.0.0`, folder `derivatives/TextGrids` | `public_datasets`, rule `download_nature_story_stimuli` (`aws s3 cp --no-sign-request` from `s3://openneuro.org/ds003020/derivatives/TextGrids`) |
+| Files | Release |
+|---|---|
+| `responses/S*_BOLD.hdf`, `responses/run_onsets.json`, `mappers/`, `stimuli/*.wav` | "Nature Story Listening 3T fMRI Data", Huth, de Heer, Deniz, Gong, Gallant, Theunissen (Gallant and Theunissen labs), 11 subjects; G-Node GIN, DOI `10.12751/g-node.t4wew2` |
+| `stimuli/textgrids/<story>.TextGrid` | "An fMRI dataset during a passive natural language listening task", LeBel, Wagner, Jain, … Huth, *Sci. Data* 10, 555 (2023); OpenNeuro `ds003020`, DOI `10.18112/openneuro.ds003020.v4.0.0`, folder `derivatives/TextGrids`, available without an account with `aws s3 cp --no-sign-request` from `s3://openneuro.org/ds003020/derivatives/TextGrids` |
 
 `ds003020` is a different, later Huth lab dataset (Moth Radio Hour stories, its own subjects). Its
 84 stories include all 11 Nature Stories stories. The G-Node archive contains the audio of each
@@ -58,7 +58,7 @@ Done on 2026-10-09 on the downloaded files, with the workflow's own TextGrid par
 | wheretheressmoke (test) | 311 | 311 | 601.9 | 601.9 |
 
 G-Node lengths are those of the corrected `new_run_onsets.json` (see the
-[README](../../README.md#input-files-not-produced-by-the-download)).
+[README](../../README.md#input-files-that-are-not-plain-downloads)).
 
 Findings:
 
@@ -168,3 +168,13 @@ existed only as a hand-copied table. It now writes `textgrid_check.tsv` and
 `textgrid_check_unexplained_words.tsv` to `results/mind/nature_stories/qc/` and is built by
 `all_nature_stories_dataset` (not by `rule all`). Section 4 gives the new command and the lowest
 unrounded correlations. The values did not change.
+
+### 2026-11-16 15:42 — download column removed from the sources table
+
+The sources table no longer names the lab's own download workflow and its rules, which a reader
+outside the lab cannot use. The public S3 location of the TextGrids is kept in the release column.
+
+### 2026-11-16 15:52 — README link updated
+
+The link to the README section on input files that need an extra step follows that section's new
+title.

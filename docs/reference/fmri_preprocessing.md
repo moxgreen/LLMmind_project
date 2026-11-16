@@ -47,7 +47,8 @@ steps are listed below.
 
 **1. Stimulus selection.** A stimulus is kept only if at least `minimum_subjects_per_stimulus`
 (= 2) different subjects saw it, and it is not in the dataset's `excluded_stimuli.txt`. Nature
-Stories ignores `minimum_subjects_per_stimulus`: it requires every subject for every story.
+Stories ignores `minimum_subjects_per_stimulus`: it requires every subject for every story. This
+leaves about 1,000 stimuli each in NSD and Caption Scene.
 
 - Narratives: the 10 tasks of `schema_subtasks` and `notthefall_variants` in `config.yaml` (the schema sub-stories and the two
   scrambled "Not the Fall" versions) are dropped, and scans listed in `scan_exclude.json` are
@@ -78,7 +79,8 @@ Stories ignores `minimum_subjects_per_stimulus`: it requires every subject for e
   voxels with finite data and renormalising the rows.
 - Caption Scene: each subject's T1w (`ses-01_run-001`; the four repeated
   T1w scans share one grid and match the mean BOLD image equally well) is registered to
-  MNI152NLin6Asym 1 mm, the space of the Schaefer volume atlas, with ANTs
+  MNI152NLin6Asym 1 mm (`tpl-MNI152NLin6Asym_res-01_T1w.nii.gz`, downloaded from TemplateFlow
+  into `resources/atlases/` by rule `fetch_mni_template`), the space of the Schaefer volume atlas, with ANTs
   `antsRegistrationSyNQuick.sh -t s` (rigid, affine and SyN; seed `random_seed`). The BOLD runs are
   already aligned to that T1w by the dataset authors and share one grid per subject, so the same
   transforms map them to MNI. For every atlas voxel in a parcel, the native BOLD voxel to sample is
@@ -95,7 +97,7 @@ Stories ignores `minimum_subjects_per_stimulus`: it requires every subject for e
 | Dataset | Atlas file | Space | How it is applied |
 |---|---|---|---|
 | Narratives | `tpl-MNI152NLin2009cAsym_res-01_atlas-Schaefer2018_desc-200Parcels7Networks_dseg.nii.gz`, downloaded from TemplateFlow into `resources/atlases/` by `extract_narratives_parcels.py` | MNI152NLin2009cAsym, like the BOLD files | resampled with nearest neighbour onto the BOLD grid |
-| NSD | nilearn's `Schaefer2018_200Parcels_7Networks_order_FSLMNI152_1mm.nii.gz` | MNI152NLin6Asym (FSL MNI152) | resampled with nearest neighbour onto the BOLD grid |
+| NSD | nilearn's `Schaefer2018_200Parcels_7Networks_order_FSLMNI152_1mm.nii.gz`, downloaded by `nilearn.datasets.fetch_atlas_schaefer_2018` | MNI152NLin6Asym (FSL MNI152) | resampled with nearest neighbour onto the BOLD grid |
 | Caption Scene | the same nilearn atlas | MNI152NLin6Asym | sampled on its own 1 mm grid (step 3) |
 | Nature Stories | the fsaverage annotation | fsaverage | per vertex |
 
@@ -350,3 +352,9 @@ instead of giving 0.
 New subsection with the number of COCO images shared by the retained Caption Scene and NSD
 stimuli (13 of 1000), counted by COCO image ID, for the methods' comparison of the two vision
 datasets. No processing changed.
+
+### 2026-11-16 15:42 — atlas and template downloads, stimulus counts moved here from the README
+
+Step 1 now gives the number of stimuli left in NSD and Caption Scene, step 3 where the MNI template
+comes from, and the atlas table how the nilearn atlas is downloaded. These facts were in the
+README, which now links here. Nothing in the processing changed.

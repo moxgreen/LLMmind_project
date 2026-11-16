@@ -19,6 +19,10 @@ of neighbours the two sets share, divided by *k*, so it lies in [0, 1]
 (`compute_alignment.compute_alignment_scores()`). The **model-level alignment score** is the mean
 over concepts.
 
+No step builds or stores a full concept × concept similarity matrix: similarity is computed in
+blocks and immediately reduced to each concept's top-ranked neighbours, up to the largest *k*
+configured for the dataset.
+
 ## 2. Relabelling null
 
 The null hypothesis is that the two representations are unrelated beyond chance. It is built by
@@ -72,6 +76,15 @@ are descriptive summaries of the per-concept p-values, **not tests**: a mean or 
 p-values has no calibrated interpretation, and the minimum is the best concept's uncorrected
 p-value. They are kept on purpose (decision of 2026-09-30) but must not be reported as model-level
 p-values.
+
+**Where the results are written.** The per-concept p-values are in the per-configuration TSVs
+under `results/alignment_scores/`; the model-level p-value is computed from them and written only
+to the summary tables. The relabelled scores are kept as one all-*k* file per configuration in
+`results/alignment_scores/relabelled_common_neighbours/`: the relabelled number of common
+neighbours for every relabelling, concept and *k*. In
+`results/tsv_summaries/all_model_model_alignment_scores.tsv` the `model`/`stimuli_type` pair of
+the brain-model table becomes `model_1 | stimuli_type_1 | model_2 | stimuli_type_2`, each pair
+once, with `model_1` earlier than `model_2` in the `models:` order of the config.
 
 ## 4. Enrichment
 
@@ -520,3 +533,9 @@ Section 5 no longer has the "check under arbitrary dependence", a one-off count 
 survive Benjamini-Yekutieli as well as Benjamini-Hochberg. The developer decided that BH is the
 correction of the project and that BY is too conservative for this experiment; the check would be
 redone only if a reviewer asks about the dependence between the tests.
+
+### 2026-11-16 15:42 — block-wise similarity and output layout moved here from the README
+
+Section 1 now says that no full similarity matrix is built, and section 3 where the p-values and
+relabelled scores are written and the column layout of the model-model summary table. These facts
+were in the README, which now links here. Nothing in the analysis changed.

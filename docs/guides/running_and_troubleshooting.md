@@ -282,6 +282,11 @@ bf16). Before adding a model, check its `config.json` for `num_experts`, `num_lo
 
 ## 6. Troubleshooting
 
+- **The pipeline stops at once with `ValueError: config: ...`**: the main config values (model
+  modality, quantization, model-key format `<family>_<size>`, similarity types,
+  `minimum_subjects_per_stimulus`, `relative_depth`, neighbourhood sizes) are checked when the
+  pipeline starts, before any job runs. The message names the key and the accepted values; fix
+  the value in `config/config.yaml`.
 - **`ProtectedOutputException` / write-protected files under `resources/models/`**: pretrained
   models are downloaded via `huggingface_hub`, which can leave downloaded files (and sometimes
   their directory) read-only. Run `chmod -R u+w resources/models/` and retry. If Snakemake also
@@ -494,3 +499,8 @@ to the 15,900 files the manifest uses, checked against `csd_events_manifest.tsv`
 Section 1 now explains how to set up and run the layer-depth pilot (BLOOMZ at 75% depth on
 Narratives, in its own working directory). Section 2 explains why the new `--relative_depth`
 option sits after the end of the `get_embeddings` command text.
+
+### 2026-11-16 15:42 — configuration checks described
+
+Section 6 now describes the configuration checks made at startup and the error they raise. This
+was a sentence in the README, which now links here.

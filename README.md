@@ -272,34 +272,17 @@ resources/datasets/
 └── nsd_data_dataset/
 ```
 
-In this lab, these are not populated by hand: the sibling `public_datasets`
-Snakemake project downloads/clones the raw data for all four datasets. Its
-outputs land under `public_datasets/results_molilab_cold_back/<dataset>/`
-(itself a symlink into cold storage,
-`/mnt/molilab_cold_bak/LLMmind/downloaded_datasets`), **not** directly inside
-this repository — after running it, link each dataset directory into place
-here:
-
-```bash
-ln -s ../public_datasets/results_molilab_cold_back/caption_scene_dataset resources/datasets/caption_scene_dataset
-ln -s ../public_datasets/results_molilab_cold_back/narratives_dataset/dataset resources/datasets/narratives_dataset
-ln -s ../public_datasets/results_molilab_cold_back/nature_stories_dataset resources/datasets/nature_stories_dataset
-ln -s ../public_datasets/results_molilab_cold_back/nsd_data_dataset resources/datasets/nsd_data_dataset
-```
-
-(paths above assume `public_datasets/` is checked out as a sibling of this
-repository; adjust if yours lives elsewhere.) Note the extra `/dataset`
-suffix for `narratives_dataset` — `public_datasets` also keeps a
-`cloned_dataset/` working copy alongside the fetched files, which should
-not be linked.
-
-If you're sourcing the raw data some other way, just make sure the files
-listed above end up at the same relative paths under
-`resources/datasets/<dataset>/`.
+The raw data were downloaded with an auxiliary Snakemake workflow that is
+not part of this repository. Its download rules are left out of this
+pipeline on purpose: the datasets are very large, and a run should not fill a
+disk by mistake. To reproduce the analysis, download the files listed above
+from the public releases of the four datasets and place them in these
+directories, at the paths given above. A dataset directory may also be a
+symbolic link to wherever the data are stored.
 
 ### Input files not produced by the download
 
-`public_datasets` does not produce every input file listed above. The
+The download does not produce every input file listed above. The
 files below come from the public datasets but must be extracted, copied or
 corrected by hand:
 

@@ -1,3 +1,4 @@
+run_snakemake_workflow.sh
 .snakemake/
 resources/
 results/

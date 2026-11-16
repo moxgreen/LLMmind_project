@@ -1,4 +1,5 @@
 run_snakemake_workflow.sh
+parquet2tsv.sh
 .snakemake/
 resources/
 results/

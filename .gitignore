@@ -1,6 +1,7 @@
 run_snakemake_workflow.sh
 parquet2tsv.sh
 .snakemake/
+logs/
 resources/
 results/
 workflow/envs/LLMmind_project/

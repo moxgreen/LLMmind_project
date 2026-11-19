@@ -66,51 +66,68 @@ runs alongside other jobs the run briefly uses more CPUs than `--cores`. Lower
 
 ### Layer-depth pilot
 
-The pilot reads the five BLOOMZ models at 75% of their depth instead of their last layer, on
-Narratives only, and computes the brain-model nearest-neighbour alignment and the Spearman RSA
-(whole cortex and language region). Why and how the layer is chosen is in
+The pilot reads the five BLOOMZ models and the 16 enabled Gemma models (every Gemma entry of
+`config/config.yaml` that is not commented out) at an intermediate depth instead of their last
+layer, on Narratives only, and computes the brain-model nearest-neighbour alignment and the
+Spearman RSA (whole cortex and language region). Why and how the layer is chosen is in
 [`model_embeddings.md`](../reference/model_embeddings.md), section 3. Its settings are the overlay
 `config/layer_depth_pilot.yaml` (`relative_depth`, `datasets`, `model_subset`), which the command
 adds on top of `config/config.yaml` without changing it.
 
-It runs in its own working directory, `results/layer_depth_pilot/`, so all its outputs go to
-`results/layer_depth_pilot/results/` and no final-layer result is touched. The directory holds
+The pilot is run at the depths 25%, 50%, 67% and 75%, each in its own working directory,
+`results/tests/layer_depth_pilot_<D>/` (`D` = 25, 50, 67, 75), so each depth's outputs go to
+`results/tests/layer_depth_pilot_<D>/results/` and no final-layer result is touched. The depth is
+given on the command line as `--config relative_depth=0.<D>`, which overrides the overlay's 0.75;
+the file names do not contain the depth, only the directory name does. Each directory holds
 links to `config/`, `resources/` and `workflow/`, and a copy of the Narratives brain results, so
-the brain side is reused rather than recomputed. To create it (once, from the project root):
+the brain side is reused rather than recomputed. To create one (once per depth, from the project
+root):
 
 ```bash
-P=results/layer_depth_pilot
+P=results/tests/layer_depth_pilot_75
 mkdir -p $P/results/mind $P/results/language_mind
-ln -s ../../config $P/config
-ln -s ../../resources $P/resources
-ln -s ../../workflow $P/workflow
+ln -s ../../../config $P/config
+ln -s ../../../resources $P/resources
+ln -s ../../../workflow $P/workflow
 cp -a results/mind/narratives $P/results/mind/
 cp -a results/language_mind/narratives $P/results/language_mind/
 ```
 
-Then, from the project root on node5, dry-run first and run only if the job list holds nothing but
-the pilot jobs (`get_embeddings` ×5, `compute_llm_nearest_neighbours` ×5, the alignment,
-relabelling, p-value and Spearman jobs ×30 each, the four aggregations; 164 in all). Any ISC,
-stimulus, excluded-stimuli or download job would write into the main `resources/` through the
-link, so stop if one appears. The targets go before the options, because `--quiet` would read them
-as its own values:
+`run_snakemake_workflow.sh` runs the four depths one after the other (the loop under `# pilot`;
+it stops at the first depth that fails). Dry-run each depth first, from the project root, and run
+only if the job list holds nothing but pilot jobs: `get_embeddings` and
+`compute_llm_nearest_neighbours` once per model, the alignment, relabelling, hypergeometric and
+empirical p-value and Spearman jobs six times per model (3 similarity types × 2 regions), and the
+four aggregations. Models already computed in that directory are not rerun. Any ISC, stimulus,
+excluded-stimuli or download job would write into the main `resources/` through the link, so
+stop if one appears. The targets go before the options, because `--quiet` would read them as its
+own values:
 
 ```bash
+D=75
 snakemake \
     results/tsv_summaries/all_model_brain_alignment_scores.tsv \
     results/tsv_summaries/all_model_brain_alignment_scores_language.tsv \
     results/tsv_summaries/all_spearman_alignment_scores.tsv \
     results/tsv_summaries/all_spearman_alignment_scores_language.tsv \
-    --directory results/layer_depth_pilot \
+    --directory results/tests/layer_depth_pilot_$D \
     --configfile "$PWD/config/layer_depth_pilot.yaml" \
+    --config relative_depth=0.$D \
     --use-conda --conda-prefix "$PWD/.snakemake/conda" \
     --cores 4 --resources gpu=1 \
     -n --quiet rules
 ```
 
-Drop `-n --quiet rules` to run it. `--conda-prefix` reuses the project's environments; without
-it Snakemake would build new ones inside the pilot directory. The summary tables land in
-`results/layer_depth_pilot/results/tsv_summaries/`.
+Drop `-n --quiet rules` to run it, or submit `run_snakemake_workflow.sh` to run all four depths.
+`--conda-prefix` reuses the project's environments; without it Snakemake would build new ones
+inside the pilot directory. The summary tables land in
+`results/tests/layer_depth_pilot_<D>/results/tsv_summaries/`.
+
+The Gemma models are the first quantised models read at an intermediate depth (several large
+Gemma models are loaded in 8 or 4 bits), and Gemma 3n keeps several parallel copies of its
+hidden state inside the network, so its intermediate hidden states may have a different shape
+from those of the other models. Neither has been checked yet: look at the first Gemma 3n and
+quantised `get_embeddings` logs of a run before trusting their results.
 
 ## 2. When Snakemake reruns a job
 
@@ -504,3 +521,12 @@ option sits after the end of the `get_embeddings` command text.
 
 Section 6 now describes the configuration checks made at startup and the error they raise. This
 was a sentence in the README, which now links here.
+
+### 2026-11-19 10:00 — layer-depth pilot extended to Gemma and to four depths
+
+Section 1 now describes the pilot as it is run: the 16 enabled Gemma models were added to the
+five BLOOMZ models in `config/layer_depth_pilot.yaml`, at the developer's request, and the pilot
+runs at 25%, 50%, 67% and 75% depth, one working directory per depth under `results/tests/`,
+launched by the loop in `run_snakemake_workflow.sh`. The section described a single 75% run in
+`results/layer_depth_pilot/`, which has been removed. Added a warning that quantised models and
+Gemma 3n have not been checked at intermediate depths.

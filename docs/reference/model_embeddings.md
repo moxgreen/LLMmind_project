@@ -58,9 +58,9 @@ block 0 is the token embeddings). The same applies to vision models. Pooling doe
 With *f* = 1 the vector is identical to the default one. Intermediate blocks come before the final
 layer norm, so their hidden states are not normalised.
 
-`relative_depth` is set to 0.75 only by the overlay `config/layer_depth_pilot.yaml`, which runs
-the five BLOOMZ models on Narratives (how to run it:
-[running guide](../guides/running_and_troubleshooting.md), section 1). The BLOOMZ models have
+`relative_depth` is set only for the layer-depth pilot: the overlay `config/layer_depth_pilot.yaml`
+runs the five BLOOMZ models and the 16 enabled Gemma models on Narratives, at 25%, 50%, 67% and
+75% depth (how to run it: [running guide](../guides/running_and_troubleshooting.md), section 1). The BLOOMZ models have
 24 blocks (560m, 1b1, 1b7; *k* = 18) or 30 (3b, 7b1; *k* = 23), read from their local
 `config.json`. The depth was fixed before any result was seen, from brain-encoding studies of
 GPT-like models (Caucheteux & King 2022; Antonello et al. 2023, OPT) that find the best layer near
@@ -144,3 +144,8 @@ Section 3 now says which layer the vector comes from and describes the `relative
 (null: last hidden state, as before; a fraction: the block at that depth), the layer-depth pilot
 that sets it to 0.75 for BLOOMZ on Narratives, and why one depth is fixed in advance. Added a
 caveat on the few very large dimensions of BLOOMZ vectors.
+
+### 2026-11-19 10:00 — layer-depth pilot extended to Gemma and to four depths
+
+Section 3 now says that the pilot covers the 16 enabled Gemma models as well as BLOOMZ, and the
+depths 25%, 50%, 67% and 75% rather than 75% only.

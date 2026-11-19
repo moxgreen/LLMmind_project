@@ -1,8 +1,8 @@
 # written with AI assistance: Claude Code, Claude Opus 5.5 (claude-opus-5-5)
-# last AI edit: 2026-11-13, see docs/changelog/developers/ for details
+# last AI edit: 2026-11-19, see docs/changelog/developers/ for details
 
-# overlay on config/config.yaml for the layer-depth pilot: the BLOOMZ models read at 75% of
-# their depth, on Narratives only; run it in its own working directory (see
+# overlay on config/config.yaml for the layer-depth pilot: the BLOOMZ and Gemma models read at
+# 75% of their depth, on Narratives only; run it in its own working directory (see
 # docs/guides/running_and_troubleshooting.md), so its outputs never mix with the main results
 relative_depth: 0.75
 
@@ -16,3 +16,19 @@ model_subset:
   - "bloom_1b7"
   - "bloom_3b"
   - "bloom_7b1"
+  - "gemma_2b"
+  - "gemma_7b"
+  - "gemma2_2b"
+  - "gemma2_9b"
+  - "gemma2_27b"
+  - "gemma3_270m"
+  - "gemma3_1b"
+  - "gemma3_4b"
+  - "gemma3_12b"
+  - "gemma3_27b"
+  - "gemma3n_e2b"
+  - "gemma3n_e4b"
+  - "gemma4_e2b"
+  - "gemma4_e4b"
+  - "gemma4_12b"
+  - "gemma4_31b"

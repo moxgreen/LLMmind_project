@@ -5,6 +5,7 @@
 Changes made on this day, in order:
 
 - Layer-depth pilot extended to the Gemma models (new feature, documentation)
+- Gemma 3n left out of the layer-depth pilot (removal, documentation)
 
 ---
 
@@ -22,3 +23,15 @@ The large Gemma models are loaded in reduced precision, and Gemma 3n has an unus
 structure; neither has been tried at intermediate depths yet, so check their first results
 before relying on them. The running guide's pilot section now describes the current four-depth
 setup and how to start it.
+
+---
+
+## 11:10 — Gemma 3n left out of the layer-depth pilot
+
+Kind: removal, documentation
+
+The first run of the layer-depth pilot with the Gemma models stopped almost at once: the two
+Gemma 3n models (E2B and E4B) cannot be read at an intermediate depth, because inside the network
+they keep four copies of their internal state and combine them only at the very end. The pilot now
+leaves these two models out and runs the other 14 Gemma models with the five BLOOMZ models. Their
+normal (last-layer) results in the main pipeline are not affected.

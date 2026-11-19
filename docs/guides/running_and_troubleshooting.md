@@ -66,8 +66,9 @@ runs alongside other jobs the run briefly uses more CPUs than `--cores`. Lower
 
 ### Layer-depth pilot
 
-The pilot reads the five BLOOMZ models and the 16 enabled Gemma models (every Gemma entry of
-`config/config.yaml` that is not commented out) at an intermediate depth instead of their last
+The pilot reads the five BLOOMZ models and 14 Gemma models (every Gemma entry of
+`config/config.yaml` that is not commented out, except the two Gemma 3n models, see below) at an
+intermediate depth instead of their last
 layer, on Narratives only, and computes the brain-model nearest-neighbour alignment and the
 Spearman RSA (whole cortex and language region). Why and how the layer is chosen is in
 [`model_embeddings.md`](../reference/model_embeddings.md), section 3. Its settings are the overlay
@@ -124,10 +125,15 @@ inside the pilot directory. The summary tables land in
 `results/tests/layer_depth_pilot_<D>/results/tsv_summaries/`.
 
 The Gemma models are the first quantised models read at an intermediate depth (several large
-Gemma models are loaded in 8 or 4 bits), and Gemma 3n keeps several parallel copies of its
-hidden state inside the network, so its intermediate hidden states may have a different shape
-from those of the other models. Neither has been checked yet: look at the first Gemma 3n and
+Gemma models are loaded in 8 or 4 bits); this has not been checked yet, so look at the first
 quantised `get_embeddings` logs of a run before trusting their results.
+
+**Gemma 3n cannot be read at an intermediate depth.** Gemma 3n keeps four parallel copies of its
+hidden state inside the network and merges them only after the last block, so its intermediate
+hidden states have an extra leading dimension (shape `(4, 1, tokens, 2048)`). `get_embeddings`
+stops with `ValueError: Expected a 2D or 3D hidden-state tensor, got shape (4, 1, 2048, 2048)`,
+and Snakemake then stops the whole run. `gemma3n_e2b` and `gemma3n_e4b` are therefore left out of
+the pilot's `model_subset`. Their last-layer embeddings in the main pipeline are not affected.
 
 ## 2. When Snakemake reruns a job
 
@@ -530,3 +536,10 @@ runs at 25%, 50%, 67% and 75% depth, one working directory per depth under `resu
 launched by the loop in `run_snakemake_workflow.sh`. The section described a single 75% run in
 `results/layer_depth_pilot/`, which has been removed. Added a warning that quantised models and
 Gemma 3n have not been checked at intermediate depths.
+
+### 2026-11-19 11:10 — Gemma 3n left out of the layer-depth pilot
+
+The first Gemma run of the pilot stopped at 25% depth because `get_embeddings` cannot pool Gemma
+3n's intermediate hidden states, which carry four parallel copies. Section 1 now says that the
+two Gemma 3n models are left out of the pilot (14 Gemma models instead of 16), quotes the error,
+and keeps the warning for quantised models only.

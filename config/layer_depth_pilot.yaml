@@ -1,11 +1,6 @@
 # written with AI assistance: Claude Code, Claude Opus 5.5 (claude-opus-5-5)
 # last AI edit: 2026-11-19, see docs/changelog/developers/ for details
 
-# overlay on config/config.yaml for the layer-depth pilot: the BLOOMZ and Gemma models read at
-# 75% of their depth, on Narratives only; run it in its own working directory (see
-# docs/guides/running_and_troubleshooting.md), so its outputs never mix with the main results
-relative_depth: 0.75
-
 datasets:
   - "narratives"
 

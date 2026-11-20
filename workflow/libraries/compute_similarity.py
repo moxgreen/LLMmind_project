@@ -1,5 +1,5 @@
 # edited with AI assistance: Claude Code, Claude Opus 5.5 (claude-opus-5-5)
-# last AI edit: 2026-10-08, see docs/changelog/developers/ for details
+# last AI edit: 2026-11-20, see docs/changelog/developers/ for details
 import numpy as np
 from scipy.stats import rankdata
 
@@ -107,6 +107,34 @@ def extract_embedding_matrix(embedding_df):
     embedding_cols = sorted(embedding_cols, key = lambda c: int(c))
 
     return embedding_df[embedding_cols].to_numpy(dtype = np.float64)
+
+# the quantile of a model's absolute embedding values above which values are capped (Huh et al.
+# 2024, platonic-rep metrics.remove_outliers)
+CAP_QUANTILE = 0.95
+
+def capped_embedding_matrix(embedding_df, concepts = None):
+    """
+    The model's concepts x dimensions embedding matrix with every value clipped at the
+    cap: the mean, over all stimuli of the file, of each stimulus' CAP_QUANTILE quantile
+    of absolute values. The cap is computed on the whole file, so subsets of concepts
+    share one cap. Only for model embeddings: brain representations are never capped.
+    """
+    embedding_matrix = extract_embedding_matrix(embedding_df)
+    cap = np.quantile(np.abs(embedding_matrix), CAP_QUANTILE, axis = 1).mean()
+    embedding_matrix = np.clip(embedding_matrix, -cap, cap)
+
+    if concepts is None:
+        return embedding_matrix
+
+    positions = embedding_df.index.get_indexer(concepts)
+
+    if (positions < 0).any():
+        raise ValueError(
+            f"{(positions < 0).sum()} requested concept(s) are missing from the "
+            "embeddings"
+        )
+
+    return embedding_matrix[positions]
 
 NORMALIZE_FUNCTIONS_BY_SIMILARITY_TYPE = {
     "cosine": normalize_l2, 

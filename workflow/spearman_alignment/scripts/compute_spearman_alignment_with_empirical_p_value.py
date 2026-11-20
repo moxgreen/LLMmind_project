@@ -1,5 +1,5 @@
 # edited with AI assistance: Claude Code, Claude Opus 5.5 (claude-opus-5-5)
-# last AI edit: 2026-10-09, see docs/changelog/developers/ for details
+# last AI edit: 2026-11-20, see docs/changelog/developers/ for details
 import argparse
 from pathlib import Path
 
@@ -8,8 +8,8 @@ import pandas as pd
 from scipy.stats import rankdata
 
 from libraries.compute_similarity import (
+    capped_embedding_matrix, 
     dataframe_to_embedding_matrix, 
-    extract_embedding_matrix, 
     normalize_fn_for_similarity_type, 
 )
 from libraries.compute_statistics import empirical_upper_tail_p_value
@@ -102,7 +102,7 @@ def main():
             f"concept(s), e.g. {missing_concepts[:5]}"
         )
 
-    model_embedding_matrix = extract_embedding_matrix(model_embedding_df.loc[concepts])
+    model_embedding_matrix = capped_embedding_matrix(model_embedding_df, concepts)
     model_similarity_df = validate_similarity_dataframe(
         similarity_df = compute_similarity_dataframe(
             model_embedding_matrix, 

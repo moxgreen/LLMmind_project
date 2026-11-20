@@ -1,5 +1,5 @@
 # edited with AI assistance: Claude Code, Claude Opus 5.5 (claude-opus-5-5)
-# last AI edit: 2026-10-02, see docs/changelog/developers/ for details
+# last AI edit: 2026-11-20, see docs/changelog/developers/ for details
 from pathlib import Path
 
 import numpy as np
@@ -12,7 +12,7 @@ from libraries.compute_nearest_neighbours import (
     relabel_nearest_neighbours, 
 )
 from libraries.compute_similarity import (
-    extract_embedding_matrix, 
+    capped_embedding_matrix, 
     normalize_fn_for_similarity_type, 
 )
 
@@ -24,7 +24,7 @@ def compute_topk_on_concept_subset(
 ):
     # top-k is recomputed within `concepts`, not filtered from a larger file: the permutation needs
     # neighbour indices to be positions in this closed set
-    embedding_matrix = extract_embedding_matrix(embedding_df.loc[concepts])
+    embedding_matrix = capped_embedding_matrix(embedding_df, concepts)
 
     neighbour_indices, _ = compute_blockwise_topk_from_embeddings(
         embedding_matrix = embedding_matrix, 

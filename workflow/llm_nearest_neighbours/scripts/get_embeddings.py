@@ -1,5 +1,5 @@
 # edited with AI assistance: Claude Code, Claude Opus 5.5 (claude-opus-5-5)
-# last AI edit: 2026-11-13, see docs/changelog/developers/ for details
+# last AI edit: 2026-11-20, see docs/changelog/developers/ for details
 import argparse
 import gc
 import math
@@ -118,9 +118,30 @@ def move_inputs_to_device(
         for key, value in inputs.items()
     }
 
-def hidden_state_at_relative_depth(output, relative_depth: float) -> torch.Tensor:
+def final_norm(model) -> torch.nn.Module:
+    # the norm the model applies to every token after its last block: ln_f (BLOOM) or norm
+    # (Gemma 1-4, under language_model in the multimodal Gemma 3, 3n and 4 checkpoints)
+    for owner in (model, getattr(model, "language_model", None,)):
+        for name in ("ln_f", "norm"):
+            module = getattr(owner, name, None,)
+
+            if isinstance(module, torch.nn.Module):
+                return module
+
+    raise ValueError(
+        "--relative_depth: no final norm (ln_f or norm) found on "
+        f"{type(model).__name__}"
+    )
+
+def hidden_state_at_relative_depth(
+    output, 
+    relative_depth: float, 
+    model, 
+) -> torch.Tensor:
     # hidden_states[0] is the token embeddings and hidden_states[L] the output of the last of
-    # the L blocks, so block k = relative_depth*L rounded to the nearest integer, halves up
+    # the L blocks, so block k = relative_depth*L rounded to the nearest integer, halves up;
+    # block L is read from last_hidden_state (after the final norm, and after Gemma 3n's
+    # merge of its streams, which its hidden_states[L] lacks), the default embedding
     hidden_states = getattr(output, "hidden_states", None,)
 
     if hidden_states is None:
@@ -130,18 +151,37 @@ def hidden_state_at_relative_depth(output, relative_depth: float) -> torch.Tenso
         )
 
     number_of_blocks = len(hidden_states) - 1
+    block = math.floor(relative_depth*number_of_blocks + 0.5)
 
-    return hidden_states[math.floor(relative_depth*number_of_blocks + 0.5)]
+    if block == number_of_blocks:
+        return output.last_hidden_state
+
+    hidden_state = hidden_states[block]
+
+    # Gemma 3n keeps 4 AltUp streams, shape (4, batch, tokens, dim), until after its last block:
+    # keep stream 0, the one its attention and MLP blocks update
+    if hidden_state.ndim == 4:
+        hidden_state = hidden_state[0]
+
+    # normalise every token as the model does after its last block, so that a few very large
+    # tokens do not dominate the mean over tokens
+    with torch.inference_mode():
+        return final_norm(model)(hidden_state)
 
 def extract_embedding_from_output(
     output, 
     pool: str, 
     attention_mask: torch.Tensor | None = None, 
     relative_depth: float | None = None, 
+    model = None, 
 ) -> torch.Tensor:
     if relative_depth is not None:
         return pool_hidden_state(
-            hidden_state = hidden_state_at_relative_depth(output, relative_depth,), 
+            hidden_state = hidden_state_at_relative_depth(
+                output = output, 
+                relative_depth = relative_depth, 
+                model = model, 
+            ), 
             pool = pool, 
             attention_mask = attention_mask
         )
@@ -369,6 +409,7 @@ def embed_long_text(
             pool = pool, 
             attention_mask = attention_mask, 
             relative_depth = relative_depth, 
+            model = model, 
         )
 
         chunk_embeddings.append(pooled.squeeze(0).detach().cpu().float())
@@ -426,6 +467,7 @@ def embed_image(
         pool = pool, 
         attention_mask = None, 
         relative_depth = relative_depth, 
+        model = model, 
     )
 
     embedding = embedding.squeeze(0).detach().cpu().float()

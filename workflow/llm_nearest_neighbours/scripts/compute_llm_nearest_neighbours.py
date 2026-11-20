@@ -1,10 +1,10 @@
 # edited with AI assistance: Claude Code, Claude Opus 5.5 (claude-opus-5-5)
-# last AI edit: 2026-10-09, see docs/changelog/developers/ for details
+# last AI edit: 2026-11-20, see docs/changelog/developers/ for details
 
 import argparse
 
 from libraries.compute_nearest_neighbours import write_all_nearest_neighbours
-from libraries.compute_similarity import extract_embedding_matrix
+from libraries.compute_similarity import capped_embedding_matrix
 from libraries.parquet_io import read_parquet
 
 def main():
@@ -35,7 +35,7 @@ def main():
         raise ValueError("--number_of_neighbours must be a positive integer")
 
     embedding_df = read_parquet(args.embedding_dataframe)
-    embedding_matrix = extract_embedding_matrix(embedding_df)
+    embedding_matrix = capped_embedding_matrix(embedding_df)
     concepts = embedding_df.index
 
     write_all_nearest_neighbours(

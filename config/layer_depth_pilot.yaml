@@ -1,5 +1,5 @@
 # written with AI assistance: Claude Code, Claude Opus 5.5 (claude-opus-5-5)
-# last AI edit: 2026-11-19, see docs/changelog/developers/ for details
+# last AI edit: 2026-11-20, see docs/changelog/developers/ for details
 
 datasets:
   - "narratives"
@@ -21,6 +21,8 @@ model_subset:
   - "gemma3_4b"
   - "gemma3_12b"
   - "gemma3_27b"
+  - "gemma3n_e2b"
+  - "gemma3n_e4b"
   - "gemma4_e2b"
   - "gemma4_e4b"
   - "gemma4_12b"

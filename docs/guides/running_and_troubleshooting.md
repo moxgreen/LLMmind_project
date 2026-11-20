@@ -66,19 +66,19 @@ runs alongside other jobs the run briefly uses more CPUs than `--cores`. Lower
 
 ### Layer-depth pilot
 
-The pilot reads the five BLOOMZ models and 14 Gemma models (every Gemma entry of
-`config/config.yaml` that is not commented out, except the two Gemma 3n models, see below) at an
-intermediate depth instead of their last
+The pilot reads the five BLOOMZ models and the 16 Gemma models (every Gemma entry of
+`config/config.yaml` that is not commented out) at an intermediate depth instead of their last
 layer, on Narratives only, and computes the brain-model nearest-neighbour alignment and the
 Spearman RSA (whole cortex and language region). Why and how the layer is chosen is in
 [`model_embeddings.md`](../reference/model_embeddings.md), section 3. Its settings are the overlay
-`config/layer_depth_pilot.yaml` (`relative_depth`, `datasets`, `model_subset`), which the command
+`config/layer_depth_pilot.yaml` (`datasets`, `model_subset`), which the command
 adds on top of `config/config.yaml` without changing it.
 
 The pilot is run at the depths 25%, 50%, 67% and 75%, each in its own working directory,
 `results/tests/layer_depth_pilot_<D>/` (`D` = 25, 50, 67, 75), so each depth's outputs go to
 `results/tests/layer_depth_pilot_<D>/results/` and no final-layer result is touched. The depth is
-given on the command line as `--config relative_depth=0.<D>`, which overrides the overlay's 0.75;
+given on the command line as `--config relative_depth=0.<D>` (`relative_depth` is null in
+`config/config.yaml`);
 the file names do not contain the depth, only the directory name does. Each directory holds
 links to `config/`, `resources/` and `workflow/`, and a copy of the Narratives brain results, so
 the brain side is reused rather than recomputed. To create one (once per depth, from the project
@@ -128,12 +128,12 @@ The Gemma models are the first quantised models read at an intermediate depth (s
 Gemma models are loaded in 8 or 4 bits); this has not been checked yet, so look at the first
 quantised `get_embeddings` logs of a run before trusting their results.
 
-**Gemma 3n cannot be read at an intermediate depth.** Gemma 3n keeps four parallel copies of its
-hidden state inside the network and merges them only after the last block, so its intermediate
-hidden states have an extra leading dimension (shape `(4, 1, tokens, 2048)`). `get_embeddings`
-stops with `ValueError: Expected a 2D or 3D hidden-state tensor, got shape (4, 1, 2048, 2048)`,
-and Snakemake then stops the whole run. `gemma3n_e2b` and `gemma3n_e4b` are therefore left out of
-the pilot's `model_subset`. Their last-layer embeddings in the main pipeline are not affected.
+**Rerunning the pilot after a change to `get_embeddings.py`.** Snakemake does not see edits to
+the script (section 2), so a pilot directory whose embeddings exist is not recomputed: add
+`--forcerun get_embeddings` to the command (or to the loop in `run_snakemake_workflow.sh`). This
+recomputes every model's embeddings and everything downstream, and overwrites the summary tables
+of that directory; copy `results/tests/layer_depth_pilot_<D>/results/tsv_summaries/` elsewhere
+first to keep the previous numbers.
 
 ## 2. When Snakemake reruns a job
 
@@ -178,7 +178,13 @@ changing its code. This includes:
 - the embedding and ISC code, including the shared `libraries/` modules, for example
   `--forcerun get_embeddings compute_narratives_isc compute_nature_stories_isc`;
 - `create_isc_manifest`, `write_narratives_problematic_stimuli` and
-  `write_nature_stories_excluded_stimuli` (the last two write the excluded-stimuli lists).
+  `write_nature_stories_excluded_stimuli` (the last two write the excluded-stimuli lists);
+- the model-side similarity code (`workflow/libraries/compute_similarity.py`,
+  `compute_relabelled_alignment.py` and the scripts that use them):
+  `--forcerun compute_llm_nearest_neighbours compute_spearman_alignment_with_empirical_p_value
+  relabel_llm_similarity_and_compute_relabelled_llm_alignment_score
+  relabel_llm_similarity_and_compute_relabelled_llm_llm_alignment_score`, which reruns every
+  brain-model and model-model result.
 
 ## 3. Settings that change many results
 
@@ -368,6 +374,12 @@ bf16). Before adding a model, check its `config.json` for `num_experts`, `num_lo
 
 ### Leftover outputs from older versions
 
+**Model-side results computed without the cap.** Model nearest neighbours, relabelled scores,
+Spearman RSA results and every summary table built from them that were computed before model
+vectors were capped (`docs/reference/model_embeddings.md`, section 5) are uncapped, and Snakemake
+does not rerun them by itself. Rerun them with the `--forcerun` command for the model-side
+similarity code in section 2; until then, do not mix them with newly computed results.
+
 Results directories written by older versions of the pipeline can contain files that the current
 code no longer produces or reads. They are safe to delete:
 
@@ -543,3 +555,12 @@ The first Gemma run of the pilot stopped at 25% depth because `get_embeddings` c
 3n's intermediate hidden states, which carry four parallel copies. Section 1 now says that the
 two Gemma 3n models are left out of the pilot (14 Gemma models instead of 16), quotes the error,
 and keeps the warning for quantised models only.
+
+### 2026-11-20 16:00 — pilot with normalised depths and Gemma 3n, cap of model values
+
+Section 1: the pilot again covers the 16 Gemma models (Gemma 3n can now be read at intermediate
+depths), the overlay no longer holds `relative_depth`, and a paragraph explains how to recompute
+a pilot directory after a change to `get_embeddings.py` (`--forcerun get_embeddings`), which
+replaces the note on the Gemma 3n failure. Section 2 lists the `--forcerun` command for the
+model-side similarity code, where the cap of model values was added. "Leftover outputs from older
+versions" warns that model-side results computed before the cap are uncapped.

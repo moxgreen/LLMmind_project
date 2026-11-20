@@ -54,14 +54,23 @@ block after the final layer norm, i.e. the input of the next-token prediction he
 `relative_depth` is a fraction *f* in (0, 1], the `get_embeddings` rule passes
 `--relative_depth f`, the model also returns the hidden state after every block, and the vector
 comes from block *k* = *f*·*L* rounded to the nearest integer, halves up (*L* = number of blocks;
-block 0 is the token embeddings). The same applies to vision models. Pooling does not change.
-With *f* = 1 the vector is identical to the default one. Intermediate blocks come before the final
-layer norm, so their hidden states are not normalised.
+block 0 is the token embeddings). When *k* = *L* the vector is the default one (the model's last
+hidden state). An intermediate block comes before the model's final norm, so before pooling every
+token of it is passed through that norm (`ln_f` for BLOOMZ, `norm` for Gemma), as the model does
+after its last block: each token then counts with the same scale in the mean, and a few very large
+tokens cannot dominate it. Gemma 3n keeps four parallel streams of its hidden state ("AltUp") until
+after its last block; at an intermediate block only stream 0 is kept, the one its attention and
+feed-forward blocks update (streams 1–3 are cheaper predicted copies in projected coordinates).
+Pooling does not change. The final norm is looked up for BLOOMZ and Gemma only: any other model
+read at an intermediate depth stops with an error naming it. The normalisation and the Gemma 3n
+stream were checked on small randomly initialised BLOOM, Gemma, Gemma 3 and Gemma 3n models
+(*f* = 1 gives the default vector; *f* = 0.5 the mean of the normalised tokens), not yet on the
+real checkpoints.
 
 `relative_depth` is set only for the layer-depth pilot: the overlay `config/layer_depth_pilot.yaml`
-runs the five BLOOMZ models and 14 Gemma models on Narratives, at 25%, 50%, 67% and
-75% depth. The two Gemma 3n models are left out: they keep four parallel copies of the hidden
-state until after the last block, so an intermediate block has no single hidden state to pool (how to run it: [running guide](../guides/running_and_troubleshooting.md), section 1). The BLOOMZ models have
+runs the five BLOOMZ models and the 16 enabled Gemma models on Narratives, at 25%, 50%, 67% and
+75% depth (how to run it: [running guide](../guides/running_and_troubleshooting.md), section 1).
+The BLOOMZ models have
 24 blocks (560m, 1b1, 1b7; *k* = 18) or 30 (3b, 7b1; *k* = 23), read from their local
 `config.json`. The depth was fixed before any result was seen, from brain-encoding studies of
 GPT-like models (Caucheteux & King 2022; Antonello et al. 2023, OPT) that find the best layer near
@@ -73,7 +82,8 @@ construction (Gröger et al., Sec. 4.2).
 **Caveat: a few very large dimensions.** In BLOOMZ-560m, on one Narratives story, the three
 largest of the 1024 dimensions hold 38% of the squared norm of the last-layer vector and 50% at
 75% depth. Such dimensions dominate cosine and Pearson similarity but not Spearman similarity,
-which uses ranks; the pilot compares the three similarity types for this reason.
+which uses ranks; the pilot compares the three similarity types for this reason. Every model
+vector is capped before any similarity is computed (section 5), which bounds these dimensions.
 
 **Caveat: the BOS token is included in the mean.** In many decoder models, Gemma and
 Llama-style models in particular, the hidden state at the first position (here the BOS token) is
@@ -82,7 +92,9 @@ Averaging over all tokens, BOS included, can therefore pull every stimulus vecto
 direction. The effect is largest for short texts, where the BOS is one of few tokens, and for the
 first chunk of each text. It shrinks as texts get longer. Every stimulus of a model gets the same
 treatment, but a shared offset still compresses the similarities between stimuli, and none of
-the three similarity types removes it. Excluding the BOS
+the three similarity types removes it. At intermediate depths the per-token normalisation above
+limits the weight of an outsized BOS, as the final norm does at the last layer; the cap of
+section 5 clips what remains. Excluding the BOS
 position from the mean would change every language-model embedding and every result downstream,
 so it has not been done. The manuscript's methods state that the BOS token is included.
 
@@ -102,10 +114,19 @@ so it has not been done. The manuscript's methods state that the BOS token is in
 
 ## 5. From vectors to neighbours
 
-The embeddings file holds one row per stimulus. `compute_llm_nearest_neighbours.py` then
-normalises the vectors for the chosen similarity (L2 for cosine, centring + L2 for Pearson, ranks
-+ centring + L2 for Spearman), and keeps the largest configured k nearest neighbours of each
-stimulus, excluding the stimulus itself.
+The embeddings file holds one row per stimulus, stored without any cap. `compute_llm_nearest_neighbours.py`
+first caps the values, then normalises the vectors for the chosen similarity (L2 for cosine,
+centring + L2 for Pearson, ranks + centring + L2 for Spearman), and keeps the largest configured k
+nearest neighbours of each stimulus, excluding the stimulus itself.
+
+**Cap.** As in Huh et al. 2024 (`remove_outliers` in their code, quantile 0.95), every value of a
+model's vectors is clipped to ±*c*, where *c* is the mean over all stimuli of the file of each
+stimulus' 95th percentile of absolute values (`capped_embedding_matrix()` and `CAP_QUANTILE` in
+`workflow/libraries/compute_similarity.py`). *c* is computed on the whole embeddings file, so the
+observed neighbours, the relabelled neighbours (computed on the brain's concepts only) and the
+Spearman RSA all use the same cap. Brain representations are never capped. On the layer-depth
+pilot (Narratives) the cap changed the scores by −0.02 to +0.03 on average per model family; in
+Gemma 3 4B at 67% depth the largest value is about 45 900 against a cap of about 73.
 
 ## 6. Sources
 
@@ -156,3 +177,12 @@ depths 25%, 50%, 67% and 75% rather than 75% only.
 Section 3 now says that the pilot runs 14 Gemma models, not 16, and why the two Gemma 3n models
 are left out: their intermediate hidden states hold four parallel copies, which `get_embeddings`
 cannot pool.
+
+### 2026-11-20 16:00 — intermediate depths normalised per token, Gemma 3n back, model values capped
+
+Section 3: an intermediate block is now passed token by token through the model's final norm
+before pooling (it was pooled unnormalised, so a few very large tokens could dominate the mean);
+block *L* is read from the last hidden state; Gemma 3n is read at intermediate depths through its
+stream 0 and is back in the pilot (16 Gemma models). Vision models are no longer said to support
+intermediate depths. Section 5: model vectors are capped before every similarity, as in Huh et al.
+2024. The BOS and large-dimension caveats mention both.

@@ -3,6 +3,7 @@
 
 datasets:
   - "narratives"
+  - 'nature_stories'
 
 # the only models run; their settings stay in config/config.yaml
 model_subset:

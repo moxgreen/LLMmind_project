@@ -70,76 +70,59 @@ The pilot reads the five BLOOMZ models and the 16 Gemma models (every Gemma entr
 `config/config.yaml` that is not commented out) at a chosen relative depth instead of their last
 layer, on Narratives and Nature Stories, and computes the brain-model nearest-neighbour alignment and the
 Spearman RSA (whole cortex and language region). Why and how the layer is chosen is in
-[`model_embeddings.md`](../reference/model_embeddings.md), section 3. Its settings are the overlay
-`config/layer_depth_pilot.yaml` (`datasets`, `model_subset`), which the command
-adds on top of `config/config.yaml` without changing it.
+[`model_embeddings.md`](../reference/model_embeddings.md), section 3.
 
-The pilot is run at the depths 25%, 50%, 67%, 75% and 100%, each in its own working directory,
-`results/tests/layer_depth_pilot_<D>/` (`D` = 25, 50, 67, 75, 100), so each depth's outputs go to
-`results/tests/layer_depth_pilot_<D>/results/` and no main result is touched. The 100% run reads
-the same vectors as the main pipeline and serves as the final-layer comparison computed with the
-same code. The depth is given on the command line as `--config relative_depth=<D/100>` (`0.25`,
-…, `1`; `relative_depth` is null in `config/config.yaml`);
-the file names do not contain the depth, only the directory name does. Each directory holds
-links to `config/`, `resources/` and `workflow/`, and a copy of the brain results of both datasets, so
-the brain side is reused rather than recomputed. To create one (once per depth, from the project
-root):
+**Running it.** The pilot has its own Snakefile, `workflow/layer_depth_pilot/Snakefile`, run
+from the project root with the base environment active (on node5, or through
+`run_snakemake_workflow.sh`, whose last command is this one):
 
 ```bash
-P=results/tests/layer_depth_pilot_75
-mkdir -p $P/results/mind $P/results/language_mind
-ln -s ../../../config $P/config
-ln -s ../../../resources $P/resources
-ln -s ../../../workflow $P/workflow
-for DS in narratives nature_stories; do
-    cp -a results/mind/$DS $P/results/mind/
-    cp -a results/language_mind/$DS $P/results/language_mind/
-done
+snakemake -s workflow/layer_depth_pilot/Snakefile --cores 4 --resources gpu=1 -n   # dry run
+snakemake -s workflow/layer_depth_pilot/Snakefile --cores 4 --resources gpu=1
 ```
 
-`run_snakemake_workflow.sh` runs the five depths one after the other (the loop under `# pilot`;
-it stops at the first depth that fails). Dry-run each depth first, from the project root, and run
-only if the job list holds nothing but pilot jobs: `get_embeddings` and
-`compute_llm_nearest_neighbours` once per model and dataset, the alignment, relabelling,
-hypergeometric and empirical p-value and Spearman jobs six times per model and dataset
-(3 similarity types × 2 regions), and the four aggregations (1352 jobs in all for 21 models and
-two datasets). Models already computed in that directory are not rerun. Any ISC, stimulus,
-excluded-stimuli or download job would write into the main `resources/` through the link, so
-stop if one appears. The targets go before the options, because `--quiet` would read them as its
-own values:
+**Settings.** `config/layer_depth_pilot.yaml` holds the depths (`relative_depths`, now
+0.25, 0.5, 0.67, 0.75 and 1), the datasets and the models (`model_subset`); the inner runs add it
+on top of `config/config.yaml` without changing it.
 
-```bash
-D=75
-snakemake \
-    results/tsv_summaries/all_model_brain_alignment_scores.tsv \
-    results/tsv_summaries/all_model_brain_alignment_scores_language.tsv \
-    results/tsv_summaries/all_spearman_alignment_scores.tsv \
-    results/tsv_summaries/all_spearman_alignment_scores_language.tsv \
-    --directory results/tests/layer_depth_pilot_$D \
-    --configfile "$PWD/config/layer_depth_pilot.yaml" \
-    --config relative_depth=0.$D \
-    --use-conda --conda-prefix "$PWD/.snakemake/conda" \
-    --cores 4 --resources gpu=1 \
-    -n --quiet rules
-```
+**What a depth job does.** The Snakefile has one rule, `run_layer_depth_pilot`, with one job per
+depth *D* (in percent). Each job reserves 4 cores and the GPU, so the depths run one after the
+other, and:
 
-Drop `-n --quiet rules` to run it, or submit `run_snakemake_workflow.sh` to run all five depths
-(about 1 h 20 min per depth on node5).
-`--conda-prefix` reuses the project's environments; without it Snakemake would build new ones
-inside the pilot directory. The summary tables land in
-`results/tests/layer_depth_pilot_<D>/results/tsv_summaries/`.
+1. links `results/tests/layer_depth_pilot_<D>/` to the project's `config/`, `resources/` and
+   `workflow/`, and its `results/mind/<dataset>` and `results/language_mind/<dataset>` to the main
+   brain results of every pilot dataset, so the brain side is reused, not recomputed or copied
+   (`ln -T` stops the job if a real directory is in the way);
+2. runs the main workflow in that directory (`snakemake --directory …`) with
+   `--config relative_depth=<D/100>` (`relative_depth` is null in `config/config.yaml`),
+   `--conda-prefix` set to the project's environments (without it Snakemake would build new ones
+   inside the pilot directory), and `--allowed-rules` listing only the model-side rules:
+   `get_embeddings`, `compute_llm_nearest_neighbours`, the alignment, relabelling,
+   hypergeometric and empirical p-value and Spearman rules, and the two aggregations. Since the
+   brain results and `resources/` are links, a brain, ISC, stimulus or download job would write
+   into the main ones; with this list such jobs are never scheduled, the existing brain files
+   are plain inputs, and a missing one stops the run.
 
-At 100% depth every pilot embedding is identical to the main pipeline's, for all 21 models
-including the quantised Gemma models, so the 100% summary tables differ from the main ones only by
+A full depth is 1352 jobs (21 models, two datasets) and takes about 1 h 20 min on node5.
+
+**Outputs.** Each depth's results go to `results/tests/layer_depth_pilot_<D>/results/` with the
+main workflow's file names (the depth is only in the directory name); its summary tables are in
+`results/tests/layer_depth_pilot_<D>/results/tsv_summaries/`. No main result is touched. The 100%
+run reads the same vectors as the main pipeline and serves as the final-layer comparison
+computed with the same code: its embeddings are identical to the main pipeline's for all 21
+models, quantised Gemma models included, so its summary tables differ from the main ones only by
 the cap of model values. Intermediate depths of the quantised models have run without errors but
 have not been checked further.
 
-**Rerunning the pilot after a change to `get_embeddings.py`.** Snakemake does not see edits to
-the script (section 2), so a pilot directory whose embeddings exist is not recomputed: add
-`--forcerun get_embeddings` to the command (or to the loop in `run_snakemake_workflow.sh`). This
-recomputes every model's embeddings and everything downstream, and overwrites the summary tables
-of that directory; copy `results/tests/layer_depth_pilot_<D>/results/tsv_summaries/` elsewhere
-first to keep the previous numbers.
+**Rerunning.** A depth job runs only when one of its four summary tables is missing. After a
+code or settings change, add `--forcerun run_layer_depth_pilot`: every depth job then starts its
+inner run, which recomputes only what Snakemake sees as outdated (section 2). Edits to a script
+that Snakemake does not see, such as `get_embeddings.py`, are not picked up that way: first delete
+the outputs of the first affected rule in each depth directory, for example
+`results/tests/layer_depth_pilot_*/results/language_models/*/embeddings/*.parquet` after a change
+to `get_embeddings.py`, which recomputes every embedding and everything downstream. Copy
+`results/tests/layer_depth_pilot_<D>/results/tsv_summaries/` elsewhere first to keep the previous
+numbers.
 
 ## 2. When Snakemake reruns a job
 
@@ -578,3 +561,11 @@ Nature Stories, as `run_snakemake_workflow.sh` and `config/layer_depth_pilot.yam
 the setup commands copy the brain results of both datasets, and the expected job list and run
 time are given. The warning about quantised models is replaced by the check that the 100% pilot
 embeddings equal the main ones for every model.
+
+### 2026-11-23 16:30 — pilot run by its own Snakefile
+
+Section 1: the pilot is now run by `workflow/layer_depth_pilot/Snakefile`, one job per depth,
+instead of directories set up by hand and the loop in `run_snakemake_workflow.sh`. The section
+describes the command, the depth list in `config/layer_depth_pilot.yaml`, the links to the main
+brain results (which replace the copies), the `--allowed-rules` safeguard, the outputs and how to
+rerun; the hand-made setup commands and the per-depth dry-run check are gone.

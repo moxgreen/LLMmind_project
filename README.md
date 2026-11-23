@@ -84,6 +84,8 @@ workflow/
   llm_llm_alignment/        Model-model alignment scoring
   spearman_alignment/       Spearman rank-correlation alignment (model- and concept-level)
   visualisation/            Plotting rules (heatmaps, line plots, boxplots)
+  layer_depth_pilot/        Separate Snakefile that runs the main workflow once per
+                             layer depth for the layer-depth pilot
   envs/                     Base environment for running Snakemake itself
                              (LLMmind_project_environment.yaml spec + the
                              materialized LLMmind_project/ conda prefix,
@@ -376,6 +378,20 @@ snakemake --use-conda --cores <N> -n
 # run everything
 snakemake --use-conda --cores <N>
 ```
+
+The layer-depth pilot, which reads a subset of the language models at several
+depths instead of their last layer, has its own Snakefile; on node5 (or
+`sbatch run_snakemake_workflow.sh`):
+
+```bash
+# dry run, then run every depth one after the other
+snakemake -s workflow/layer_depth_pilot/Snakefile --cores 4 --resources gpu=1 -n
+snakemake -s workflow/layer_depth_pilot/Snakefile --cores 4 --resources gpu=1
+```
+
+Its settings, outputs (`results/tests/layer_depth_pilot_<D>/`) and rerun
+mechanics are in the
+[running guide](docs/guides/running_and_troubleshooting.md#layer-depth-pilot).
 
 All pipeline behaviour (datasets, models, similarity metrics, neighbourhood
 sizes, number of permutations) is set in `config/config.yaml`; no code changes

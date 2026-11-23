@@ -67,20 +67,21 @@ runs alongside other jobs the run briefly uses more CPUs than `--cores`. Lower
 ### Layer-depth pilot
 
 The pilot reads the five BLOOMZ models and the 16 Gemma models (every Gemma entry of
-`config/config.yaml` that is not commented out) at an intermediate depth instead of their last
-layer, on Narratives only, and computes the brain-model nearest-neighbour alignment and the
+`config/config.yaml` that is not commented out) at a chosen relative depth instead of their last
+layer, on Narratives and Nature Stories, and computes the brain-model nearest-neighbour alignment and the
 Spearman RSA (whole cortex and language region). Why and how the layer is chosen is in
 [`model_embeddings.md`](../reference/model_embeddings.md), section 3. Its settings are the overlay
 `config/layer_depth_pilot.yaml` (`datasets`, `model_subset`), which the command
 adds on top of `config/config.yaml` without changing it.
 
-The pilot is run at the depths 25%, 50%, 67% and 75%, each in its own working directory,
-`results/tests/layer_depth_pilot_<D>/` (`D` = 25, 50, 67, 75), so each depth's outputs go to
-`results/tests/layer_depth_pilot_<D>/results/` and no final-layer result is touched. The depth is
-given on the command line as `--config relative_depth=0.<D>` (`relative_depth` is null in
-`config/config.yaml`);
+The pilot is run at the depths 25%, 50%, 67%, 75% and 100%, each in its own working directory,
+`results/tests/layer_depth_pilot_<D>/` (`D` = 25, 50, 67, 75, 100), so each depth's outputs go to
+`results/tests/layer_depth_pilot_<D>/results/` and no main result is touched. The 100% run reads
+the same vectors as the main pipeline and serves as the final-layer comparison computed with the
+same code. The depth is given on the command line as `--config relative_depth=<D/100>` (`0.25`,
+…, `1`; `relative_depth` is null in `config/config.yaml`);
 the file names do not contain the depth, only the directory name does. Each directory holds
-links to `config/`, `resources/` and `workflow/`, and a copy of the Narratives brain results, so
+links to `config/`, `resources/` and `workflow/`, and a copy of the brain results of both datasets, so
 the brain side is reused rather than recomputed. To create one (once per depth, from the project
 root):
 
@@ -90,16 +91,19 @@ mkdir -p $P/results/mind $P/results/language_mind
 ln -s ../../../config $P/config
 ln -s ../../../resources $P/resources
 ln -s ../../../workflow $P/workflow
-cp -a results/mind/narratives $P/results/mind/
-cp -a results/language_mind/narratives $P/results/language_mind/
+for DS in narratives nature_stories; do
+    cp -a results/mind/$DS $P/results/mind/
+    cp -a results/language_mind/$DS $P/results/language_mind/
+done
 ```
 
-`run_snakemake_workflow.sh` runs the four depths one after the other (the loop under `# pilot`;
+`run_snakemake_workflow.sh` runs the five depths one after the other (the loop under `# pilot`;
 it stops at the first depth that fails). Dry-run each depth first, from the project root, and run
 only if the job list holds nothing but pilot jobs: `get_embeddings` and
-`compute_llm_nearest_neighbours` once per model, the alignment, relabelling, hypergeometric and
-empirical p-value and Spearman jobs six times per model (3 similarity types × 2 regions), and the
-four aggregations. Models already computed in that directory are not rerun. Any ISC, stimulus,
+`compute_llm_nearest_neighbours` once per model and dataset, the alignment, relabelling,
+hypergeometric and empirical p-value and Spearman jobs six times per model and dataset
+(3 similarity types × 2 regions), and the four aggregations (1352 jobs in all for 21 models and
+two datasets). Models already computed in that directory are not rerun. Any ISC, stimulus,
 excluded-stimuli or download job would write into the main `resources/` through the link, so
 stop if one appears. The targets go before the options, because `--quiet` would read them as its
 own values:
@@ -119,14 +123,16 @@ snakemake \
     -n --quiet rules
 ```
 
-Drop `-n --quiet rules` to run it, or submit `run_snakemake_workflow.sh` to run all four depths.
+Drop `-n --quiet rules` to run it, or submit `run_snakemake_workflow.sh` to run all five depths
+(about 1 h 20 min per depth on node5).
 `--conda-prefix` reuses the project's environments; without it Snakemake would build new ones
 inside the pilot directory. The summary tables land in
 `results/tests/layer_depth_pilot_<D>/results/tsv_summaries/`.
 
-The Gemma models are the first quantised models read at an intermediate depth (several large
-Gemma models are loaded in 8 or 4 bits); this has not been checked yet, so look at the first
-quantised `get_embeddings` logs of a run before trusting their results.
+At 100% depth every pilot embedding is identical to the main pipeline's, for all 21 models
+including the quantised Gemma models, so the 100% summary tables differ from the main ones only by
+the cap of model values. Intermediate depths of the quantised models have run without errors but
+have not been checked further.
 
 **Rerunning the pilot after a change to `get_embeddings.py`.** Snakemake does not see edits to
 the script (section 2), so a pilot directory whose embeddings exist is not recomputed: add
@@ -556,7 +562,7 @@ The first Gemma run of the pilot stopped at 25% depth because `get_embeddings` c
 two Gemma 3n models are left out of the pilot (14 Gemma models instead of 16), quotes the error,
 and keeps the warning for quantised models only.
 
-### 2026-11-20 16:00 — pilot with normalised depths and Gemma 3n, cap of model values
+### 2026-11-20 12:15 — pilot with normalised depths and Gemma 3n, cap of model values
 
 Section 1: the pilot again covers the 16 Gemma models (Gemma 3n can now be read at intermediate
 depths), the overlay no longer holds `relative_depth`, and a paragraph explains how to recompute
@@ -564,3 +570,11 @@ a pilot directory after a change to `get_embeddings.py` (`--forcerun get_embeddi
 replaces the note on the Gemma 3n failure. Section 2 lists the `--forcerun` command for the
 model-side similarity code, where the cap of model values was added. "Leftover outputs from older
 versions" warns that model-side results computed before the cap are uncapped.
+
+### 2026-11-23 10:00 — pilot covers five depths and two datasets
+
+Section 1: the layer-depth pilot now runs at 25%, 50%, 67%, 75% and 100% depth on Narratives and
+Nature Stories, as `run_snakemake_workflow.sh` and `config/layer_depth_pilot.yaml` already did;
+the setup commands copy the brain results of both datasets, and the expected job list and run
+time are given. The warning about quantised models is replaced by the check that the 100% pilot
+embeddings equal the main ones for every model.

@@ -64,12 +64,14 @@ feed-forward blocks update (streams 1–3 are cheaper predicted copies in projec
 Pooling does not change. The final norm is looked up for BLOOMZ and Gemma only: any other model
 read at an intermediate depth stops with an error naming it. The normalisation and the Gemma 3n
 stream were checked on small randomly initialised BLOOM, Gemma, Gemma 3 and Gemma 3n models
-(*f* = 1 gives the default vector; *f* = 0.5 the mean of the normalised tokens), not yet on the
-real checkpoints.
+(*f* = 1 gives the default vector; *f* = 0.5 the mean of the normalised tokens). On the real
+checkpoints, *f* = 1 gives exactly the default vectors for all 21 pilot models on Narratives and
+Nature Stories, quantised Gemma models included; the intermediate depths of the real models ran
+without errors but have no reference to be compared with.
 
 `relative_depth` is set only for the layer-depth pilot: the overlay `config/layer_depth_pilot.yaml`
-runs the five BLOOMZ models and the 16 enabled Gemma models on Narratives, at 25%, 50%, 67% and
-75% depth (how to run it: [running guide](../guides/running_and_troubleshooting.md), section 1).
+runs the five BLOOMZ models and the 16 enabled Gemma models on Narratives and Nature Stories, at
+25%, 50%, 67%, 75% and 100% depth (how to run it: [running guide](../guides/running_and_troubleshooting.md), section 1).
 The BLOOMZ models have
 24 blocks (560m, 1b1, 1b7; *k* = 18) or 30 (3b, 7b1; *k* = 23), read from their local
 `config.json`. The depth was fixed before any result was seen, from brain-encoding studies of
@@ -126,7 +128,12 @@ stimulus' 95th percentile of absolute values (`capped_embedding_matrix()` and `C
 observed neighbours, the relabelled neighbours (computed on the brain's concepts only) and the
 Spearman RSA all use the same cap. Brain representations are never capped. On the layer-depth
 pilot (Narratives) the cap changed the scores by −0.02 to +0.03 on average per model family; in
-Gemma 3 4B at 67% depth the largest value is about 45 900 against a cap of about 73.
+Gemma 3 4B at 67% depth the largest value is about 45 900 against a cap of about 73. At the final
+layer (pilot at 100% depth against the main results, same vectors), the cap raises the
+brain-model scores of the 21 pilot models by 0.01 (nearest neighbours) and 0.02 (RSA) on average
+on Narratives, and the RSA by 0.06 on average on Nature Stories (up to 0.42 in single cases,
+0.08–0.17 on average for BLOOMZ and Gemma 7B), where the share of cases with p < 0.05 rises from
+14% to 32%.
 
 ## 6. Sources
 
@@ -178,7 +185,7 @@ Section 3 now says that the pilot runs 14 Gemma models, not 16, and why the two 
 are left out: their intermediate hidden states hold four parallel copies, which `get_embeddings`
 cannot pool.
 
-### 2026-11-20 16:00 — intermediate depths normalised per token, Gemma 3n back, model values capped
+### 2026-11-20 12:15 — intermediate depths normalised per token, Gemma 3n back, model values capped
 
 Section 3: an intermediate block is now passed token by token through the model's final norm
 before pooling (it was pooled unnormalised, so a few very large tokens could dominate the mean);
@@ -186,3 +193,11 @@ block *L* is read from the last hidden state; Gemma 3n is read at intermediate d
 stream 0 and is back in the pilot (16 Gemma models). Vision models are no longer said to support
 intermediate depths. Section 5: model vectors are capped before every similarity, as in Huh et al.
 2024. The BOS and large-dimension caveats mention both.
+
+### 2026-11-23 10:00 — pilot scope and check on the real checkpoints
+
+Section 3: the pilot now covers Nature Stories as well as Narratives and the depths 25–100%, as
+the pilot overlay and run script already did. The vectors read at *f* = 1 by the pilot were
+compared with the main pipeline's on the real checkpoints and are identical for every model; the
+page no longer says the code is untested on them. Section 5 gives the effect of the cap at the final layer on
+both datasets.

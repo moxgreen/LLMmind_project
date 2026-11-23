@@ -9,7 +9,7 @@ Changes made on this day, in order:
 
 ---
 
-## 16:00 — Intermediate depths normalised per token; Gemma 3n readable at intermediate depths
+## 12:10 — Intermediate depths normalised per token; Gemma 3n readable at intermediate depths
 
 Kind: new_feature, documentation
 
@@ -48,7 +48,7 @@ Kind: new_feature, documentation
 
 ---
 
-## 16:20 — Model embeddings capped before every similarity
+## 12:15 — Model embeddings capped before every similarity
 
 Kind: new_feature, documentation
 

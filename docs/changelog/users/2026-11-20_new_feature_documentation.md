@@ -9,7 +9,7 @@ Changes made on this day, in order:
 
 ---
 
-## 16:00 — Intermediate layers are normalised before averaging; Gemma 3n works in the depth pilot
+## 12:10 — Intermediate layers are normalised before averaging; Gemma 3n works in the depth pilot
 
 Kind: new feature, documentation
 
@@ -23,7 +23,7 @@ the command (see the running guide); this overwrites that folder's summary table
 
 ---
 
-## 16:20 — Extreme values in model embeddings are capped
+## 12:15 — Extreme values in model embeddings are capped
 
 Kind: new feature, documentation
 

@@ -19,9 +19,25 @@ of neighbours the two sets share, divided by *k*, so it lies in [0, 1]
 (`compute_alignment.compute_alignment_scores()`). The **model-level alignment score** is the mean
 over concepts.
 
-No step builds or stores a full concept × concept similarity matrix: similarity is computed in
-blocks and immediately reduced to each concept's top-ranked neighbours, up to the largest *k*
-configured for the dataset.
+**Similarity types** (`workflow/libraries/compute_similarity.py`). Each vector is normalised, and
+the similarity of two concepts is the dot product of their normalised vectors:
+
+- **cosine:** L2 normalisation, so the similarity is the cosine of the angle between the vectors;
+- **Pearson:** centring on the vector's mean, then L2 normalisation, so the similarity is Pearson's
+  r between the two vectors' values;
+- **Spearman:** ranks (ties share their average rank), then centring and L2 normalisation, so the
+  similarity is Spearman's ρ.
+
+A brain vector holds a concept's 200 parcel ISC values (17 or 29 in a region), a model vector its
+embedding. Model vectors are capped before normalisation; brain vectors are not
+([`model_embeddings.md`](model_embeddings.md), section 5).
+
+**Neighbours.** A concept's *k* nearest neighbours are the *k* other concepts with the highest
+similarity. No step builds or stores a full concept × concept similarity matrix: similarity is
+computed in blocks and immediately reduced to each concept's top-ranked neighbours, up to the
+largest *k* configured for the dataset (`compute_nearest_neighbours.compute_blockwise_topk_from_embeddings()`).
+Ties at the *k*-th position are broken by the order NumPy's `argpartition` returns: deterministic,
+but not by a stated rule.
 
 ## 2. Relabelling null
 
@@ -539,3 +555,9 @@ redone only if a reviewer asks about the dependence between the tests.
 Section 1 now says that no full similarity matrix is built, and section 3 where the p-values and
 relabelled scores are written and the column layout of the model-model summary table. These facts
 were in the README, which now links here. Nothing in the analysis changed.
+
+### 2026-11-25 12:00 — similarity types and neighbour ties defined
+
+Section 1 now defines the three similarity types as the code computes them, says that only model
+vectors are capped, and how ties at the *k*-th neighbour are broken, so that the methods section
+can be written from this page alone. Nothing in the analysis changed.

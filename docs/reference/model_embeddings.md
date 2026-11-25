@@ -77,8 +77,12 @@ Stories (how to run it: [running guide](../guides/running_and_troubleshooting.md
 The BLOOMZ models have
 24 blocks (560m, 1b1, 1b7; *k* = 18) or 30 (3b, 7b1; *k* = 23), read from their local
 `config.json`. The depth was fixed before any result was seen, from brain-encoding studies of
-GPT-like models (Caucheteux & King 2022; Antonello et al. 2023, OPT) that find the best layer near
-75% of the depth; those figures still have to be checked against the papers. A single depth fixed
+decoder language models. Antonello, Vaidya & Huth (2023, arXiv:2305.11863, section 3.1) find that
+"the OPT models have maximum performance with layers that are roughly 3/4 into the model" (their
+best model reads layer 33 of 48 of OPT-30B, about 69%), while their LLaMA models peak "in
+relatively early layers" (layer 18 of 60 for LLaMA-33B); 75% therefore rests on OPT, not on every
+family. Caucheteux & King (2022) are cited for the same point, but their paper could not be read
+to check it. A single depth fixed
 in advance is used, rather than the best of several layers, because the best of more layers is
 higher by chance alone and larger models have more layers, which would create a size trend by
 construction (Gröger et al., Sec. 4.2).
@@ -147,7 +151,8 @@ source (`modeling_timm_wrapper.py`, `modeling_dinov2.py`). The ImageNet-12k fine
 **Not verified:** the size of the BOS outlier in these specific models was not measured. The
 large-dimension figures for BLOOMZ-560m come from a single story (`pieman`, run on CPU).
 `hidden_states[L]` equal to the last hidden state was checked for BLOOMZ-560m only (identical
-vectors with *f* = 1 and without the option).
+vectors with *f* = 1 and without the option). The quotations from Antonello et al. (2023) were
+read on 2026-11-25 in arXiv v4 (sections 3.1–3.3); Caucheteux & King (2022) were not read.
 
 ## Changes
 
@@ -208,3 +213,10 @@ both datasets.
 
 Section 3 says that the pilot is run by `workflow/layer_depth_pilot/Snakefile`, with the depths
 listed in `config/layer_depth_pilot.yaml`.
+
+### 2026-11-25 12:00 — evidence for the 75% depth checked
+
+Section 3 said that brain-encoding studies of GPT-like models find the best layer near 75% of
+the depth and that this still had to be checked. Antonello et al. (2023) state it for OPT only;
+their LLaMA models peak early. The page now quotes what the paper says and that Caucheteux & King
+(2022) could not be checked.

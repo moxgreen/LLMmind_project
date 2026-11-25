@@ -32,6 +32,11 @@ the pipeline:
   — how to run parts of the pipeline, when Snakemake reruns a job, the
   settings that change many results, the software environments, model
   limitations and what to do when a run fails
+- [`docs/reference/study_overview.md`](docs/reference/study_overview.md)
+  — start here to write the article: study design, datasets, models, parameters,
+  which page covers each part of the article, which numbers the workflow
+  reproduces, limitations and references. The `docs/reference/` pages are the
+  main source for the article
 - [`docs/reference/fmri_preprocessing.md`](docs/reference/fmri_preprocessing.md)
   — what each dataset's authors did to the BOLD data before this workflow, and
   what the workflow itself does, up to the ISC (a source for the methods
@@ -335,7 +340,8 @@ Models are declared under `models:` in `config/config.yaml`, each with a
 Hugging Face identifier, modality (`language` or `vision`), optional
 quantization method and parameter count. Currently configured: the BLOOMZ,
 OpenLLaMA and Gemma (Gemma, Gemma 2, Gemma 3, Gemma 3n, Gemma 4) language
-model families; the CLIP, DINOv2 and ImageNet-21K ViT vision model families.
+model families; the CLIP, DINOv2 and ImageNet-21K ViT vision model families
+(full list in [`study_overview.md`](docs/reference/study_overview.md), section 3).
 Models are downloaded on demand by the `llm_nearest_neighbours` module.
 
 A model runs on the stimulus type of a dataset that matches its modality:

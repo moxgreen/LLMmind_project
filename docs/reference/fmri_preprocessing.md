@@ -35,10 +35,13 @@ Sources:
 The Caption Scene space was also checked on the local files. The rows of section 2 come from the
 code: `make_caption_scene_manifest.py`, `make_nsd_manifest.py`, `assemble_nsd_bold.py`,
 `extract_*_parcels.py`, `libraries/fmri_processing.py`, the dataset Snakefiles and
-`config/config.yaml`. **Not verified:** the Narratives confound list (6 motion + 5 aCompCor +
-cosine 128 s) is taken from a search-engine summary of the paper, since the full text could not be
-fetched. The `-polort 2` detrending and the 6 mm smoothing were read directly from the authors'
-scripts.
+`config/config.yaml`. **Not read verbatim:** the Narratives confound list (six head-motion
+parameters, the first five principal components of eroded CSF and white-matter masks, cosine
+high-pass basis with a 128 s cutoff, all in one regression model). Two automated summaries of the
+paper (Nastase et al. 2021, doi:10.1038/s41597-021-01033-3, section on the AFNI workflows) agree on
+it, the second on 2026-11-25, but the methods text itself could not be fetched; check it against
+the paper before citing. The `-polort 2` detrending and the 6 mm smoothing were read directly from
+the authors' scripts.
 
 ## 2. What this workflow does
 
@@ -358,3 +361,9 @@ datasets. No processing changed.
 Step 1 now gives the number of stimuli left in NSD and Caption Scene, step 3 where the MNI template
 comes from, and the atlas table how the nilearn atlas is downloaded. These facts were in the
 README, which now links here. Nothing in the processing changed.
+
+### 2026-11-25 12:00 — Narratives confound list checked again
+
+The note on the Narratives confound regression in section 1 now gives the list as a second
+summary of the paper reports it (eroded CSF and white-matter masks, one regression model) and the
+paper's DOI. The methods text still could not be read verbatim, so the note keeps its warning.

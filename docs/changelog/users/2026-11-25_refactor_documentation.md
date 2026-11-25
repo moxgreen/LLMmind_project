@@ -4,6 +4,7 @@
 
 - Reference pages prepared for writing the article (documentation)
 - Reference pages corrected after an external audit (documentation)
+- Main analysis keeps the last layer; layer-depth pilot results documented (refactor, documentation)
 
 ---
 
@@ -43,3 +44,17 @@ Kind: documentation
   before it goes into the article.
 - The limitations list is more detailed about the brain regions and the differences between
   models.
+
+---
+
+## 16:30 — Main analysis keeps the last layer; layer-depth pilot results documented
+
+Kind: refactor, documentation
+
+- The main analysis reads every model at its last layer. Another depth is used only when a run
+  asks for one, as the layer-depth pilot does.
+- The pilot's results are now written down in `docs/reference/model_embeddings.md`: some model
+  families align better with the brain at intermediate depths, others at the last layer.
+- The option that sets the depth is now written together with the other options of the
+  embedding step. Nothing changes in the results, but the next run recomputes every embedding
+  and everything after it once.

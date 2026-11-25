@@ -90,6 +90,45 @@ in advance is used, rather than the best of several layers, because the best of 
 higher by chance alone and larger models have more layers, which would create a size trend by
 construction (Gröger, Wen & Brbić 2026, arXiv:2602.14486, Sec. 4.2).
 
+**Decision: the main analysis reads the last layer.** Every result of the main pipeline uses the
+model's last hidden state (`relative_depth: null`); another depth is used only where a run
+specifies it, as the pilot does. The pilot results below are therefore a sensitivity analysis, not
+the main result.
+
+**Layer-depth pilot results.** Run on 2026-11-20 and again from the pilot's own Snakefile on
+2026-11-23 (node5, identical tables), with the per-token normalisation and the cap of section 5;
+21 models (5 BLOOMZ, 16 Gemma), depths 25/50/67/75/100%. Exact permutation p-values for the
+within-family size trends (at most 5 models per family); no correction across depths, similarity
+types or families. Outputs: `results/tests/layer_depth_pilot_<D>/results/tsv_summaries/`.
+
+- **Narratives, Spearman RSA by depth** (mean over models, similarity types, whole cortex and
+  language region; 25 / 50 / 67 / 75 / 100%):
+
+  | Family | 25% | 50% | 67% | 75% | 100% |
+  |---|---|---|---|---|---|
+  | BLOOMZ | 0.497 | 0.526 | 0.527 | 0.517 | 0.494 |
+  | Gemma | 0.508 | 0.506 | 0.514 | 0.476 | 0.470 |
+  | Gemma 2 | 0.498 | 0.494 | 0.471 | 0.456 | 0.439 |
+  | Gemma 3 | 0.492 | 0.492 | 0.475 | 0.465 | 0.526 |
+  | Gemma 3n | 0.482 | 0.511 | 0.428 | 0.476 | 0.488 |
+  | Gemma 4 | 0.479 | 0.507 | 0.471 | 0.476 | 0.536 |
+
+  BLOOMZ, Gemma and Gemma 2 align best at intermediate depths and worst at the last layer; Gemma 3
+  and Gemma 4 align best at the last layer (best depth per case: Gemma 3 21/30, Gemma 4 16/24). No
+  single relative depth suits every architecture. Local alignment (5 nearest neighbours) is
+  flatter, highest at 25–67% for every family except Gemma 3n.
+- **Narratives, significance:** RSA p < 0.05 in every case at every depth; local alignment
+  p < 0.05 in 93 / 94 / 90 / 83% of cases at 25–75%, against 75% at the last layer.
+- **Narratives, model size:** no significant positive trend within any family at any depth.
+  Gemma 3 RSA in the language region decreases with size at 67% and 75% (ρ = −1, p = 0.017, all
+  three similarity types). Pooled over the 21 models, RSA decreases with size at 67–75% (9 of 12
+  conditions, ρ −0.51 to −0.75; t approximation) and is flat at the last layer; this pooled trend
+  is confounded with family, since the largest models are mostly Gemma 3 and 4.
+- **Nature Stories** (11 stories, RSA only): weak at every depth (RSA p < 0.05 in 19 / 11 / 14 /
+  22 / 32% of cases at 25–100%); too few stories to support a depth choice.
+- **Caveat.** Choosing a depth for the main analysis from these numbers would be a maximum over
+  layers, the selection the fixed-depth design avoids; this is one reason the last layer is kept.
+
 **Caveat: a few very large dimensions.** In BLOOMZ-560m, on one Narratives story, the three
 largest of the 1024 dimensions hold 38% of the squared norm of the last-layer vector and 50% at
 75% depth. Such dimensions dominate cosine and Pearson similarity but not Spearman similarity,
@@ -230,3 +269,10 @@ their LLaMA models peak early. The page now quotes what the paper says.
 Section 3 now quotes Caucheteux & King (2022), read in the Europe PMC full text: their "middle
 layers" are *L*/2 to 3*L*/4, so 75% is the upper end of the range both cited papers support. The
 "Gröger et al." citation now gives the paper (arXiv:2602.14486), identified from its abstract.
+
+### 2026-11-25 16:30 — last layer kept; pilot results recorded
+
+The developer decided that the main analysis keeps the last layer, with other depths used only
+where a run specifies them. Section 3 states this and now records the results of the layer-depth
+pilot (normalised, capped sweep of 2026-11-20, reproduced by the pilot Snakefile on 2026-11-23),
+which until now were only in the project's working notes.

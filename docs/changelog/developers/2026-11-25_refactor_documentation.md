@@ -4,6 +4,7 @@
 
 - Reference pages prepared as the main source for the article (documentation)
 - Audit of the reference pages: references verified, terms defined, numbers dated (documentation)
+- Depth flag written in the `get_embeddings` command; last layer kept; pilot results documented (refactor, documentation)
 
 ---
 
@@ -60,7 +61,7 @@ Addresses points 2, 4, 7 and 8 of an external documentation audit of 2026-11-25 
 points 1, 5, 6 and 9 were not acted on).
 
 - `docs/reference/study_overview.md`:
-  - section 8 rebuilt: 38 entries checked (Crossref API, arXiv API and abstract pages, Europe PMC,
+  - section 8 rebuilt: 35 entries, 34 checked (all but timm) (Crossref API, arXiv API and abstract pages, Europe PMC,
     G-Node, Hugging Face cards) and marked †, with DOIs or arXiv IDs; what could not be checked is
     stated per entry (PMLR pages of CLIP, TMLR of DINOv2, NeurIPS of QLoRA, ICML of Huh et al., the
     timm Zenodo DOI). Added: Gemma 3n (model-card citation, no report), Gemma 4 technical report
@@ -92,3 +93,50 @@ points 1, 5, 6 and 9 were not acted on).
 - Verification: each reference compared field by field with the record fetched (one-off scripts in
   the session scratchpad, removed); internal Markdown links of `README.md` and `docs/` checked with
   a one-off script: 0 broken. No code or result changed.
+
+---
+
+## 16:30 — Depth flag written in the `get_embeddings` command; last layer kept; pilot results documented
+
+Kind: refactor, documentation
+
+- `workflow/llm_nearest_neighbours/Snakefile`: the module-level `RELATIVE_DEPTH_ARG`, concatenated
+  after the closing line of the `get_embeddings` shell text, is replaced by
+  `params.relative_depth_arg` (`""` when `config["relative_depth"]` is `None`, else
+  `--relative_depth <f>`), written as `{params.relative_depth_arg}` before `--excluded_stimuli`;
+  the rule comment on the concatenation is removed. `get_embeddings.py` is unchanged. Rendered
+  command: identical options for the main pipeline (no flag), `--relative_depth 0.75` with
+  `--config relative_depth=0.75`.
+- Rerun cost: the `code` trigger (shell text) and, for 21 jobs, the `params` trigger mark all 100
+  `get_embeddings` jobs and everything downstream. The developer stopped the forced main run of
+  2026-11-25 11:23 (35,774 jobs from `compute_llm_nearest_neighbours` down, 1% done) so the change
+  rides on that rerun: the dry run now plans 35,874 jobs (the same plus 100 embeddings), nothing
+  upstream of `get_embeddings`.
+- Decision recorded (developer, 2026-11-25): the main analysis keeps the last layer; another
+  depth only where a run sets `relative_depth`. `docs/reference/model_embeddings.md`, section 3,
+  states it and records the layer-depth pilot results (the normalised, capped sweep of 2026-11-20,
+  which the pilot Snakefile reproduced on 2026-11-23; Narratives RSA by family and depth,
+  significance, size trends, Nature Stories), previously only in the TODO file.
+- `docs/reference/study_overview.md`: pilot no longer "in progress"; "Last layer only" limitation
+  states the pilot finding; a block duplicated earlier the same day by the reference-replacement
+  script (it matched the inline text "`## Changes` entry" in section 6 instead of the heading) is
+  removed.
+- `docs/guides/running_and_troubleshooting.md`, section 2: the paragraph on the `get_embeddings`
+  command text describes the new parameter.
+- TODO: P3/S3 (decided), P4/S4 (done) and P7/S7 (the pilot Snakefile, verified by its real run of
+  2026-11-23: same Narratives RSA profile as the 2026-11-20 sweep for every family and depth)
+  closed; S8 to be implemented after the rerun.
+
+### Context
+
+- Request: "about P3, we should take the last layer unless specified differently, I will stop the
+  run right now, so that you can make this change safely", then "proceed with the changes to
+  get_embeddings".
+- Files changed: `workflow/llm_nearest_neighbours/Snakefile`, `docs/reference/model_embeddings.md`,
+  `docs/reference/study_overview.md`, `docs/guides/running_and_troubleshooting.md`,
+  `docs/AI_USAGE.md`, both changelogs of the day (renamed from `2026-11-25_documentation.md`).
+- Verification: node5 checked for running Snakemake processes and locks before the edit (none);
+  `snakemake <embedding> -n -p --forcerun get_embeddings` with and without
+  `--config relative_depth=0.75` shows the expected commands; `snakemake --use-conda -n` plans
+  35,874 jobs with reasons "Code has changed" (79) and "Code + Params have changed" (21) for
+  `get_embeddings`. Not yet run.

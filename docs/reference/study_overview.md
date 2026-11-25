@@ -177,9 +177,10 @@ workflow's outputs; no rule or script in the repository rebuilds them:
   downloads"). The TextGrid word-level check, in contrast, is a workflow rule
   ([`nature_stories_stimuli.md`](nature_stories_stimuli.md), section 4).
 
-**In progress.** The layer-depth pilot reads a subset of the language models at several relative
-depths ([`model_embeddings.md`](model_embeddings.md), "Which layer"); its results are not yet
-documented on these pages.
+**Layer-depth pilot.** A sensitivity analysis run by its own Snakefile, not by the main workflow:
+21 language models read at five relative depths on Narratives and Nature Stories. Its tables are
+in `results/tests/layer_depth_pilot_<D>/` and its results in
+[`model_embeddings.md`](model_embeddings.md), "Layer-depth pilot results".
 
 ## 7. Limitations
 
@@ -197,8 +198,10 @@ Each point is described in full on the page linked.
 - **The similarity type changes the Narratives result**, mostly through a few high-ISC auditory
   parcels ([`statistics.md`](statistics.md), section 8, "Why the similarity types differ on
   Narratives").
-- **Last layer only.** Every model is read at its last hidden state, which may underestimate its
-  alignment, unevenly across models ([`model_embeddings.md`](model_embeddings.md), "Which layer").
+- **Last layer only.** The main analysis reads every model at its last hidden state. In the
+  layer-depth pilot, BLOOMZ, Gemma and Gemma 2 align better at intermediate depths and Gemma 3 and
+  Gemma 4 at the last layer, so the last layer underestimates some families' alignment more than
+  others ([`model_embeddings.md`](model_embeddings.md), "Layer-depth pilot results").
 - **BOS token in the mean** of every language-model chunk
   ([`model_embeddings.md`](model_embeddings.md), "Caveat: the BOS token is included in the mean").
 - **Model size is confounded.** Within the Gemma 2, Gemma 3, Gemma 4 and OpenLLaMA families only
@@ -348,160 +351,6 @@ could not be checked.
   surface visualizer for fMRI. *Frontiers in Neuroinformatics* 9, 23. doi:10.3389/fninf.2015.00023 †
   (Nature Stories' cortical voxels are defined with a pycortex mask)
 
-## Changes` entry that added it. The code it was measured with is the
-last commit before that date (`git log -1 --until=<date>`); the config is the one in that commit.
-Numbers measured on the outputs of an earlier pipeline run say which run when it matters, as
-[`clean_run_duration.md`](clean_run_duration.md) does. Before quoting a number in the article,
-recompute it from the current tables or confirm that nothing it depends on has changed since its
-date.
-
-**Not reproduced by the workflow.** These numbers come from one-off checks, run once on the
-workflow's outputs; no rule or script in the repository rebuilds them:
-
-- the robustness checks of [`statistics.md`](statistics.md), section 8, including the model-size
-  analysis;
-- the NSD trial-history figures (81% of preceding trials subject-specific; 178 of 1000 images with
-  the same preceding trial in all subjects) in [`fmri_preprocessing.md`](fmri_preprocessing.md),
-  "Limitation: the hemodynamic delay";
-- the overlap of the NSD and Caption Scene images ([`fmri_preprocessing.md`](fmri_preprocessing.md));
-- the regional crossover analysis ([`regional_crossover.md`](regional_crossover.md)), run with two
-  scripts that are not in the repository;
-- the check of the Nature Stories corrected run onsets (README, "Input files that are not plain
-  downloads"). The TextGrid word-level check, in contrast, is a workflow rule
-  ([`nature_stories_stimuli.md`](nature_stories_stimuli.md), section 4).
-
-**In progress.** The layer-depth pilot reads a subset of the language models at several relative
-depths ([`model_embeddings.md`](model_embeddings.md), "Which layer"); its results are not yet
-documented on these pages.
-
-## 7. Limitations
-
-Each point is described in full on the page linked.
-
-- **Short event windows and the hemodynamic delay.** NSD and Caption Scene ISCs are correlations
-  over 3 and 6 volumes that start at stimulus onset; in NSD the window mostly holds the response
-  to earlier trials ([`fmri_preprocessing.md`](fmri_preprocessing.md), "Limitation: the
-  hemodynamic delay").
-- **Few stories.** Narratives has 18 concepts and Nature Stories 11, so the nearest-neighbour
-  scores are coarse and the null is discrete ([`statistics.md`](statistics.md), section 3).
-- **The Narratives RSA rests on the two Shapes units.** Without them no model survives correction;
-  the local alignment was not rechecked without them ([`statistics.md`](statistics.md), section 8,
-  "Dependencies between the Narratives units").
-- **The similarity type changes the Narratives result**, mostly through a few high-ISC auditory
-  parcels ([`statistics.md`](statistics.md), section 8, "Why the similarity types differ on
-  Narratives").
-- **Last layer only.** Every model is read at its last hidden state, which may underestimate its
-  alignment, unevenly across models ([`model_embeddings.md`](model_embeddings.md), "Which layer").
-- **BOS token in the mean** of every language-model chunk
-  ([`model_embeddings.md`](model_embeddings.md), "Caveat: the BOS token is included in the mean").
-- **Model size is confounded.** Within the Gemma 2, Gemma 3, Gemma 4 and OpenLLaMA families only
-  the largest models are quantised; the families differ in training data, training objective
-  (next-token prediction for the language models, of which BLOOMZ is also instruction-tuned;
-  contrastive image-text learning for CLIP, three of them then fine-tuned on ImageNet-12k classification; self-supervised learning for DINOv2; supervised
-  classification for the ImageNet-21k ViTs) and recipe; no language model is below 270M
-  parameters; the "E" models count with their total parameters (section 3 above;
-  [`statistics.md`](statistics.md), section 8, "Model size").
-- **No noise ceiling.** How reliable the brain similarity structure is, and so the highest
-  alignment any model could reach, was not estimated.
-- **Group-level regions.** Both regions come from a group atlas, not from each subject; this fits
-  individual language cortex poorly ([`brain_regions.md`](brain_regions.md), section 5).
-- **Auditory parcels in the language region.** 9 of its 17 parcels are auditory, so on the spoken
-  stories alignment there may reflect acoustic rather than linguistic processing
-  ([`brain_regions.md`](brain_regions.md), section 2).
-- **Ventral temporal cortex outside the visual region**, which is the 7-network `Vis` network
-  ([`brain_regions.md`](brain_regions.md), section 5).
-- **No cross-modality regional comparison in the workflow.** Each model is compared only with its
-  own modality's region; the one-off crossover analysis is outside the workflow
-  ([`regional_crossover.md`](regional_crossover.md)).
-- **Not every analysis is reproducible from the repository** (section 6).
-
-## 8. References
-
-The works cited on the reference pages. Entries marked † were checked against the publication;
-the others were written from the pages and from memory and must be checked before submission.
-
-**Datasets**
-
-- Nastase, S. A., Liu, Y.-F., Hillman, H., et al. (2021). The "Narratives" fMRI dataset for
-  evaluating models of naturalistic language comprehension. *Scientific Data* 8, 250.
-  doi:10.1038/s41597-021-01033-3 †
-- Allen, E. J., et al. (2022). A massive 7T fMRI dataset to bridge cognitive neuroscience and
-  artificial intelligence. *Nature Neuroscience* 25, 116–126.
-- Li et al. (2026). A large-scale fMRI dataset for vision-language semantic association (Caption
-  Scene Dataset). *Scientific Data*. doi:10.1038/s41597-026-07248-6; data: ScienceDB
-  doi:10.57760/sciencedb.27580.
-- Huth, A. G., de Heer, W. A., Deniz, F., Gong, X., Gallant, J. L., Theunissen, F. E. Nature story
-  listening 3T fMRI data. G-Node GIN, doi:10.12751/g-node.t4wew2.
-- LeBel, A., Wagner, L., Jain, S., et al. (2023). A natural language fMRI dataset for voxelwise
-  encoding models. *Scientific Data* 10, 555. Data: OpenNeuro ds003020,
-  doi:10.18112/openneuro.ds003020.v4.0.0.
-- Lin, T.-Y., et al. (2014). Microsoft COCO: Common objects in context. *ECCV 2014*. (Source of the
-  NSD and Caption Scene images.)
-
-**Atlases and regions**
-
-- Schaefer, A., et al. (2018). Local-global parcellation of the human cerebral cortex from
-  intrinsic functional connectivity MRI. *Cerebral Cortex* 28, 3095–3114.
-- Kong, R., et al. (2021). Individual-specific areal-level parcellations improve functional
-  connectivity prediction of behavior. *Cerebral Cortex* 31, 4477–4500. (The "Kong2022" 17-network
-  labels of the Schaefer parcellation in the CBIG repository.)
-- Fedorenko, E., Hsieh, P.-J., Nieto-Castañón, A., Whitfield-Gabrieli, S., Kanwisher, N. (2010).
-  New method for fMRI investigations of language: defining ROIs functionally in individual
-  subjects. *Journal of Neurophysiology* 104, 1177–1194. doi:10.1152/jn.00032.2010
-
-**Models**
-
-- Muennighoff, N., et al. (2023). Crosslingual generalization through multitask finetuning.
-  *ACL 2023*. (BLOOMZ)
-- Gemma Team (2024). Gemma: Open models based on Gemini research and technology. arXiv:2403.08295.
-- Gemma Team (2024). Gemma 2: Improving open language models at a practical size.
-  arXiv:2408.00118.
-- Gemma Team (2025). Gemma 3 technical report. arXiv:2503.19786.
-- Gemma 3n and Gemma 4: no reference recorded; cite the Hugging Face model cards.
-- Geng, X., Liu, H. (2023). OpenLLaMA: An open reproduction of LLaMA. Software,
-  github.com/openlm-research/open_llama.
-- Radford, A., et al. (2021). Learning transferable visual models from natural language
-  supervision. *ICML 2021*. (CLIP)
-- Cherti, M., et al. (2023). Reproducible scaling laws for contrastive language-image learning.
-  *CVPR 2023*. (OpenCLIP models trained on LAION-2B)
-- Oquab, M., et al. (2024). DINOv2: Learning robust visual features without supervision.
-  *Transactions on Machine Learning Research*.
-- Dosovitskiy, A., et al. (2021). An image is worth 16x16 words: Transformers for image
-  recognition at scale. *ICLR 2021*.
-- Steiner, A., et al. (2022). How to train your ViT? Data, augmentation, and regularization in
-  vision transformers. *Transactions on Machine Learning Research*. (The `augreg_in21k` models)
-
-**Methods compared with**
-
-- Huh, M., Cheung, B., Wang, T., Isola, P. (2024). Position: The platonic representation
-  hypothesis. *ICML 2024*. (Value cap, layer choice)
-- Antonello, R. J., Vaidya, A. R., Huth, A. G. (2023). Scaling laws for language encoding models
-  in fMRI. arXiv:2305.11863 (NeurIPS 2023). †
-- Caucheteux, C., King, J.-R. (2022). Brains and algorithms partially converge in natural language
-  processing. *Communications Biology* 5, 134. doi:10.1038/s42003-022-03036-1
-- Gröger et al.: cited by [`model_embeddings.md`](model_embeddings.md) and the manuscript for
-  local versus global alignment and the best-of-many-layers bias; the full reference is not
-  recorded in the repository.
-
-**Software**
-
-- Mölder, F., et al. (2021). Sustainable data analysis with Snakemake. *F1000Research* 10, 33.
-- Avants, B. B., et al. (2011). A reproducible evaluation of ANTs similarity metric performance in
-  brain image registration. *NeuroImage* 54, 2033–2044.
-- Ciric, R., et al. (2022). TemplateFlow: FAIR-sharing of multi-scale, multi-species brain models.
-  *Nature Methods* 19, 1568–1571.
-- Abraham, A., et al. (2014). Machine learning for neuroimaging with scikit-learn. *Frontiers in
-  Neuroinformatics* 8, 14. (nilearn)
-- Wolf, T., et al. (2020). Transformers: State-of-the-art natural language processing.
-  *EMNLP 2020: System Demonstrations*.
-- Wightman, R. (2019). PyTorch Image Models (timm). Software, github.com/huggingface/pytorch-image-models.
-- Dettmers, T., et al. (2022). LLM.int8(): 8-bit matrix multiplication for transformers at scale.
-  *NeurIPS 2022*; Dettmers, T., et al. (2023). QLoRA: Efficient finetuning of quantized LLMs.
-  *NeurIPS 2023*. (bitsandbytes 8-bit and 4-bit)
-- Gao, J. S., Huth, A. G., Lescroart, M. D., Gallant, J. L. (2015). Pycortex: an interactive
-  surface visualizer for fMRI. *Frontiers in Neuroinformatics* 9, 23. (Nature Stories' cortical voxels are defined with a
-  pycortex mask)
-
 ## Changes
 
 ### 2026-11-25 12:00 — page created
@@ -510,3 +359,10 @@ New entry point for writing the article from the reference pages: study design, 
 counted from the manifests, the model table from the config, analysis parameters and pinned
 software versions, a map from article parts to pages, which numbers the workflow reproduces and
 which come from one-off checks, the limitations, and a reference list.
+
+### 2026-11-25 16:30 — layer-depth pilot finished; duplicated block removed
+
+Section 6 no longer calls the layer-depth pilot "in progress" and points to its results; the
+"Last layer only" limitation states what the pilot found. A block duplicated by an editing error
+earlier the same day (the end of section 6, section 7 and the old reference list, repeated after
+the new references) was removed.

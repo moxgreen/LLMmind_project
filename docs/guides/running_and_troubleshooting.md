@@ -155,10 +155,10 @@ This relies on the `params` rerun trigger, so a run with `--rerun-triggers mtime
 edits.
 
 **The `get_embeddings` command text.** Snakemake also reruns a job when the `shell:` text of
-its rule changes. `--relative_depth` (`relative_depth` in the config) is therefore appended after
-the end of that text in `workflow/llm_nearest_neighbours/Snakefile`, not written among the other
-options: with `relative_depth: null` the text is the one that built the current embeddings, so
-nothing reruns. Moving the option into the text reruns every embedding and everything downstream.
+its rule changes. `--relative_depth` is written in that text as `{params.relative_depth_arg}`,
+which is empty when `relative_depth` is null (the main pipeline) and `--relative_depth <f>` when a
+run sets it (the layer-depth pilot); changing `relative_depth` reruns the embeddings through the
+`params` trigger, not through the text.
 
 **Not covered.** For every other rule, force the rerun yourself with `--forcerun <rule>` after
 changing its code. This includes:
@@ -569,3 +569,10 @@ instead of directories set up by hand and the loop in `run_snakemake_workflow.sh
 describes the command, the depth list in `config/layer_depth_pilot.yaml`, the links to the main
 brain results (which replace the copies), the `--allowed-rules` safeguard, the outputs and how to
 rerun; the hand-made setup commands and the per-depth dry-run check are gone.
+
+### 2026-11-25 16:30 — depth flag written in the `get_embeddings` command
+
+Section 2: `--relative_depth` is now a parameter written among the other options of the
+`get_embeddings` command, empty when `relative_depth` is null, instead of text appended after the
+command to keep the rule's text unchanged. The change makes the next run rerun every embedding
+once, and everything downstream.

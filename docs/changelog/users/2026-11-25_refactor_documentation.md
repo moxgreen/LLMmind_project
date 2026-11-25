@@ -6,6 +6,7 @@
 - Reference pages corrected after an external audit (documentation)
 - Layer-depth pilot: correct job count and run time (documentation)
 - Main analysis keeps the last layer; layer-depth pilot results documented (refactor, documentation)
+- Tests outside the main pipeline gathered in one folder, with their own guide (refactor, documentation)
 
 ---
 
@@ -70,3 +71,19 @@ Kind: refactor, documentation
 - The option that sets the depth is now written together with the other options of the
   embedding step. Nothing changes in the results, but the next run recomputes every embedding
   and everything after it once.
+
+---
+
+## 17:30 — Tests outside the main pipeline gathered in one folder, with their own guide
+
+Kind: refactor, documentation
+
+- The tests that are not part of the main analysis now live in `workflow/additional_tests/`, one
+  folder per test, so it is clear they never run with the main pipeline. For now this holds the
+  layer-depth pilot; more tests will be added there.
+- The pilot is now run with
+  `snakemake -s workflow/additional_tests/layer_depth_pilot/Snakefile --cores 4 --resources gpu=1`
+  (or `run_snakemake_workflow.sh`, already updated). Its results stay in `results/tests/` and
+  nothing needs to be recomputed.
+- The new guide `docs/guides/additional_tests.md` explains how to run each test, its settings, its
+  outputs and how to rerun it.

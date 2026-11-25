@@ -6,6 +6,7 @@
 - Audit of the reference pages: references verified, terms defined, numbers dated (documentation)
 - Pilot job count and run time corrected in the running guide (documentation)
 - Depth flag written in the `get_embeddings` command; last layer kept; pilot results documented (refactor, documentation)
+- Layer-depth pilot moved to `workflow/additional_tests/`; new additional-tests guide (refactor, documentation)
 
 ---
 
@@ -171,3 +172,44 @@ Kind: refactor, documentation
   `--config relative_depth=0.75` shows the expected commands; `snakemake --use-conda -n` plans
   35,874 jobs with reasons "Code has changed" (79) and "Code + Params have changed" (21) for
   `get_embeddings`. Not yet run.
+
+---
+
+## 17:30 — Layer-depth pilot moved to `workflow/additional_tests/`; new additional-tests guide
+
+Kind: refactor, documentation
+
+- `workflow/layer_depth_pilot/Snakefile` moved with `git mv` to
+  `workflow/additional_tests/layer_depth_pilot/Snakefile`, the folder that will hold every test
+  outside the main pipeline (TODO S8). The rule is unchanged: its links are relative to
+  `PILOT_DIR` (`results/tests/layer_depth_pilot_<D>/`), not to the Snakefile, and `configfile:`
+  resolves from the working directory, so nothing reruns. Outputs stay in `results/tests/`
+  (developer's decision).
+- Path updated in the Snakefile's header comment, the comment of `config/layer_depth_pilot.yaml`
+  and the pilot command of `run_snakemake_workflow.sh`.
+- New guide `docs/guides/additional_tests.md`: introduction (layout `workflow/additional_tests/<test>/`,
+  overlay `config/<test>.yaml`, outputs under `results/tests/`, never part of `rule all`), a table
+  of the tests, and section 1, the layer-depth pilot section moved from
+  `running_and_troubleshooting.md` (paths updated, content otherwise unchanged).
+  `running_and_troubleshooting.md` keeps a short "Additional tests" subsection linking to it.
+- `README.md`: index line for the guide, `additional_tests/` in the layout, pilot commands replaced
+  by one sentence linking to the guide. `docs/reference/model_embeddings.md`, section 3: path and
+  link updated.
+- TODO: P8/S8 revised (tests in `workflow/additional_tests/`, one guide section per test, the
+  collaborator's regional crossover added as a test, Spearman and largest k only) and approved;
+  SUGGESTIONS I26/IS26 moved into P8/S8.
+
+### Context
+
+- Request: "in the workflow, the subproject should be named something like 'additional_tests/' …
+  I would create a document which specify how to run each test (just like we did for the pilot)",
+  then "keep results/tests/<tests>/, move the pilot right now, and for the moment consider only
+  spearman and the largest k".
+- Files changed: `workflow/additional_tests/layer_depth_pilot/Snakefile` (moved),
+  `config/layer_depth_pilot.yaml`, `run_snakemake_workflow.sh`, `README.md`,
+  `docs/guides/additional_tests.md` (new), `docs/guides/running_and_troubleshooting.md`,
+  `docs/reference/model_embeddings.md`, `docs/AI_USAGE.md`, both changelogs of the day.
+- Verification: the main run active on node5 (started 12:02 from an interactive shell, not from
+  `run_snakemake_workflow.sh`) does not include the pilot; `snakemake -s
+  workflow/additional_tests/layer_depth_pilot/Snakefile --cores 4 --resources gpu=1 -n` reports
+  "Nothing to be done".

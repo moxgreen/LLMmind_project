@@ -1,11 +1,11 @@
 # written with AI assistance: Claude Code, Claude Opus 5.5 (claude-opus-5-5)
-# last AI edit: 2026-11-23, see docs/changelog/developers/ for details
+# last AI edit: 2026-11-25, see docs/changelog/developers/ for details
 configfile: "config/layer_depth_pilot.yaml"
 
 # the layer-depth pilot: one job per depth runs the main workflow (workflow/Snakefile) in its own
 # directory, results/tests/layer_depth_pilot_<D>/, on the datasets and models of
 # config/layer_depth_pilot.yaml; run from the project root with
-#     snakemake -s workflow/layer_depth_pilot/Snakefile --cores 4 --resources gpu=1
+#     snakemake -s workflow/additional_tests/layer_depth_pilot/Snakefile --cores 4 --resources gpu=1
 
 # depths in percent, the directory names; the depth is passed as D/100 written as short as
 # possible (1, not 1.0), because it is part of the get_embeddings shell text, whose change

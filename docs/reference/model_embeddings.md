@@ -69,11 +69,10 @@ checkpoints, *f* = 1 gives exactly the default vectors for all 21 pilot models o
 Nature Stories, quantised Gemma models included; the intermediate depths of the real models ran
 without errors but have no reference to be compared with.
 
-`relative_depth` is set only for the layer-depth pilot: `workflow/layer_depth_pilot/Snakefile`
+`relative_depth` is set only for the layer-depth pilot: `workflow/additional_tests/layer_depth_pilot/Snakefile`
 runs the main workflow once per depth listed in `config/layer_depth_pilot.yaml` (25%, 50%, 67%,
 75% and 100%), on the five BLOOMZ models and the 16 enabled Gemma models, on Narratives and Nature
-Stories (how to run it: [running guide](../guides/running_and_troubleshooting.md), section 1,
-"Layer-depth pilot").
+Stories (how to run it: [additional-tests guide](../guides/additional_tests.md), section 1).
 The BLOOMZ models have
 24 blocks (560m, 1b1, 1b7; *k* = 18) or 30 (3b, 7b1; *k* = 23), read from their local
 `config.json`. The depth was fixed before any result was seen, from brain-encoding studies of
@@ -276,3 +275,9 @@ The developer decided that the main analysis keeps the last layer, with other de
 where a run specifies them. Section 3 states this and now records the results of the layer-depth
 pilot (normalised, capped sweep of 2026-11-20, reproduced by the pilot Snakefile on 2026-11-23),
 which until now were only in the project's working notes.
+
+### 2026-11-25 17:30 — pilot Snakefile path
+
+Section 3: the pilot's Snakefile moved to `workflow/additional_tests/layer_depth_pilot/`, with the
+other tests outside the main pipeline; how to run it is in
+[`additional_tests.md`](../guides/additional_tests.md).

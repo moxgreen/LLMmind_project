@@ -101,6 +101,7 @@ git history and may include later human edits.
 | `docs/changelog/users/2026-11-20_new_feature_documentation.md` | written | 2026-11-23 | Claude Opus 5.5 (`claude-opus-5-5`) | not yet reviewed |
 | `docs/changelog/users/2026-11-23_new_feature_removal_documentation.md` | written | 2026-11-23 | Claude Opus 5.5 (`claude-opus-5-5`) | not yet reviewed |
 | `docs/changelog/users/2026-11-25_refactor_documentation.md` | written | 2026-11-25 | Claude Opus 5.5 (`claude-opus-5-5`) | not yet reviewed |
+| `docs/guides/additional_tests.md` | written | 2026-11-25 | Claude Opus 5.5 (`claude-opus-5-5`) | not yet reviewed |
 | `docs/guides/running_and_troubleshooting.md` | written | 2026-11-25 | Claude Opus 5.5 (`claude-opus-5-5`) | not yet reviewed |
 | `docs/reference/brain_regions.md` | written | 2026-11-25 | Claude Opus 5.5 (`claude-opus-5-5`) | not yet reviewed |
 | `docs/reference/clean_run_duration.md` | written | 2026-10-22 | Claude Opus 5.5 (`claude-opus-5-5`) | not yet reviewed |
@@ -111,10 +112,11 @@ git history and may include later human edits.
 | `docs/reference/statistics.md` | written | 2026-11-25 | Claude Opus 5.5 (`claude-opus-5-5`) | not yet reviewed |
 | `docs/reference/study_overview.md` | written | 2026-11-25 | Claude Opus 5.5 (`claude-opus-5-5`) | not yet reviewed |
 | `.gitignore` | edited | 2026-10-02 | Claude Opus 5.5 (`claude-opus-5-5`) * | not yet reviewed |
-| `config/layer_depth_pilot.yaml` | written | 2026-11-23 | Claude Opus 5.5 (`claude-opus-5-5`) | not yet reviewed |
+| `config/layer_depth_pilot.yaml` | written | 2026-11-25 | Claude Opus 5.5 (`claude-opus-5-5`) | not yet reviewed |
 | `config/config.yaml` | edited | 2026-11-13 | Claude Opus 5.5 (`claude-opus-5-5`) | not yet reviewed |
 | `parquet2tsv.sh` | edited | 2026-10-02 | Claude Opus 5.5 (`claude-opus-5-5`) | not yet reviewed |
-| `run_snakemake_workflow.sh` | written | 2026-11-23 | Claude Opus 5.5 (`claude-opus-5-5`) | not yet reviewed |
+| `run_snakemake_workflow.sh` | written | 2026-11-25 | Claude Opus 5.5 (`claude-opus-5-5`) | not yet reviewed |
+| `workflow/additional_tests/layer_depth_pilot/Snakefile` | written | 2026-11-25 | Claude Opus 5.5 (`claude-opus-5-5`) | not yet reviewed |
 | `workflow/Snakefile` | edited | 2026-11-13 | Claude Opus 5.5 (`claude-opus-5-5`) | not yet reviewed |
 | `workflow/dataset_processing/caption_scene_dataset/Snakefile` | edited | 2026-10-08 | Claude Opus 5.5 (`claude-opus-5-5`) | not yet reviewed |
 | `workflow/dataset_processing/caption_scene_dataset/envs/caption_scene_dataset_processing_environment.yaml` | edited | 2026-10-02 | Claude Opus 5.5 (`claude-opus-5-5`) | not yet reviewed |
@@ -147,7 +149,6 @@ git history and may include later human edits.
 | `workflow/isc_nearest_neighbours/scripts/create_isc_dataframe.py` | edited | 2026-10-02 | Claude Opus 5.5 (`claude-opus-5-5`) | not yet reviewed |
 | `workflow/isc_nearest_neighbours/scripts/create_isc_manifest.py` | edited | 2026-10-02 | Claude Opus 5.5 (`claude-opus-5-5`) | not yet reviewed |
 | `workflow/isc_nearest_neighbours/scripts/extract_region_isc_dataframe.py` | written | 2026-10-14 | Claude Opus 5.5 (`claude-opus-5-5`) | not yet reviewed |
-| `workflow/layer_depth_pilot/Snakefile` | written | 2026-11-23 | Claude Opus 5.5 (`claude-opus-5-5`) | not yet reviewed |
 | `workflow/libraries/aggregate_alignment_scores.py` | edited | 2026-11-09 | Claude Opus 5.5 (`claude-opus-5-5`) | not yet reviewed |
 | `workflow/libraries/code_version.py` | written | 2026-10-05 | Claude Opus 5.5 (`claude-opus-5-5`) | not yet reviewed |
 | `workflow/libraries/compute_alignment.py` | edited | 2026-10-09 | Claude Opus 5.5 (`claude-opus-5-5`) | not yet reviewed |

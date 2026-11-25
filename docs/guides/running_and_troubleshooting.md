@@ -103,7 +103,8 @@ other, and:
    into the main ones; with this list such jobs are never scheduled, the existing brain files
    are plain inputs, and a missing one stops the run.
 
-A full depth is 1352 jobs (21 models, two datasets) and takes about 1 h 20 min on node5.
+A full depth is 1348 jobs (21 models, two datasets), all model-side, and takes about
+1 h 10 min to 1 h 25 min on node5; the five depths run one after the other, about 6 h 30 min in all.
 
 **Outputs.** Each depth's results go to `results/tests/layer_depth_pilot_<D>/results/` with the
 main workflow's file names (the depth is only in the directory name); its summary tables are in
@@ -569,6 +570,13 @@ instead of directories set up by hand and the loop in `run_snakemake_workflow.sh
 describes the command, the depth list in `config/layer_depth_pilot.yaml`, the links to the main
 brain results (which replace the copies), the `--allowed-rules` safeguard, the outputs and how to
 rerun; the hand-made setup commands and the per-depth dry-run check are gone.
+
+### 2026-11-25 15:15 — pilot job count and run time from the first Snakefile run
+
+Section 1: a full depth is 1348 jobs, not 1352, and takes 1 h 10 min to 1 h 25 min (about
+6 h 30 min for the five depths), as measured on the first full run of the pilot Snakefile on
+node5 (2026-11-23). The four jobs fewer are the Nature Stories ISC jobs that the earlier copies
+of the brain results rebuilt; with links and `--allowed-rules` no brain-side job runs.
 
 ### 2026-11-25 16:30 — depth flag written in the `get_embeddings` command
 

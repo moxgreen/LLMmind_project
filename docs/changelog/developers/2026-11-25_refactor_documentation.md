@@ -4,6 +4,7 @@
 
 - Reference pages prepared as the main source for the article (documentation)
 - Audit of the reference pages: references verified, terms defined, numbers dated (documentation)
+- Pilot job count and run time corrected in the running guide (documentation)
 - Depth flag written in the `get_embeddings` command; last layer kept; pilot results documented (refactor, documentation)
 
 ---
@@ -93,6 +94,36 @@ points 1, 5, 6 and 9 were not acted on).
 - Verification: each reference compared field by field with the record fetched (one-off scripts in
   the session scratchpad, removed); internal Markdown links of `README.md` and `docs/` checked with
   a one-off script: 0 broken. No code or result changed.
+
+---
+
+## 15:15 — Pilot job count and run time corrected in the running guide
+
+Kind: documentation
+
+- `docs/guides/running_and_troubleshooting.md`, section 1 "Layer-depth pilot": 1352 → 1348 jobs
+  per depth, run time 1 h 20 min → 1 h 10 min to 1 h 25 min per depth (about 6 h 30 min in all);
+  `## Changes` entry added. The 1352 of the 2026-11-20 runs included the four Nature Stories ISC
+  jobs (`create_isc_dataframe` and the ISC neighbours) rebuilt in the brain-result copies; the
+  pilot Snakefile links the brain results and passes `--allowed-rules` with the nine model-side
+  rules only, so they no longer run.
+- First full run of `workflow/layer_depth_pilot/Snakefile` on node5, 2026-11-23 15:52–22:19
+  (`--forcerun run_layer_depth_pilot`): 6/6 outer jobs, 1348/1348 inner jobs per depth, no errors.
+  Every inner job ran for "Missing output files": the model-side outputs of the 2026-11-20 run
+  were no longer in the depth directories when it started.
+
+### Context
+
+- Request: "the full Snakemake pilot workflow ended. check the outputs", then "proceed with the
+  guide fix and the TODO update". The TODO update had already been made in the 16:30 change
+  (P7/S7 closed), so the TODO file was not changed again.
+- Files changed: `docs/guides/running_and_troubleshooting.md`, both changelogs of the day.
+- Verification (one-off scripts in the session scratchpad, removed): outer and per-depth Snakemake
+  logs (job stats, rerun reasons, no error lines); no file in `results/` outside `results/tests/`
+  modified during the run; brain folders in each depth directory are links; summary tables hold
+  all 21 models for both datasets with no missing values; Narratives RSA means by family and depth
+  and the shares of p < 0.05 equal the 2026-11-20 values; the 42 `*_embeddings.parquet` files of
+  the 100% depth equal the main ones (max abs difference 0).
 
 ---
 

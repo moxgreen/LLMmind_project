@@ -4,6 +4,7 @@
 
 - Reference pages prepared for writing the article (documentation)
 - Reference pages corrected after an external audit (documentation)
+- Layer-depth pilot: correct job count and run time (documentation)
 - Main analysis keeps the last layer; layer-depth pilot results documented (refactor, documentation)
 
 ---
@@ -44,6 +45,17 @@ Kind: documentation
   before it goes into the article.
 - The limitations list is more detailed about the brain regions and the differences between
   models.
+
+---
+
+## 15:15 — Layer-depth pilot: correct job count and run time
+
+Kind: documentation
+
+- The running guide now gives the job count and run time measured on the first full run of the
+  layer-depth pilot with its own Snakefile: 1348 jobs and about 1 h 10 min to 1 h 25 min per
+  depth, about 6 h 30 min for all five depths. Its results are the same as those of the earlier
+  pilot run, and it changed none of the main results.
 
 ---
 

@@ -3,6 +3,7 @@
 > *Written with AI assistance (Claude Code). See [`docs/AI_USAGE.md`](../../AI_USAGE.md).*
 
 - Reference pages prepared as the main source for the article (documentation)
+- Audit of the reference pages: references verified, terms defined, numbers dated (documentation)
 
 ---
 
@@ -48,3 +49,46 @@ Kind: documentation
   parameters compared with `config/config.yaml`; package versions read from the env files;
   similarity and tie handling read from `compute_similarity.py` and `compute_nearest_neighbours.py`;
   citations checked by fetching the arXiv and PMC pages. No code or result changed.
+
+---
+
+## 15:00 — Audit of the reference pages: references verified, terms defined, numbers dated
+
+Kind: documentation
+
+Addresses points 2, 4, 7 and 8 of an external documentation audit of 2026-11-25 (the code-related
+points 1, 5, 6 and 9 were not acted on).
+
+- `docs/reference/study_overview.md`:
+  - section 8 rebuilt: 38 entries checked (Crossref API, arXiv API and abstract pages, Europe PMC,
+    G-Node, Hugging Face cards) and marked †, with DOIs or arXiv IDs; what could not be checked is
+    stated per entry (PMLR pages of CLIP, TMLR of DINOv2, NeurIPS of QLoRA, ICML of Huh et al., the
+    timm Zenodo DOI). Added: Gemma 3n (model-card citation, no report), Gemma 4 technical report
+    (arXiv:2607.02770), Gröger, Wen & Brbić 2026 (arXiv:2602.14486, identified from its abstract),
+    LAION-5B, the Caucheteux & King author correction. Corrected: Nature Stories release authors
+    (4, 2026, not 6), Allen et al. year of issue and DOI, Li et al. 2026 volume 13, article 905;
+  - new subsection "Terms used on these pages" (similarity vs alignment, Spearman similarity vs
+    Spearman RSA, concept- vs model-level inference, ISC vs activation, language region =
+    language + auditory, total vs effective parameters);
+  - section 6: rule for dating a hand-reported number (date next to it or in the page's
+    `## Changes`; code = `git log -1 --until=<date>`); dataset and model tables tagged with
+    commit `da29acf`;
+  - section 7: the regional limitation split into four (group-level regions, auditory parcels,
+    ventral temporal cortex, no cross-modality comparison); training objectives added to the
+    size confound.
+- `docs/reference/model_embeddings.md`: Caucheteux & King 2022 read in Europe PMC (PMC8850612):
+  "middle layers" = *L*/2 to 3*L*/4, example layer 9 of 12; Gröger citation completed.
+- `docs/reference/statistics.md`: section 6 renamed "Spearman RSA (global alignment)" with the
+  distinction from the Spearman similarity type; size analysis states total parameters.
+- `docs/reference/nature_stories_stimuli.md`: G-Node release authors corrected.
+- `docs/reference/regional_crossover.md`: "Spearman alignment" → "Spearman RSA".
+- `docs/reference/brain_regions.md`: language region described as language + auditory at first
+  mention.
+
+### Context
+
+- Request: an external audit pasted by the developer, then "proceed with the documentation edits".
+- Files changed: the six reference pages above, `docs/AI_USAGE.md`, both changelogs of the day.
+- Verification: each reference compared field by field with the record fetched (one-off scripts in
+  the session scratchpad, removed); internal Markdown links of `README.md` and `docs/` checked with
+  a one-off script: 0 broken. No code or result changed.

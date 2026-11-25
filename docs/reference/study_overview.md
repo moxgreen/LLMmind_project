@@ -32,10 +32,32 @@ whole cortex and on the region of the model's modality (language or visual,
 [`brain_regions.md`](brain_regions.md)). The tests, multiple-testing rule and figures are in
 [`statistics.md`](statistics.md).
 
+### Terms used on these pages
+
+- **Similarity** compares two stimuli *within* one representational space (the brain's, or one
+  model's). **Alignment** compares two spaces: how alike they arrange the same stimuli.
+- **Similarity type** (cosine, Pearson, Spearman) is how two stimuli's vectors are compared.
+  **Spearman similarity** is one of these types; **Spearman RSA** (global alignment) is the
+  Spearman correlation between two spaces' similarity structures, computed once for every
+  similarity type. In code and output names the RSA is called `spearman_alignment`.
+- **Concept-level** results and p-values describe one stimulus; **model-level** results and
+  p-values describe one model (or model pair) over all stimuli. Only model-level p-values are
+  tested and corrected for multiple testing ([`statistics.md`](statistics.md), sections 3 and 5).
+- **ISC** measures how synchronised the subjects' BOLD time courses are for a stimulus, parcel by
+  parcel. It is not the amplitude of the response ("activation"): a parcel can respond strongly
+  with a low ISC if the response differs between subjects.
+- **Language region** is the name of the 17-parcel region used for language models. It holds 8
+  language and 9 auditory parcels ([`brain_regions.md`](brain_regions.md), section 2), so it is a
+  combined language and auditory region, not a language-selective one. **Visual region** is the
+  29-parcel `Vis` network.
+- **Parameters** are total parameter counts. The Gemma 3n and Gemma 4 "E" models are named after
+  their smaller *effective* counts (section 3).
+
 ## 2. Datasets
 
-Counted from the workflow's manifests (`results/mind/<dataset>/manifests/`) on 2026-11-25. A
-"concept" is one stimulus that enters the analysis.
+Counted from the workflow's manifests (`results/mind/<dataset>/manifests/`) on 2026-11-25, at
+commit `da29acf`, with the current `config/config.yaml`. A "concept" is one stimulus that enters
+the analysis.
 
 | Dataset | Task | Stimuli given to the models | Concepts *n* | Subjects | TR | Time points per concept | *k* |
 |---|---|---|---|---|---|---|---|
@@ -57,7 +79,8 @@ Counted from the workflow's manifests (`results/mind/<dataset>/manifests/`) on 2
 
 ## 3. Models
 
-38 models, 24 language and 14 vision, from `config/config.yaml` (`models:`). All are loaded
+38 models, 24 language and 14 vision, from `config/config.yaml` (`models:`) at commit
+`da29acf`. All are loaded
 without their task head, from Hugging Face. "Parameters" is `parameters_millions` in the config,
 the value used for ordering the figures and for the model-size analysis; for the Gemma 3n and
 Gemma 4 "E" models it is the total, not the "effective" 2B or 4B of their names.
@@ -129,6 +152,16 @@ Hardware and run time: one NVIDIA RTX A5000 (24 GB); a clean run takes about 33 
 Take result numbers from these tables, not from the pages: the pages quote some of them, at the
 date given next to them.
 
+**How to date a number on these pages.** The result tables and manifests are the authoritative
+source; a number written on a page is a copy that can go out of date when the config, the
+exclusion rules or the code change. Every such number carries the date it was measured, either
+next to it or in the page's `## Changes` entry that added it. The code it was measured with is the
+last commit before that date (`git log -1 --until=<date>`); the config is the one in that commit.
+Numbers measured on the outputs of an earlier pipeline run say which run when it matters, as
+[`clean_run_duration.md`](clean_run_duration.md) does. Before quoting a number in the article,
+recompute it from the current tables or confirm that nothing it depends on has changed since its
+date.
+
 **Not reproduced by the workflow.** These numbers come from one-off checks, run once on the
 workflow's outputs; no rule or script in the repository rebuilds them:
 
@@ -169,15 +202,217 @@ Each point is described in full on the page linked.
 - **BOS token in the mean** of every language-model chunk
   ([`model_embeddings.md`](model_embeddings.md), "Caveat: the BOS token is included in the mean").
 - **Model size is confounded.** Within the Gemma 2, Gemma 3, Gemma 4 and OpenLLaMA families only
-  the largest models are quantised; the families differ in training data and recipe (BLOOMZ is
-  instruction-tuned); no language model is below 270M parameters; the "E" models count with their
-  total parameters (section 3 above; [`statistics.md`](statistics.md), section 8, "Model size").
+  the largest models are quantised; the families differ in training data, training objective
+  (next-token prediction for the language models, of which BLOOMZ is also instruction-tuned;
+  contrastive image-text learning for CLIP, three of them then fine-tuned on ImageNet-12k classification; self-supervised learning for DINOv2; supervised
+  classification for the ImageNet-21k ViTs) and recipe; no language model is below 270M
+  parameters; the "E" models count with their total parameters (section 3 above;
+  [`statistics.md`](statistics.md), section 8, "Model size").
 - **No noise ceiling.** How reliable the brain similarity structure is, and so the highest
   alignment any model could reach, was not estimated.
-- **Brain regions.** The language region comes from a group atlas, which fits individual language
-  cortex poorly, and includes auditory parcels; the visual region excludes ventral temporal
-  parcels; models are compared only with their own modality's region
+- **Group-level regions.** Both regions come from a group atlas, not from each subject; this fits
+  individual language cortex poorly ([`brain_regions.md`](brain_regions.md), section 5).
+- **Auditory parcels in the language region.** 9 of its 17 parcels are auditory, so on the spoken
+  stories alignment there may reflect acoustic rather than linguistic processing
+  ([`brain_regions.md`](brain_regions.md), section 2).
+- **Ventral temporal cortex outside the visual region**, which is the 7-network `Vis` network
   ([`brain_regions.md`](brain_regions.md), section 5).
+- **No cross-modality regional comparison in the workflow.** Each model is compared only with its
+  own modality's region; the one-off crossover analysis is outside the workflow
+  ([`regional_crossover.md`](regional_crossover.md)).
+- **Not every analysis is reproducible from the repository** (section 6).
+
+## 8. References
+
+The works cited on the reference pages. Entries marked † were checked on 2026-11-25 against the
+publisher, Crossref, arXiv, Europe PMC or the release page. The note after an entry says what
+could not be checked.
+
+**Datasets**
+
+- Nastase, S. A., Liu, Y.-F., Hillman, H., et al. (2021). The "Narratives" fMRI dataset for
+  evaluating models of naturalistic language comprehension. *Scientific Data* 8, 250.
+  doi:10.1038/s41597-021-01033-3 †
+- Allen, E. J., St-Yves, G., Wu, Y., et al. (2022). A massive 7T fMRI dataset to bridge cognitive
+  neuroscience and artificial intelligence. *Nature Neuroscience* 25(1), 116–126.
+  doi:10.1038/s41593-021-00962-x †
+- Li, S., Jin, Z., Gu, S., et al. (2026). A large-scale fMRI dataset for vision-language semantic
+  association. *Scientific Data* 13, 905. doi:10.1038/s41597-026-07248-6 † (5 authors; the full
+  list is in the Crossref record). Data: ScienceDB, doi:10.57760/sciencedb.27580.
+- Huth, A. G., de Heer, W. A., Deniz, F., Gong, X. L. (2026). Nature story listening 3T fMRI data.
+  G-Node GIN. doi:10.12751/g-node.t4wew2 †
+- LeBel, A., Wagner, L., Jain, S., et al. (2023). A natural language fMRI dataset for voxelwise
+  encoding models. *Scientific Data* 10, 555. doi:10.1038/s41597-023-02437-z † Data: OpenNeuro
+  ds003020, doi:10.18112/openneuro.ds003020.v4.0.0.
+- Lin, T.-Y., Maire, M., Belongie, S., et al. (2014). Microsoft COCO: Common objects in context.
+  *ECCV 2014*, Lecture Notes in Computer Science 8693, 740–755. doi:10.1007/978-3-319-10602-1_48 †
+  (the volume number 8693 was not in the Crossref record). Source of the NSD and Caption Scene
+  images.
+
+**Atlases and regions**
+
+- Schaefer, A., Kong, R., Gordon, E. M., et al. (2018). Local-global parcellation of the human
+  cerebral cortex from intrinsic functional connectivity MRI. *Cerebral Cortex* 28(9), 3095–3114.
+  doi:10.1093/cercor/bhx179 †
+- Kong, R., Yang, Q., Gordon, E., et al. (2021). Individual-specific areal-level parcellations
+  improve functional connectivity prediction of behavior. *Cerebral Cortex* 31(10), 4477–4500.
+  doi:10.1093/cercor/bhab101 † The CBIG repository calls the 17-network labels derived from it
+  "Kong2022"; that these labels come from this paper was not checked.
+- Fedorenko, E., Hsieh, P.-J., Nieto-Castañón, A., Whitfield-Gabrieli, S., Kanwisher, N. (2010).
+  New method for fMRI investigations of language: defining ROIs functionally in individual
+  subjects. *Journal of Neurophysiology* 104(2), 1177–1194. doi:10.1152/jn.00032.2010 †
+
+**Models**
+
+- Muennighoff, N., Wang, T., Sutawika, L., et al. (2023). Crosslingual generalization through
+  multitask finetuning. *Proceedings of the 61st Annual Meeting of the ACL (Long Papers)*,
+  15991–16111. doi:10.18653/v1/2023.acl-long.891 † (BLOOMZ)
+- Gemma Team: Mesnard, T., Hardin, C., Dadashi, R., et al. (2024). Gemma: Open models based on
+  Gemini research and technology. arXiv:2403.08295 †
+- Gemma Team: Riviere, M., Pathak, S., Sessa, P. G., et al. (2024). Gemma 2: Improving open
+  language models at a practical size. arXiv:2408.00118 †
+- Gemma Team: Kamath, A., Ferret, J., Pathak, S., et al. (2025). Gemma 3 technical report.
+  arXiv:2503.19786 †
+- Gemma Team (2025). Gemma 3n. Google DeepMind. https://ai.google.dev/gemma/docs/gemma-3n † There
+  is no technical report; this is the citation the Hugging Face model cards
+  (`google/gemma-3n-E2B`, `google/gemma-3n-E4B`) ask for.
+- Gemma Team: El Abd, S., Aggarwal, V., Algayres, R., et al. (2026). Gemma 4 technical report.
+  arXiv:2607.02770 † (found in the arXiv listing and cited by the `google/gemma-4-*` model cards;
+  the abstract page itself was not read).
+- Geng, X., Liu, H. (2023). OpenLLaMA: An open reproduction of LLaMA. Software,
+  https://github.com/openlm-research/open_llama † (the citation its README gives)
+- Radford, A., Kim, J. W., Hallacy, C., et al. (2021). Learning transferable visual models from
+  natural language supervision. *ICML 2021*, PMLR 139, 8748–8763. arXiv:2103.00020 † for the arXiv
+  entry; the PMLR volume and pages come from a secondary source and were not checked. (CLIP)
+- Cherti, M., Beaumont, R., Wightman, R., et al. (2023). Reproducible scaling laws for contrastive
+  language-image learning. *CVPR 2023*, 2818–2829. doi:10.1109/CVPR52729.2023.00276 † (OpenCLIP
+  models trained on LAION-2B)
+- Schuhmann, C., Beaumont, R., Vencu, R., et al. (2022). LAION-5B: An open large-scale dataset for
+  training next generation image-text models. *NeurIPS 2022 Datasets and Benchmarks Track*.
+  arXiv:2210.08402 † (the dataset of which LAION-2B is the English part)
+- Oquab, M., Darcet, T., Moutakanni, T., et al. (2024). DINOv2: Learning robust visual features
+  without supervision. *Transactions on Machine Learning Research*. arXiv:2304.07193 † for the
+  arXiv entry; the TMLR publication was not checked.
+- Dosovitskiy, A., Beyer, L., Kolesnikov, A., et al. (2021). An image is worth 16x16 words:
+  Transformers for image recognition at scale. *ICLR 2021*. arXiv:2010.11929 † (arXiv: "ICLR
+  camera-ready version")
+- Steiner, A., Kolesnikov, A., Zhai, X., Wightman, R., Uszkoreit, J., Beyer, L. (2022). How to
+  train your ViT? Data, augmentation, and regularization in vision transformers. *Transactions on
+  Machine Learning Research* (05/2022). arXiv:2106.10270 † (the `augreg_in21k` models)
+
+**Methods compared with**
+
+- Huh, M., Cheung, B., Wang, T., Isola, P. (2024). Position: The platonic representation
+  hypothesis. *ICML 2024*. arXiv:2405.07987 † for the arXiv entry ("The Platonic Representation
+  Hypothesis"); the ICML publication and its "Position:" title were not checked. (Value cap)
+- Gröger, F., Wen, S., Brbić, M. (2026). Revisiting the platonic representation hypothesis: An
+  Aristotelian view. *ICML 2026* (arXiv: "ICML 2026 camera-ready"). arXiv:2602.14486 † Its
+  abstract matches what the pages cite it for: depth and width inflate representational
+  similarity, a permutation-based null calibrates it, and local neighbourhood agreement survives
+  calibration while global measures do not. That this is the paper the manuscript cites was not
+  checked against the manuscript; Sec. 4.2 was not read.
+- Antonello, R., Vaidya, A., Huth, A. (2023). Scaling laws for language encoding models in fMRI.
+  *Advances in Neural Information Processing Systems 36 (NeurIPS 2023)*, 21895–21907.
+  doi:10.52202/075280-0958, arXiv:2305.11863 †
+- Caucheteux, C., King, J.-R. (2022). Brains and algorithms partially converge in natural language
+  processing. *Communications Biology* 5, 134. doi:10.1038/s42003-022-03036-1 † (Author
+  correction: *Communications Biology* 6, 396, 2023, doi:10.1038/s42003-023-04776-4.)
+
+**Software**
+
+- Mölder, F., Jablonski, K. P., Letcher, B., et al. (2021). Sustainable data analysis with
+  Snakemake. *F1000Research* 10, 33. doi:10.12688/f1000research.29032.2 † (version 2)
+- Avants, B. B., Tustison, N. J., Song, G., et al. (2011). A reproducible evaluation of ANTs
+  similarity metric performance in brain image registration. *NeuroImage* 54(3), 2033–2044.
+  doi:10.1016/j.neuroimage.2010.09.025 †
+- Ciric, R., Thompson, W. H., Lorenz, R., et al. (2022). TemplateFlow: FAIR-sharing of
+  multi-scale, multi-species brain models. *Nature Methods* 19, 1568–1571.
+  doi:10.1038/s41592-022-01681-2 †
+- Abraham, A., Pedregosa, F., Eickenberg, M., et al. (2014). Machine learning for neuroimaging
+  with scikit-learn. *Frontiers in Neuroinformatics* 8, 14. doi:10.3389/fninf.2014.00014 †
+  (nilearn)
+- Wolf, T., Debut, L., Sanh, V., et al. (2020). Transformers: State-of-the-art natural language
+  processing. *Proceedings of EMNLP 2020: System Demonstrations*, 38–45.
+  doi:10.18653/v1/2020.emnlp-demos.6 †
+- Wightman, R. (2019). PyTorch Image Models. GitHub,
+  https://github.com/huggingface/pytorch-image-models. Not checked: the Zenodo DOI
+  10.5281/zenodo.4414861 resolves to a 2023 release record (v0.8.10dev0), not to a 2019 entry;
+  cite the version used (timm 1.0.30) or that record.
+- Dettmers, T., Lewis, M., Belkada, Y., Zettlemoyer, L. (2022). LLM.int8(): 8-bit matrix
+  multiplication for transformers at scale. *NeurIPS 2022*. arXiv:2208.07339 † (bitsandbytes
+  8-bit)
+- Dettmers, T., Pagnoni, A., Holtzman, A., Zettlemoyer, L. (2023). QLoRA: Efficient finetuning of
+  quantized LLMs. *NeurIPS 2023*. arXiv:2305.14314 † for the arXiv entry; the NeurIPS publication
+  was not checked. (bitsandbytes 4-bit)
+- Gao, J. S., Huth, A. G., Lescroart, M. D., Gallant, J. L. (2015). Pycortex: an interactive
+  surface visualizer for fMRI. *Frontiers in Neuroinformatics* 9, 23. doi:10.3389/fninf.2015.00023 †
+  (Nature Stories' cortical voxels are defined with a pycortex mask)
+
+## Changes` entry that added it. The code it was measured with is the
+last commit before that date (`git log -1 --until=<date>`); the config is the one in that commit.
+Numbers measured on the outputs of an earlier pipeline run say which run when it matters, as
+[`clean_run_duration.md`](clean_run_duration.md) does. Before quoting a number in the article,
+recompute it from the current tables or confirm that nothing it depends on has changed since its
+date.
+
+**Not reproduced by the workflow.** These numbers come from one-off checks, run once on the
+workflow's outputs; no rule or script in the repository rebuilds them:
+
+- the robustness checks of [`statistics.md`](statistics.md), section 8, including the model-size
+  analysis;
+- the NSD trial-history figures (81% of preceding trials subject-specific; 178 of 1000 images with
+  the same preceding trial in all subjects) in [`fmri_preprocessing.md`](fmri_preprocessing.md),
+  "Limitation: the hemodynamic delay";
+- the overlap of the NSD and Caption Scene images ([`fmri_preprocessing.md`](fmri_preprocessing.md));
+- the regional crossover analysis ([`regional_crossover.md`](regional_crossover.md)), run with two
+  scripts that are not in the repository;
+- the check of the Nature Stories corrected run onsets (README, "Input files that are not plain
+  downloads"). The TextGrid word-level check, in contrast, is a workflow rule
+  ([`nature_stories_stimuli.md`](nature_stories_stimuli.md), section 4).
+
+**In progress.** The layer-depth pilot reads a subset of the language models at several relative
+depths ([`model_embeddings.md`](model_embeddings.md), "Which layer"); its results are not yet
+documented on these pages.
+
+## 7. Limitations
+
+Each point is described in full on the page linked.
+
+- **Short event windows and the hemodynamic delay.** NSD and Caption Scene ISCs are correlations
+  over 3 and 6 volumes that start at stimulus onset; in NSD the window mostly holds the response
+  to earlier trials ([`fmri_preprocessing.md`](fmri_preprocessing.md), "Limitation: the
+  hemodynamic delay").
+- **Few stories.** Narratives has 18 concepts and Nature Stories 11, so the nearest-neighbour
+  scores are coarse and the null is discrete ([`statistics.md`](statistics.md), section 3).
+- **The Narratives RSA rests on the two Shapes units.** Without them no model survives correction;
+  the local alignment was not rechecked without them ([`statistics.md`](statistics.md), section 8,
+  "Dependencies between the Narratives units").
+- **The similarity type changes the Narratives result**, mostly through a few high-ISC auditory
+  parcels ([`statistics.md`](statistics.md), section 8, "Why the similarity types differ on
+  Narratives").
+- **Last layer only.** Every model is read at its last hidden state, which may underestimate its
+  alignment, unevenly across models ([`model_embeddings.md`](model_embeddings.md), "Which layer").
+- **BOS token in the mean** of every language-model chunk
+  ([`model_embeddings.md`](model_embeddings.md), "Caveat: the BOS token is included in the mean").
+- **Model size is confounded.** Within the Gemma 2, Gemma 3, Gemma 4 and OpenLLaMA families only
+  the largest models are quantised; the families differ in training data, training objective
+  (next-token prediction for the language models, of which BLOOMZ is also instruction-tuned;
+  contrastive image-text learning for CLIP, three of them then fine-tuned on ImageNet-12k classification; self-supervised learning for DINOv2; supervised
+  classification for the ImageNet-21k ViTs) and recipe; no language model is below 270M
+  parameters; the "E" models count with their total parameters (section 3 above;
+  [`statistics.md`](statistics.md), section 8, "Model size").
+- **No noise ceiling.** How reliable the brain similarity structure is, and so the highest
+  alignment any model could reach, was not estimated.
+- **Group-level regions.** Both regions come from a group atlas, not from each subject; this fits
+  individual language cortex poorly ([`brain_regions.md`](brain_regions.md), section 5).
+- **Auditory parcels in the language region.** 9 of its 17 parcels are auditory, so on the spoken
+  stories alignment there may reflect acoustic rather than linguistic processing
+  ([`brain_regions.md`](brain_regions.md), section 2).
+- **Ventral temporal cortex outside the visual region**, which is the 7-network `Vis` network
+  ([`brain_regions.md`](brain_regions.md), section 5).
+- **No cross-modality regional comparison in the workflow.** Each model is compared only with its
+  own modality's region; the one-off crossover analysis is outside the workflow
+  ([`regional_crossover.md`](regional_crossover.md)).
 - **Not every analysis is reproducible from the repository** (section 6).
 
 ## 8. References

@@ -81,11 +81,14 @@ decoder language models. Antonello, Vaidya & Huth (2023, arXiv:2305.11863, secti
 "the OPT models have maximum performance with layers that are roughly 3/4 into the model" (their
 best model reads layer 33 of 48 of OPT-30B, about 69%), while their LLaMA models peak "in
 relatively early layers" (layer 18 of 60 for LLaMA-33B); 75% therefore rests on OPT, not on every
-family. Caucheteux & King (2022) are cited for the same point, but their paper could not be read
-to check it. A single depth fixed
+family. Caucheteux & King (2022, *Commun. Biol.* 5, 134) find that "the middle layers
+systematically outperform the output", with "middle layers" defined as the layers from
+*L*/2 to 3*L*/4; their example of a middle layer is "the ninth layer of a 12-layer causal
+transformer", i.e. 75%. Both papers therefore place the best layer between half and three
+quarters of the depth, and 75% is at the upper end of that range. A single depth fixed
 in advance is used, rather than the best of several layers, because the best of more layers is
 higher by chance alone and larger models have more layers, which would create a size trend by
-construction (Gröger et al., Sec. 4.2).
+construction (Gröger, Wen & Brbić 2026, arXiv:2602.14486, Sec. 4.2).
 
 **Caveat: a few very large dimensions.** In BLOOMZ-560m, on one Narratives story, the three
 largest of the 1024 dimensions hold 38% of the squared norm of the last-layer vector and 50% at
@@ -152,7 +155,9 @@ source (`modeling_timm_wrapper.py`, `modeling_dinov2.py`). The ImageNet-12k fine
 large-dimension figures for BLOOMZ-560m come from a single story (`pieman`, run on CPU).
 `hidden_states[L]` equal to the last hidden state was checked for BLOOMZ-560m only (identical
 vectors with *f* = 1 and without the option). The quotations from Antonello et al. (2023) were
-read on 2026-11-25 in arXiv v4 (sections 3.1–3.3); Caucheteux & King (2022) were not read.
+read on 2026-11-25 in arXiv v4 (sections 3.1–3.3), those from Caucheteux & King (2022) the same
+day in the Europe PMC full text (PMC8850612). The Gröger et al. reference was identified from its
+arXiv abstract; its Sec. 4.2 was not read.
 
 ## Changes
 
@@ -218,5 +223,10 @@ listed in `config/layer_depth_pilot.yaml`.
 
 Section 3 said that brain-encoding studies of GPT-like models find the best layer near 75% of
 the depth and that this still had to be checked. Antonello et al. (2023) state it for OPT only;
-their LLaMA models peak early. The page now quotes what the paper says and that Caucheteux & King
-(2022) could not be checked.
+their LLaMA models peak early. The page now quotes what the paper says.
+
+### 2026-11-25 15:00 — Caucheteux & King checked; Gröger et al. identified
+
+Section 3 now quotes Caucheteux & King (2022), read in the Europe PMC full text: their "middle
+layers" are *L*/2 to 3*L*/4, so 75% is the upper end of the range both cited papers support. The
+"Gröger et al." citation now gives the paper (arXiv:2602.14486), identified from its abstract.

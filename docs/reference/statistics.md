@@ -137,10 +137,13 @@ The region analyses (language and visual region, see [`brain_regions.md`](brain_
 families of their own: a region's brain-model and Spearman families hold only the models of its
 modality.
 
-## 6. Spearman alignment
+## 6. Spearman RSA (global alignment)
 
 `spearman_alignment/scripts/compute_spearman_alignment_with_empirical_p_value.py` compares the
-full similarity structure instead of the neighbour sets:
+full similarity structure instead of the neighbour sets. This is a representational similarity
+analysis (RSA) with Spearman's ρ as the second-order statistic; the code and output names call it
+"Spearman alignment" (`spearman_alignment`, `all_spearman_alignment_scores.tsv`). It is distinct
+from the **Spearman similarity** type of section 1, which compares two stimuli within one space.
 
 - **model level:** Spearman's ρ between the brain's and the model's pairwise concept
   similarities (the upper triangle of the two *n* × *n* similarity matrices);
@@ -198,7 +201,7 @@ Conventions:
 - **Similarity-comparison line plots** (`results/pictures/similarity_comparison_lineplots/`,
   `plot_similarity_comparison_lineplot.py`) put the cosine, Pearson and Spearman versions of a
   model-level line plot into one figure: one per dataset and *k* for the alignment score and the
-  enrichment, one per dataset for the Spearman alignment. Each similarity type is one series in its
+  enrichment, one per dataset for the Spearman RSA. Each similarity type is one series in its
   own colour (`SIMILARITY_TYPE_COLOURS`: Okabe-Ito blue `#0072B2` for cosine, reddish purple
   `#CC79A7` for Pearson, sky blue `#56B4E9` for Spearman), joined by a thin line, with half-transparent
   error bars. The series sit at the same x positions, so points may overlap. They have no
@@ -264,7 +267,7 @@ Pearson / Spearman.
 
 ### Model size
 
-Spearman's ρ between log10(`parameters_millions`) and the outcome (RSA coefficient or
+Spearman's ρ between log10(`parameters_millions`, total parameters) and the outcome (RSA coefficient or
 nearest-neighbour enrichment) for each configuration: 24 per modality. The test is two-sided around
 the null mean, permuting parameter counts within families (`model_family()`; CLIP and fine-tuned
 CLIP are separate). BH runs across the 24 configurations of a modality.
@@ -561,3 +564,9 @@ were in the README, which now links here. Nothing in the analysis changed.
 Section 1 now defines the three similarity types as the code computes them, says that only model
 vectors are capped, and how ties at the *k*-th neighbour are broken, so that the methods section
 can be written from this page alone. Nothing in the analysis changed.
+
+### 2026-11-25 15:00 — Spearman RSA named as such
+
+Section 6 is now headed "Spearman RSA (global alignment)" and says how it differs from the
+Spearman similarity type, which the old heading "Spearman alignment" did not; the size analysis
+states that it uses total parameter counts. Wording only.

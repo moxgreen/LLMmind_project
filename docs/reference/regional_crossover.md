@@ -72,7 +72,7 @@ interaction (A + D) − (B + C). On Narratives the contrast is language region �
 - **Vision-model families in the visual region:** the three base CLIP models (B/16, L/14, H/14) have
   a median of 1.180 and their ImageNet fine-tuned versions 1.146; each base model scores higher than
   its fine-tuned version, under all three similarity types. DINOv2 is the lowest family (1.126),
-  although under Spearman alignment, which compares all concept pairs instead of the neighbours, it
+  although under Spearman RSA, which compares all concept pairs instead of the neighbours, it
   has the highest coefficients of the vision models (ρ ≈ 0.015).
 
 **Narratives** (Spearman similarity, *k* = 5, 24 language models, median over models):
@@ -141,3 +141,8 @@ screen-reading reading, the Narratives "redemption" and the CLIP fine-tuning eff
 and called the bootstrap intervals and the Narratives result robust. Two details were added or
 corrected: the cells are medians over models of the concept means (the summary did not say so),
 and the Caption Scene bootstrap used 2000 iterations (the summary said 1000).
+
+### 2026-11-25 15:00 — "Spearman RSA" instead of "Spearman alignment"
+
+Section 3 calls the global measure "Spearman RSA", the term used on the other reference pages
+(see [`statistics.md`](statistics.md), section 6). Wording only.

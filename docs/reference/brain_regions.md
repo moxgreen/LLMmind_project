@@ -3,7 +3,8 @@
 > *Written with AI assistance (Claude Code). See [`docs/AI_USAGE.md`](../AI_USAGE.md).*
 
 Besides the whole cortex, every brain-model analysis is also run on the region of the model's
-own modality: language models on a language region, vision models on a visual region. This
+own modality: language models on a language region (in fact a combined language and auditory
+region, section 2), vision models on a visual region. This
 page describes how the regions are defined, how their ISC is taken from the whole-cortex ISC, and
 where the results go. It is written from the code (`config/config.yaml`, `atlas: regions:`;
 `workflow/isc_nearest_neighbours/scripts/extract_region_isc_dataframe.py`; the Snakefiles).
@@ -161,3 +162,8 @@ The summary tables (`all_*.tsv`) are now written to `results/tsv_summaries/` ins
 Section 5 has a new point: a group atlas fits individual language cortex poorly (Fedorenko et
 al. 2010), so a null result in the language region is ambiguous and the visual-vs-language
 comparison is confounded by atlas fit. Raised by a collaborator; no code or result changed.
+
+### 2026-11-25 15:00 — language region described as language and auditory
+
+The introduction now says, at the first mention, that the language region combines language and
+auditory parcels. Wording only.

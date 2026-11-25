@@ -10,7 +10,7 @@ uses the transcripts, and the check that both releases describe the same stimuli
 
 | Files | Release |
 |---|---|
-| `responses/S*_BOLD.hdf`, `responses/run_onsets.json`, `mappers/`, `stimuli/*.wav` | "Nature Story Listening 3T fMRI Data", Huth, de Heer, Deniz, Gong, Gallant, Theunissen (Gallant and Theunissen labs), 11 subjects; G-Node GIN, DOI `10.12751/g-node.t4wew2` |
+| `responses/S*_BOLD.hdf`, `responses/run_onsets.json`, `mappers/`, `stimuli/*.wav` | "Nature story listening 3T fMRI data", Huth, de Heer, Deniz, Gong (2026), 11 subjects; G-Node GIN, DOI `10.12751/g-node.t4wew2`, repository `gallantlab/story_listening` |
 | `stimuli/textgrids/<story>.TextGrid` | "An fMRI dataset during a passive natural language listening task", LeBel, Wagner, Jain, … Huth, *Sci. Data* 10, 555 (2023); OpenNeuro `ds003020`, DOI `10.18112/openneuro.ds003020.v4.0.0`, folder `derivatives/TextGrids`, available without an account with `aws s3 cp --no-sign-request` from `s3://openneuro.org/ds003020/derivatives/TextGrids` |
 
 `ds003020` is a different, later Huth lab dataset (Moth Radio Hour stories, its own subjects). Its
@@ -178,3 +178,8 @@ outside the lab cannot use. The public S3 location of the TextGrids is kept in t
 
 The link to the README section on input files that need an extra step follows that section's new
 title.
+
+### 2026-11-25 15:00 — authors of the fMRI release corrected
+
+The sources table listed six authors for the G-Node release, including Gallant and Theunissen.
+The release page lists four (Huth, de Heer, Deniz, Gong; 2026); the table now gives those.

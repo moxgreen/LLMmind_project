@@ -3,6 +3,7 @@
 > *Written with AI assistance (Claude Code). See [`docs/AI_USAGE.md`](../../AI_USAGE.md).*
 
 - Reference pages prepared for writing the article (documentation)
+- Reference pages corrected after an external audit (documentation)
 
 ---
 
@@ -25,3 +26,20 @@ A new page, `docs/reference/study_overview.md`, is the place to start. It gives:
 The statistics page now defines the three similarity measures exactly. The embeddings page now
 quotes what the cited paper actually says about the best layer depth: about 3/4 of the depth
 holds for one model family (OPT), not for all. Nothing in the pipeline or its results changed.
+
+---
+
+## 15:00 — Reference pages corrected after an external audit
+
+Kind: documentation
+
+- The reference list in `docs/reference/study_overview.md` has been checked entry by entry; each
+  checked entry has a DOI or arXiv number and a † mark, and the few details that could not be
+  checked are named. The missing Gemma 3n, Gemma 4 and Gröger et al. references are now there.
+- The overview page now defines the terms used across the pages, for example "Spearman RSA" (the
+  comparison of whole similarity structures) as distinct from "Spearman similarity" (one way of
+  comparing two stimuli), and says that the "language region" also contains auditory areas.
+- It also explains how to tell when a number on the pages was measured, so it can be checked
+  before it goes into the article.
+- The limitations list is more detailed about the brain regions and the differences between
+  models.

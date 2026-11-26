@@ -82,7 +82,7 @@ test compares identically computed values and counts ties as well.
 
 The **hypergeometric expectation** of every concept's alignment score is *k*/(*n* − 1): two random
 *k*-subsets of *n* − 1 concepts share *k*²/(*n* − 1) elements on average. It is the dashed
-reference line of the alignment-score line plot and concept scatterplot, and the subtitle of the
+reference line of the alignment-score line plot and concept boxplot, and the subtitle of the
 alignment heatmap.
 
 **The model-level test is `model_level_empirical_p_value`.** The six statistics
@@ -125,7 +125,7 @@ separately.** The families are:
 
 | Family | Members | Used by |
 |---|---|---|
-| Brain-model alignment | `model_level_empirical_p_value` of every model, for one (dataset, similarity, *k*) | the alignment line plot, the concept scatterplot, both enrichment plots and the brain row/column of the p-value heatmap (`compute_statistics.model_level_significance()`), so their asterisks agree |
+| Brain-model alignment | `model_level_empirical_p_value` of every model, for one (dataset, similarity, *k*) | the alignment line plot, the concept boxplot, both enrichment plots and the brain row/column of the p-value heatmap (`compute_statistics.model_level_significance()`), so their asterisks agree |
 | Model-model alignment | `model_level_empirical_p_value` of every model pair, for one (dataset, similarity, *k*) | the model-model cells of the p-value heatmap |
 | Spearman | model-level Spearman p-value of every model, for one (dataset, similarity) | the two Spearman plots |
 
@@ -174,11 +174,12 @@ brain's and the model's similarity structures.
 | Figure | Point or box | Error bar | Grey reference |
 |---|---|---|---|
 | Model-level alignment line plot | mean alignment score over concepts | standard error of that mean across concepts (SD/√*n*) | dashed line at the hypergeometric expectation *k*/(*n* − 1) |
-| Concept-level alignment scatterplot | one point per concept, boxplot per model | none | dashed line at *k*/(*n* − 1) |
+| Concept-level alignment boxplot | one point per concept, boxplot per model | none | dashed line at *k*/(*n* − 1) |
 | Model-level enrichment line plot | model-level enrichment | that model's null SD | dashed line at enrichment = 1 |
-| Concept-level enrichment scatterplot | one point per concept, boxplot per model | none | dashed line at enrichment = 1 |
+| Concept-level enrichment boxplot | one point per concept, boxplot per model | none | dashed line at enrichment = 1 |
 | Model-level Spearman line plot | model-level ρ, and a grey dash at that model's computed null mean | that model's null SD | dashed line at ρ = 0, the exact null expectation (section 6) |
-| Concept-level Spearman scatterplot | one point per concept, boxplot per model | none | dashed line at ρ = 0, the exact null expectation (section 6) |
+| Concept-level Spearman boxplot | one point per concept, boxplot per model | none | dashed line at ρ = 0, the exact null expectation (section 6) |
+| Model-size line plot | model-level enrichment of each model at its parameter count, one line per family | none | dashed line at enrichment = 1 |
 | Similarity-comparison line plots (alignment, enrichment, Spearman) | the value of the matching model-level line plot, one series per similarity type | as in that line plot (SE or null SD) | as in that line plot |
 | Alignment heatmap | mean alignment score of each pair; the diagonal is blank | — | — |
 | p-value heatmap | −log10 of each pair's model-level empirical p-value; the diagonal is blank | — | — |
@@ -197,7 +198,7 @@ Conventions:
   uncorrected model-level empirical p-value and blue asterisks below them the Benjamini-Hochberg
   q-value (`*` < 0.05, `**` < 0.01, `***` < 0.001); in the p-value heatmap, the asterisks give the
   q-value. Section 5 lists the families.
-- The concept-level enrichment and Spearman scatterplots draw no error bars, to stay readable.
+- The concept-level enrichment and Spearman boxplots draw no error bars, to stay readable.
 - **Similarity-comparison line plots** (`results/pictures/similarity_comparison_lineplots/`,
   `plot_similarity_comparison_lineplot.py`) put the cosine, Pearson and Spearman versions of a
   model-level line plot into one figure: one per dataset and *k* for the alignment score and the
@@ -207,11 +208,21 @@ Conventions:
   error bars. The series sit at the same x positions, so points may overlap. They have no
   asterisks, because each series belongs to a different Benjamini-Hochberg family, and the title
   names no similarity type.
+- **Model-size line plots** (`results/pictures/model_size_lineplots/`,
+  `plot_alignment_enrichment_model_size.py`, whole cortex only) show the model-level enrichment
+  against `parameters_millions` (log10 x-axis), one figure per dataset, similarity type and *k*,
+  with every model of the dataset (on Caption Scene both stimulus types). They break several of the
+  shared conventions below: each family has its own colour (matplotlib `tab20`, fixed per family
+  across figures) and its models are joined in order of size; the marker gives the stimulus type
+  (circle language, square vision); every point is labelled with its model name; the legend sits
+  outside the axes, on the right; the symlog enrichment axis is fitted by matplotlib to the points
+  and the line at 1. They carry no error bars and no asterisks. The enrichment is computed from
+  `all_model_brain_alignment_scores.tsv` as `observed_average_alignment_score` /
+  `empirical_null_mean_alignment_score`, which matches `compute_alignment_enrichment()` to a
+  relative 1.2 × 10⁻⁶ (checked on all 24 configurations, 2026-11-26).
 
 Layout, shared by all plots (constants and helpers in `libraries/visualisation_utils.py`):
 
-- **Names.** The "scatterplots" in rule, script and folder names are concept-level boxplots with
-  one point per concept; the name is historical.
 - **Titles and labels.** Titles read `<level> <quantity>` (for example "Model-level brain-model
   alignment enrichment"), with `dataset: …, similarity: …, neighbours: …` on the second line.
   Y-axis labels read `<quantity> ± <error>`, or just `<quantity>` when the plot has no error bars.
@@ -260,10 +271,10 @@ Layout, shared by all plots (constants and helpers in `libraries/visualisation_u
 ## 8. Robustness checks of the whole-cortex results
 
 Checks of the whole-cortex results, made from the main pipeline's summary tables, ISC tables,
-embeddings and neighbour files; they change no pipeline result. Except the model-size analysis, a
-one-off check made on 2026-11-05 that no script in the repository rebuilds, each is an additional
-test with its own Snakefile, outside the main pipeline; how to run them and their output tables are
-in the [additional-tests guide](../guides/additional_tests.md). Their numbers below come from the
+embeddings and neighbour files; they change no pipeline result. The model-size analysis is part of
+the main pipeline; every other check is an additional test with its own Snakefile, outside the main
+pipeline; how to run them and their output tables are in the
+[additional-tests guide](../guides/additional_tests.md). Their numbers below come from the
 run of 2026-11-26 on the outputs of the main run of 2026-11-25. Unless stated, each permutation
 null uses the pipeline's relabelling stream (*N* = 10,000, seed 37), and Benjamini-Hochberg (BH)
 q-values use the families given below. Every RSA check first reproduces the published coefficients
@@ -271,21 +282,18 @@ to within 10⁻⁵ and stops otherwise. Numbers below give cosine / Pearson / Sp
 
 ### Model size
 
-Spearman's ρ between log10(`parameters_millions`, total parameters) and the outcome (RSA coefficient or
-nearest-neighbour enrichment) for each configuration: 24 per modality. The test is two-sided around
-the null mean, permuting parameter counts within families (`model_family()`; CLIP and fine-tuned
-CLIP are separate). BH runs across the 24 configurations of a modality.
-
-| Analysis | Models | Configurations with q < 0.05 | Smallest q |
-|---|---|---|---|
-| Language | 24 | 0/24 | 0.396 |
-| Vision | 14 | 0/24 | 0.456 |
-| Language, without the 7 quantised models | 17 | 0/24 | 0.698 |
-
-Exact tests inside a family (120 orderings, smallest p = 2/120 ≈ 0.017, uncorrected and descriptive)
-reach that minimum in 2 of 24 BLOOMZ configurations (both ρ = +1) and 1 of 24 Gemma 3 configurations
-(ρ = −1, where size and quantisation coincide). With 14–24 models a modest trend cannot be excluded.
-This measures size, not capability.
+Rule `plot_alignment_enrichment_model_size` (main pipeline, whole cortex) relates the model-level
+nearest-neighbour enrichment to `parameters_millions` (total parameters) within each model family
+(`model_family()`; CLIP and fine-tuned CLIP are separate), for every dataset, similarity type and
+*k*. It draws the model-size line plots (section 7) and writes
+`results/tsv_summaries/model_size_within_family_spearman.tsv`: one row per configuration and family
+with columns `dataset`, `stimuli_type`, `similarity_type`, `number_of_neighbours`, `family`,
+`number_of_models` and `spearman_rho`, Spearman's ρ of enrichment against parameter count (the
+Pearson correlation of the ranks, average ranks for ties). Only families with at least three models
+get a row: with two models ρ is ±1 by construction. ρ is descriptive: no p-value is computed, and
+with three to five models the smallest exact two-sided p-value would be 0.33 to 0.017. The RSA
+coefficients are not analysed against size. This measures size, not capability: within the Gemma 2,
+Gemma 3, Gemma 4 and OpenLLaMA families only the largest models are quantised.
 
 ### Dependencies between the Narratives units
 
@@ -591,3 +599,13 @@ hold, with three corrections: the two pairings of the swapped blocks differ for 
 permutations reach the observed coefficient for that one model under cosine; and removing the
 highest-ISC parcels now lifts cosine too (22 of 24 corrected models, previously 11), so skew
 explains both cosine and Pearson rather than mainly Pearson.
+
+### 2026-11-26 17:30 — concept boxplots renamed; model-size analysis in the pipeline
+
+The concept-level "scatterplots" are now called boxplots in the rule, script and folder names, so
+the note on the historical name is gone from section 7. Section 7 describes the new model-size line
+plots. Section 8, "Model size": the one-off check of 2026-11-05 (a permutation test of parameter
+count against RSA coefficient and enrichment across all models of a modality, with BH q-values,
+smallest q 0.396 language / 0.456 vision, computed on the tables from before the switch to capped
+model vectors) is replaced by the pipeline rule's within-family Spearman's ρ of the enrichment,
+without p-values; the RSA outcome is dropped, at the developer's request.

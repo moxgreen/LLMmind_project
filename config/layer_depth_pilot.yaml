@@ -1,9 +1,10 @@
 # written with AI assistance: Claude Code, Claude Opus 5.5 (claude-opus-5-5)
-# last AI edit: 2026-11-25, see docs/changelog/developers/ for details
+# last AI edit: 2026-11-26, see docs/changelog/developers/ for details
 
 # the depths workflow/additional_tests/layer_depth_pilot/Snakefile runs, as fractions of each model's blocks;
-# each gets its own directory, results/tests/layer_depth_pilot_<100 x depth>/
-relative_depths: [0.25, 0.5, 0.67, 0.75, 1]
+# each gets its own directory, results/tests/layer_depth_pilot_<100 x depth>/; the final layer (1) is
+# not run: its results are the main ones (results/tsv_summaries/) for these models
+relative_depths: [0.25, 0.5, 0.67, 0.75]
 
 datasets:
   - "narratives"

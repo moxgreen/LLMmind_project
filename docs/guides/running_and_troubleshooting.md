@@ -42,9 +42,10 @@ snakemake --use-conda --cores <N> --config 'similarity_types=["cosine","pearson"
 
 # redraw every plot after the plotting code changed (see section 2)
 snakemake --use-conda --cores <N> --rerun-triggers mtime \
-    --forcerun plot_brain_model_alignment_lineplot plot_concept_alignment_scatterplot \
+    --forcerun plot_brain_model_alignment_lineplot plot_concept_alignment_boxplot \
                plot_brain_model_alignment_enrichment_lineplot \
-               plot_concept_alignment_enrichment_scatterplot plot_spearman_alignment \
+               plot_concept_alignment_enrichment_boxplot plot_spearman_alignment \
+               plot_alignment_enrichment_model_size \
                plot_alignment_heatmap plot_empirical_p_value_heatmap \
                plot_similarity_comparison_alignment_lineplot \
                plot_similarity_comparison_enrichment_lineplot \
@@ -328,6 +329,10 @@ code no longer produces or reads. They are safe to delete:
 - plot folders directly under `results/` (for example `results/alignment_heatmaps/`): plots now
   live in `results/pictures/`. Move them there to keep the plots without redrawing them, or delete
   them;
+- `results/pictures/concept_alignment_scatterplots*/`,
+  `results/pictures/concept_alignment_enrichment_scatterplots*/` and
+  `results/pictures/concept_spearman_alignment_scatterplots*/` (with their `_language` and
+  `_vision` versions): the same concept-level plots now go to the matching `*_boxplots*/` folders;
 - `results/spearman_alignment/`: the Spearman tables now sit in
   `results/spearman_alignment_scores/` and the plots in `results/pictures/`;
 - NSD parcel files without a repetition in their name
@@ -535,3 +540,9 @@ Section 1: the layer-depth pilot section moved to the new guide
 [`additional_tests.md`](additional_tests.md), which says how to run every test outside the main
 pipeline; its Snakefile moved to `workflow/additional_tests/layer_depth_pilot/`. A short
 "Additional tests" section links to it.
+
+### 2026-11-26 17:30 — concept boxplot rules renamed; model-size plots
+
+The command that redraws every plot uses the renamed rules `plot_concept_alignment_boxplot` and
+`plot_concept_alignment_enrichment_boxplot` and includes the new `plot_alignment_enrichment_model_size`.
+The old `*_scatterplots*` plot folders are listed under "Leftover outputs from older versions".

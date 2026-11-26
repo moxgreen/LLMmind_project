@@ -1,5 +1,5 @@
 # edited with AI assistance: Claude Code, Claude Opus 5.5 (claude-opus-5-5)
-# last AI edit: 2026-11-13, see docs/changelog/developers/ for details
+# last AI edit: 2026-11-26, see docs/changelog/developers/ for details
 configfile: "config/config.yaml"
 
 from itertools import combinations
@@ -264,8 +264,8 @@ rule all:
             f"results/pictures/alignment_p_value_heatmaps/dataset-{pair['dataset']}_{pair['similarity_type']}-alignment_score_{pair['number_of_neighbours']}NN_empirical_p_values.png"
             for pair in HEATMAP_PAIRINGS
         ], 
-        concept_alignment_scatterplots = [
-            f"results/pictures/concept_alignment_scatterplots{region_suffix}/dataset-{pair['dataset']}_{pair['similarity_type']}-concept_alignment_{pair['number_of_neighbours']}NN.png"
+        concept_alignment_boxplots = [
+            f"results/pictures/concept_alignment_boxplots{region_suffix}/dataset-{pair['dataset']}_{pair['similarity_type']}-concept_alignment_{pair['number_of_neighbours']}NN.png"
             for region_suffix in REGION_SUFFIXES
             for pair in HEATMAP_PAIRINGS
             if in_region(region_suffix, config[pair["dataset"]]["stimuli_dir"])
@@ -276,8 +276,8 @@ rule all:
             for pair in HEATMAP_PAIRINGS
             if in_region(region_suffix, config[pair["dataset"]]["stimuli_dir"])
         ], 
-        concept_alignment_enrichment_scatterplots = [
-            f"results/pictures/concept_alignment_enrichment_scatterplots{region_suffix}/dataset-{pair['dataset']}_{pair['similarity_type']}-concept_alignment_enrichment_{pair['number_of_neighbours']}NN.png"
+        concept_alignment_enrichment_boxplots = [
+            f"results/pictures/concept_alignment_enrichment_boxplots{region_suffix}/dataset-{pair['dataset']}_{pair['similarity_type']}-concept_alignment_enrichment_{pair['number_of_neighbours']}NN.png"
             for region_suffix in REGION_SUFFIXES
             for pair in HEATMAP_PAIRINGS
             if in_region(region_suffix, config[pair["dataset"]]["stimuli_dir"])
@@ -305,8 +305,8 @@ rule all:
             if in_region(region_suffix, config[dataset]["stimuli_dir"])
             for similarity_type in SIMILARITY_TYPES
         ], 
-        concept_spearman_scatterplots = [
-            f"results/pictures/concept_spearman_alignment_scatterplots{region_suffix}/dataset-{dataset}_{similarity_type}-concept_spearman_alignment.png"
+        concept_spearman_boxplots = [
+            f"results/pictures/concept_spearman_alignment_boxplots{region_suffix}/dataset-{dataset}_{similarity_type}-concept_spearman_alignment.png"
             for region_suffix in REGION_SUFFIXES
             for dataset in DATASETS
             if in_region(region_suffix, config[dataset]["stimuli_dir"])
@@ -333,4 +333,6 @@ rule all:
         spearman_summary = [
             f"{TSV_SUMMARIES_DIR}/all_spearman_alignment_scores{region_suffix}.tsv"
             for region_suffix in REGION_SUFFIXES
-        ]
+        ], 
+        model_size_lineplots = MODEL_SIZE_LINEPLOTS, 
+        model_size_spearman = MODEL_SIZE_SPEARMAN

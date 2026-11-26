@@ -1,5 +1,11 @@
 # edited with AI assistance: Claude Code, Claude Opus 5.5 (claude-opus-5-5)
-# last AI edit: 2026-10-14, see docs/changelog/developers/ for details
+# last AI edit: 2026-11-26, see docs/changelog/developers/ for details
+
+# outputs of plot_alignment_enrichment_model_size (whole cortex), also listed in rule all
+MODEL_SIZE_LINEPLOT = "results/pictures/model_size_lineplots/dataset-{dataset}_{similarity_type}-alignment_enrichment_model_size_{number_of_neighbours}NN.png"
+MODEL_SIZE_LINEPLOTS = [MODEL_SIZE_LINEPLOT.format(**pair) for pair in HEATMAP_PAIRINGS]
+MODEL_SIZE_SPEARMAN = TSV_SUMMARIES_DIR + "/model_size_within_family_spearman.tsv"
+
 rule all_visualisation:
     input:
         alignment_heatmaps = [
@@ -10,8 +16,8 @@ rule all_visualisation:
             f"results/pictures/alignment_p_value_heatmaps/dataset-{pair['dataset']}_{pair['similarity_type']}-alignment_score_{pair['number_of_neighbours']}NN_empirical_p_values.png"
             for pair in HEATMAP_PAIRINGS
         ], 
-        concept_alignment_scatterplots = [
-            f"results/pictures/concept_alignment_scatterplots{region_suffix}/dataset-{pair['dataset']}_{pair['similarity_type']}-concept_alignment_{pair['number_of_neighbours']}NN.png"
+        concept_alignment_boxplots = [
+            f"results/pictures/concept_alignment_boxplots{region_suffix}/dataset-{pair['dataset']}_{pair['similarity_type']}-concept_alignment_{pair['number_of_neighbours']}NN.png"
             for region_suffix in REGION_SUFFIXES
             for pair in HEATMAP_PAIRINGS
             if in_region(region_suffix, config[pair["dataset"]]["stimuli_dir"])
@@ -22,8 +28,8 @@ rule all_visualisation:
             for pair in HEATMAP_PAIRINGS
             if in_region(region_suffix, config[pair["dataset"]]["stimuli_dir"])
         ], 
-        concept_alignment_enrichment_scatterplots = [
-            f"results/pictures/concept_alignment_enrichment_scatterplots{region_suffix}/dataset-{pair['dataset']}_{pair['similarity_type']}-concept_alignment_enrichment_{pair['number_of_neighbours']}NN.png"
+        concept_alignment_enrichment_boxplots = [
+            f"results/pictures/concept_alignment_enrichment_boxplots{region_suffix}/dataset-{pair['dataset']}_{pair['similarity_type']}-concept_alignment_enrichment_{pair['number_of_neighbours']}NN.png"
             for region_suffix in REGION_SUFFIXES
             for pair in HEATMAP_PAIRINGS
             if in_region(region_suffix, config[pair["dataset"]]["stimuli_dir"])
@@ -41,8 +47,8 @@ rule all_visualisation:
             if in_region(region_suffix, config[dataset]["stimuli_dir"])
             for similarity_type in SIMILARITY_TYPES
         ], 
-        concept_spearman_scatterplots = [
-            f"results/pictures/concept_spearman_alignment_scatterplots{region_suffix}/dataset-{dataset}_{similarity_type}-concept_spearman_alignment.png"
+        concept_spearman_boxplots = [
+            f"results/pictures/concept_spearman_alignment_boxplots{region_suffix}/dataset-{dataset}_{similarity_type}-concept_spearman_alignment.png"
             for region_suffix in REGION_SUFFIXES
             for dataset in DATASETS
             if in_region(region_suffix, config[dataset]["stimuli_dir"])
@@ -66,6 +72,8 @@ rule all_visualisation:
             for dataset in DATASETS
             if in_region(region_suffix, config[dataset]["stimuli_dir"])
         ], 
+        model_size_lineplots = MODEL_SIZE_LINEPLOTS, 
+        model_size_spearman = MODEL_SIZE_SPEARMAN, 
 
 rule plot_alignment_heatmap:
     input:
@@ -132,7 +140,7 @@ rule plot_empirical_p_value_heatmap:
                 --heatmap {output.heatmap:q}
         """
 
-rule plot_concept_alignment_scatterplot:
+rule plot_concept_alignment_boxplot:
     input:
         llm_brain_alignment_scores = lambda wc: [
             f"results/alignment_scores{wc.region_suffix}/dataset-{wc.dataset}_model-{pair['model']}-{pair['stimuli_type']}_brain_{wc.similarity_type}-alignment_score_{wc.number_of_neighbours}NN.parquet"
@@ -143,7 +151,7 @@ rule plot_concept_alignment_scatterplot:
         ], 
         model_level_statistics = TSV_SUMMARIES_DIR + "/all_model_brain_alignment_scores{region_suffix}.tsv"
     output:
-        plot = "results/pictures/concept_alignment_scatterplots{region_suffix}/dataset-{dataset}_{similarity_type}-concept_alignment_{number_of_neighbours}NN.png"
+        plot = "results/pictures/concept_alignment_boxplots{region_suffix}/dataset-{dataset}_{similarity_type}-concept_alignment_{number_of_neighbours}NN.png"
     params:
         model_parameters = [
             f"{model}={config['models'][model]['parameters_millions']}"
@@ -156,7 +164,7 @@ rule plot_concept_alignment_scatterplot:
         "envs/visualisation_environment.yaml"
     shell:
         r"""
-            python3 workflow/visualisation/scripts/plot_concept_alignment_scatterplot.py \
+            python3 workflow/visualisation/scripts/plot_concept_alignment_boxplot.py \
                 --llm_brain_alignment_scores {input.llm_brain_alignment_scores:q} \
                 --model_level_statistics {input.model_level_statistics:q} \
                 --model_parameters {params.model_parameters:q} \
@@ -197,7 +205,7 @@ rule plot_brain_model_alignment_lineplot:
                 --plot {output.plot:q}
         """
 
-rule plot_concept_alignment_enrichment_scatterplot:
+rule plot_concept_alignment_enrichment_boxplot:
     input:
         llm_brain_alignment_scores = lambda wc: [
             f"results/alignment_scores{wc.region_suffix}/dataset-{wc.dataset}_model-{pair['model']}-{pair['stimuli_type']}_brain_{wc.similarity_type}-alignment_score_{wc.number_of_neighbours}NN.parquet"
@@ -215,7 +223,7 @@ rule plot_concept_alignment_enrichment_scatterplot:
         ], 
         model_level_statistics = TSV_SUMMARIES_DIR + "/all_model_brain_alignment_scores{region_suffix}.tsv"
     output:
-        plot = "results/pictures/concept_alignment_enrichment_scatterplots{region_suffix}/dataset-{dataset}_{similarity_type}-concept_alignment_enrichment_{number_of_neighbours}NN.png"
+        plot = "results/pictures/concept_alignment_enrichment_boxplots{region_suffix}/dataset-{dataset}_{similarity_type}-concept_alignment_enrichment_{number_of_neighbours}NN.png"
     params:
         model_parameters = [
             f"{model}={config['models'][model]['parameters_millions']}"
@@ -228,7 +236,7 @@ rule plot_concept_alignment_enrichment_scatterplot:
         "envs/visualisation_environment.yaml"
     shell:
         r"""
-            python3 workflow/visualisation/scripts/plot_concept_alignment_enrichment_scatterplot.py \
+            python3 workflow/visualisation/scripts/plot_concept_alignment_enrichment_boxplot.py \
                 --llm_brain_alignment_scores {input.llm_brain_alignment_scores:q} \
                 --relabelled_llm_brain_alignment_scores {input.relabelled_llm_brain_alignment_scores:q} \
                 --model_level_statistics {input.model_level_statistics:q} \
@@ -278,6 +286,31 @@ rule plot_brain_model_alignment_enrichment_lineplot:
                 --plot {output.plot:q}
         """
 
+rule plot_alignment_enrichment_model_size:
+    # whole-cortex model-level enrichment against parameter count, one plot per (dataset, 
+    # similarity type, k), and the within-family Spearman's rho of every such configuration
+    input:
+        model_level_statistics = TSV_SUMMARIES_DIR + "/all_model_brain_alignment_scores.tsv"
+    output:
+        plots = MODEL_SIZE_LINEPLOTS, 
+        within_family_spearman = MODEL_SIZE_SPEARMAN
+    params:
+        model_parameters = [
+            f"{model}={config['models'][model]['parameters_millions']}"
+            for model in MODEL_KEYS
+        ], 
+        plot_pattern = lambda wc: MODEL_SIZE_LINEPLOT
+    conda:
+        "envs/visualisation_environment.yaml"
+    shell:
+        r"""
+            python3 workflow/visualisation/scripts/plot_alignment_enrichment_model_size.py \
+                --model_level_statistics {input.model_level_statistics:q} \
+                --model_parameters {params.model_parameters:q} \
+                --plot_pattern {params.plot_pattern:q} \
+                --within_family_spearman {output.within_family_spearman:q}
+        """
+
 rule plot_spearman_alignment:
     input:
         model_level_spearman_scores = lambda wc: [
@@ -294,7 +327,7 @@ rule plot_spearman_alignment:
         ]
     output:
         model_level_plot = "results/pictures/spearman_alignment_lineplots{region_suffix}/dataset-{dataset}_{similarity_type}-brain_model_spearman_alignment.png", 
-        concept_level_plot = "results/pictures/concept_spearman_alignment_scatterplots{region_suffix}/dataset-{dataset}_{similarity_type}-concept_spearman_alignment.png"
+        concept_level_plot = "results/pictures/concept_spearman_alignment_boxplots{region_suffix}/dataset-{dataset}_{similarity_type}-concept_spearman_alignment.png"
     params:
         model_parameters = [
             f"{model}={config['models'][model]['parameters_millions']}"

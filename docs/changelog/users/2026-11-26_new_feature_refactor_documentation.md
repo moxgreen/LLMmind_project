@@ -4,6 +4,8 @@
 
 - Five extra analyses can now be rerun from the repository as additional tests (new feature, documentation)
 - The effect of the start-of-text token on the language models was measured: it changes no result (documentation)
+- The concept-level plots are now called boxplots, in their folder names too (refactor, documentation)
+- New plots of alignment enrichment against model size, and a table of the size trend within each model family (new feature, documentation)
 
 ---
 
@@ -52,3 +54,35 @@ Kind: documentation
   - Every model that was significant after correction stays significant, and none becomes so.
 - The pipeline therefore stays as it is. The details are in `docs/reference/model_embeddings.md`,
   section 3.
+
+---
+
+## 17:30 — Concept-level plots are now called boxplots
+
+Kind: refactor, documentation
+
+The concept-level plots were called "scatterplots" although they are boxplots with one point per
+concept. Their folders in `results/pictures/` are now `concept_alignment_boxplots/`,
+`concept_alignment_enrichment_boxplots/` and `concept_spearman_alignment_boxplots/` (and their
+`_language` and `_vision` versions). The plots themselves do not change. The next pipeline run
+draws them into the new folders, which takes about 20 minutes and recomputes no data; afterwards
+the old `*_scatterplots` folders can be deleted.
+
+---
+
+## 17:30 — Alignment enrichment against model size
+
+Kind: new feature, documentation
+
+The pipeline now shows whether larger models align better with the brain:
+
+- `results/pictures/model_size_lineplots/`: one plot per dataset, similarity measure and number of
+  neighbours. Each point is a model, at its number of parameters (x) and its alignment enrichment
+  (y); the models of a family share a colour and are joined in order of size; every point is
+  labelled with the model's name.
+- `results/tsv_summaries/model_size_within_family_spearman.tsv`: for each of those settings and
+  each family of at least three models, Spearman's ρ between enrichment and size (+1 means that
+  enrichment always grows with size, −1 that it always falls). It is descriptive: with three to
+  five models per family no trend can be significant.
+
+This replaces the earlier one-off model-size test, which no script in the repository reproduced.

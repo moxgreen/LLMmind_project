@@ -4,6 +4,8 @@
 
 - Five one-off analyses turned into additional tests under `workflow/additional_tests/`; documentation updated with their numbers (new feature, documentation)
 - Effect of the BOS token on the language-model embeddings measured; no pipeline change (documentation)
+- Concept-level plot rules, scripts and folders renamed from "scatterplot" to "boxplot" (refactor, documentation)
+- New rule `plot_alignment_enrichment_model_size`: enrichment against model size, with within-family Spearman's ρ (new feature, documentation)
 
 ---
 
@@ -127,3 +129,86 @@ Kind: documentation
   - The original variant reproduces `observed_average_alignment_score` and
     `model_level_empirical_p_value` of `all_model_brain_alignment_scores.tsv` (language rows)
     within 8·10⁻⁶ and 5·10⁻¹¹.
+
+---
+
+## 17:30 — Concept-level "scatterplots" renamed to boxplots
+
+Kind: refactor, documentation
+
+- Scripts renamed with `git mv`: `plot_concept_alignment_scatterplot.py` →
+  `plot_concept_alignment_boxplot.py`, `plot_concept_alignment_enrichment_scatterplot.py` →
+  `plot_concept_alignment_enrichment_boxplot.py` (content unchanged apart from the header date).
+- Rules renamed in `workflow/visualisation/Snakefile`: `plot_concept_alignment_scatterplot` →
+  `plot_concept_alignment_boxplot`, `plot_concept_alignment_enrichment_scatterplot` →
+  `plot_concept_alignment_enrichment_boxplot`.
+- Output folders renamed (`results/pictures/`): `concept_alignment_scatterplots{suffix}/` →
+  `concept_alignment_boxplots{suffix}/`, `concept_alignment_enrichment_scatterplots{suffix}/` →
+  `concept_alignment_enrichment_boxplots{suffix}/`, `concept_spearman_alignment_scatterplots{suffix}/`
+  → `concept_spearman_alignment_boxplots{suffix}/` (the `concept_level_plot` output of
+  `plot_spearman_alignment`). The input keys of `rule all` and `rule all_visualisation` are renamed
+  to match (`concept_*_boxplots`).
+- Snakemake does not know the new paths, so the next run redraws these plots (57 + 57 + 27 jobs,
+  about 18 min) and the matching `plot_spearman_alignment` jobs; no data is recomputed. The old
+  folders are listed under "Leftover outputs from older versions" in the running guide and can be
+  deleted after that run.
+- TODO P11/S11 removed.
+
+### Context
+
+- Request: TODO S11, approved on 2026-11-26, then "implement S11 and S12".
+- Files changed: `workflow/Snakefile`, `workflow/visualisation/Snakefile`, the two renamed scripts,
+  `README.md`, `docs/reference/statistics.md`, `docs/reference/clean_run_duration.md`,
+  `docs/guides/running_and_troubleshooting.md`, `docs/AI_USAGE.md`.
+- Verification: no `scatterplot` left in `workflow/`; `snakemake -n` (see the next entry).
+
+---
+
+## 17:30 — Model-size analysis of the enrichment
+
+Kind: new feature, documentation
+
+- New rule `plot_alignment_enrichment_model_size` in `workflow/visualisation/Snakefile`, one job,
+  `visualisation_environment.yaml`. Input: `all_model_brain_alignment_scores.tsv` (whole cortex).
+  Params: `model_parameters`, `plot_pattern` (a function, so Snakemake does not expand its
+  placeholders). Outputs: one PNG per `HEATMAP_PAIRINGS` entry,
+  `results/pictures/model_size_lineplots/dataset-{dataset}_{similarity_type}-alignment_enrichment_model_size_{k}NN.png`
+  (24 plots), and `results/tsv_summaries/model_size_within_family_spearman.tsv`. Paths are defined
+  once as `MODEL_SIZE_LINEPLOT`, `MODEL_SIZE_LINEPLOTS` and `MODEL_SIZE_SPEARMAN` at the top of
+  `workflow/visualisation/Snakefile` and used in the rule, `rule all` and `rule all_visualisation`.
+- New script `workflow/visualisation/scripts/plot_alignment_enrichment_model_size.py`:
+  - `read_enrichments()`: pivots the summary table and computes the model-level enrichment as
+    `observed_average_alignment_score / empirical_null_mean_alignment_score`, adds
+    `parameters_millions` and `model_family()`; stops if a model has no parameter count.
+  - `plot_configuration()`: log10 x-axis of parameters, symlog enrichment y-axis
+    (`set_enrichment_y_scale()`, limits from matplotlib's autoscaling), one line per family in a
+    fixed `tab20` colour (`FAMILY_COLOURMAP`, `FAMILY_COLOUR_ORDER`), `STIMULI_TYPE_MARKERS` for the
+    stimulus type, every point annotated with its model key, null line at 1, legend outside on the
+    right; `save_figure(..., model_figure = False)`.
+  - `within_family_spearman()`: Spearman's ρ as the Pearson correlation of the ranks (pandas, no
+    SciPy), only for families with at least `MINIMUM_FAMILY_SIZE` = 3 models; no p-values. The TSV
+    has columns `dataset`, `stimuli_type`, `similarity_type`, `number_of_neighbours`, `family`,
+    `number_of_models`, `spearman_rho`, written with `%.6g` (147 rows on the current tables).
+- Replaces the one-off model-size permutation test (scratchpad `b1_scale.py`); the across-models
+  test with BH q-values and the RSA outcome are dropped, as the developer decided.
+- TODO P12/S12 rewritten: what is left is to run the rule and update the manuscript's "Model
+  Size" text and Appendix A.
+
+### Context
+
+- Request: TODO S12, rewritten and approved by the developer on 2026-11-26, then "implement S11
+  and S12".
+- Files changed: `workflow/Snakefile`, `workflow/visualisation/Snakefile`, the new script,
+  `README.md`, `docs/reference/statistics.md` (sections 7 and 8),
+  `docs/reference/study_overview.md` (section 6), `docs/reference/clean_run_duration.md`,
+  `docs/guides/running_and_troubleshooting.md`, `docs/AI_USAGE.md`.
+- Verification:
+  - The summary-table enrichment matches `compute_alignment_enrichment()` (parquet files) for all
+    38/24/24/14 models of the 24 configurations, largest relative difference 1.2·10⁻⁶.
+  - The script, run by hand on the frontend with the visualisation environment (outputs in the
+    session scratchpad, 13 s), wrote 24 plots and 147 rows; ρ for BLOOMZ, Caption Scene, cosine,
+    *k* = 5 checked by hand (0.9); two plots inspected, after which the fixed y-lower limit of 0 was
+    dropped because it squeezed every point into a thin band near 1.
+  - `snakemake -n` (frontend) schedules 143 jobs: `plot_alignment_enrichment_model_size` 1,
+    `plot_concept_alignment_boxplot` 57, `plot_concept_alignment_enrichment_boxplot` 57,
+    `plot_spearman_alignment` 27 (renamed outputs) and `all`; nothing upstream.

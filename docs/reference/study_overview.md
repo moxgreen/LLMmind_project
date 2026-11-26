@@ -148,6 +148,8 @@ Hardware and run time: one NVIDIA RTX A5000 (24 GB); a clean run takes about 33 
   `all_model_model_alignment_scores.tsv` (model-model) and `all_spearman_alignment_scores.tsv`
   (RSA), each also with `_language` and `_vision` versions for the regions; their columns and
   which p-values are tests: [`statistics.md`](statistics.md), section 3;
+- `results/tsv_summaries/model_size_within_family_spearman.tsv`, the model-size analysis
+  ([`statistics.md`](statistics.md), section 8, "Model size");
 - the figures under `results/pictures/` ([`statistics.md`](statistics.md), section 7).
 
 Take result numbers from these tables, not from the pages: the pages quote some of them, at the
@@ -170,14 +172,13 @@ in the [additional-tests guide](../guides/additional_tests.md):
 - the layer-depth pilot: 21 language models read at five relative depths on Narratives and Nature
   Stories, results in [`model_embeddings.md`](model_embeddings.md), "Layer-depth pilot results";
 - the robustness checks of [`statistics.md`](statistics.md), section 8, except the model-size
-  analysis: Narratives dependencies, duration and length, similarity types;
+  analysis (main pipeline): Narratives dependencies, duration and length, similarity types;
 - the overlap of the NSD and Caption Scene images ([`fmri_preprocessing.md`](fmri_preprocessing.md));
 - the regional crossover analysis ([`regional_crossover.md`](regional_crossover.md)).
 
 **Not reproduced by the repository.** These numbers come from one-off checks, run once on the
 workflow's outputs; no rule or script in the repository rebuilds them:
 
-- the model-size analysis of [`statistics.md`](statistics.md), section 8;
 - the NSD trial-history figures (81% of preceding trials subject-specific; 178 of 1000 images with
   the same preceding trial in all subjects) in [`fmri_preprocessing.md`](fmri_preprocessing.md),
   "Limitation: the hemodynamic delay";
@@ -384,3 +385,8 @@ additional test.
 
 The limitation about the BOS token now gives the result of the one-off check: removing the BOS
 token changes no conclusion.
+
+### 2026-11-26 17:30 — model-size analysis in the pipeline
+
+Section 6: the model-size analysis is no longer a one-off check; the main pipeline writes its table
+`model_size_within_family_spearman.tsv`, listed with the other workflow outputs.

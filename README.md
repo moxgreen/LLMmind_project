@@ -434,14 +434,17 @@ combined summary tables have a `similarity_type` column instead.
   across all configurations, in long format, with the model-level test
   `model_level_empirical_p_value`. Their columns and which p-values are tests
   are described in [`statistics.md`](docs/reference/statistics.md).
+- `results/tsv_summaries/model_size_within_family_spearman.tsv` — Spearman's ρ
+  of the enrichment against parameter count within each model family, per
+  dataset, similarity type and *k* (section 8 of
+  [`statistics.md`](docs/reference/statistics.md)).
 - `results/pictures/` — every plot and heatmap, one subfolder per plot type:
   `alignment_heatmaps/`, `alignment_p_value_heatmaps/`,
-  `alignment_lineplots/`, `concept_alignment_scatterplots/`,
+  `alignment_lineplots/`, `concept_alignment_boxplots/`,
   `alignment_enrichment_lineplots/`,
-  `concept_alignment_enrichment_scatterplots/`,
-  `spearman_alignment_lineplots/`, `concept_spearman_alignment_scatterplots/`,
-  `similarity_comparison_lineplots/`.
-  The "scatterplots" are concept-level boxplots with one point per concept.
+  `concept_alignment_enrichment_boxplots/`,
+  `spearman_alignment_lineplots/`, `concept_spearman_alignment_boxplots/`,
+  `similarity_comparison_lineplots/`, `model_size_lineplots/`.
   What each figure shows and the conventions shared by all plots (model
   order, colours, asterisks, null intervals, axes) are in section 7 of
   [`statistics.md`](docs/reference/statistics.md).

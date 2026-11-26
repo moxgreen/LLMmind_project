@@ -143,8 +143,8 @@ about 2 min each, against a few seconds for narratives and nature_stories.
 
 | Rule | Jobs | Median | Max | Total | Measured in |
 |---|---:|---:|---:|---:|---|
-| `plot_concept_alignment_scatterplot` | 57 | 2 s | 3 s | ~2 min | 10-06 (24 jobs) |
-| `plot_concept_alignment_enrichment_scatterplot` | 57 | 10 s | 27 s | ~14 min | 10-06 (24 jobs) |
+| `plot_concept_alignment_boxplot` | 57 | 2 s | 3 s | ~2 min | 10-06 (24 jobs) |
+| `plot_concept_alignment_enrichment_boxplot` | 57 | 10 s | 27 s | ~14 min | 10-06 (24 jobs) |
 | `plot_brain_model_alignment_lineplot` | 57 | 2 s | 3 s | ~2 min | 10-06 (24 jobs) |
 | `plot_brain_model_alignment_enrichment_lineplot` | 57 | 10 s | 26 s | ~14 min | 10-06 (24 jobs) |
 | `plot_alignment_heatmap` | 24 | 4 s | 21 s | 4 min | 10-05, 10-06 |
@@ -153,6 +153,7 @@ about 2 min each, against a few seconds for narratives and nature_stories.
 | `plot_similarity_comparison_alignment_lineplot` | 19 | not measured | | ~2 min (guess) | — |
 | `plot_similarity_comparison_enrichment_lineplot` | 19 | not measured | | ~12 min (guess) | — |
 | `plot_similarity_comparison_spearman_lineplot` | 9 | not measured | | ~2 min (guess) | — |
+| `plot_alignment_enrichment_model_size` | 1 | 13 s | | 13 s | 11-26 (frontend, outside Snakemake) |
 
 The region plots and the three similarity-comparison rules were added after the measured runs;
 the region plots are scaled from the per-job durations of the whole-cortex ones. Each job reads the
@@ -344,3 +345,9 @@ the new `extract_region_isc_dataframe` (5 jobs), and the brain-model plot rules 
 use the measured per-job durations of the whole-cortex jobs. The work grows by about 9 job-hours,
 almost all after `assemble_nsd_bold`: ~33 h (31–36 h) instead of ~31 h. The Spearman rule is now
 listed under its current name, `compute_spearman_alignment_with_empirical_p_value`.
+
+### 2026-11-26 17:30 — concept boxplot rules renamed; model-size plot rule
+
+Section 2e: the two concept-level plot rules are renamed from `*_scatterplot` to `*_boxplot`, and
+the new rule `plot_alignment_enrichment_model_size` (one job, 13 s when its script was run by hand
+on the frontend) is added.

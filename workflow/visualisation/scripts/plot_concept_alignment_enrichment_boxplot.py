@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # edited with AI assistance: Claude Code, Claude Opus 5.5 (claude-opus-5-5)
-# last AI edit: 2026-10-02, see docs/changelog/developers/ for details
+# last AI edit: 2026-11-26, see docs/changelog/developers/ for details
 import argparse
 
 from libraries.compute_alignment_enrichment import (

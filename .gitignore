@@ -1,5 +1,5 @@
-run_snakemake_workflow.sh
 parquet2tsv.sh
+run_snakemake_workflow.sh
 .snakemake/
 logs/
 resources/

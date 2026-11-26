@@ -1,0 +1,82 @@
+# written with AI assistance: Claude Code, Claude Opus 5.5 (claude-opus-5-5)
+# last AI edit: 2026-11-26, see docs/changelog/developers/ for details
+configfile: "config/config.yaml"
+configfile: "config/regional_crossover.yaml"
+
+include: "../additional_tests.smk"
+
+# the collaborator's regional crossover: on Caption Scene, vision and language models in the
+# visual and language regions; on Narratives, the language models in the language region and
+# the whole cortex; run from the project root with
+#     snakemake -s workflow/additional_tests/regional_crossover/Snakefile --use-conda --cores 1
+
+SIMILARITY_TYPE = config["similarity_type"]
+OUTPUT_DIR = f"{TESTS_DIR}/regional_crossover"
+
+def brain_neighbours(mind, dataset):
+    return f"results/{mind}/{dataset}/isc_{SIMILARITY_TYPE}_nearest_neighbours.parquet"
+
+def model_neighbours(modality, dataset):
+    return [
+        f"results/{modality}_models/{dataset}/{SIMILARITY_TYPE}_nearest_neighbours/{model}_{SIMILARITY_TYPE}_nearest_neighbours.parquet"
+        for model in models_of(modality)
+    ]
+
+rule all_regional_crossover:
+    input:
+        caption_scene_cells = f"{OUTPUT_DIR}/regional_crossover_caption_scene.tsv",
+        narratives = f"{OUTPUT_DIR}/regional_crossover_narratives.tsv"
+
+rule regional_crossover_caption_scene:
+    input:
+        visual_region = brain_neighbours("vision_mind", "caption_scene"),
+        language_region = brain_neighbours("language_mind", "caption_scene"),
+        vision_neighbours = model_neighbours("vision", "caption_scene"),
+        language_neighbours = model_neighbours("language", "caption_scene")
+    output:
+        cells = f"{OUTPUT_DIR}/regional_crossover_caption_scene.tsv",
+        families = f"{OUTPUT_DIR}/regional_crossover_caption_scene_families.tsv"
+    params:
+        vision_models = models_of("vision"),
+        language_models = models_of("language"),
+        iterations = config["bootstrap"]["caption_scene"]["iterations"],
+        seed = config["bootstrap"]["caption_scene"]["seed"]
+    conda:
+        ENVIRONMENT
+    shell:
+        r"""
+            python3 workflow/additional_tests/regional_crossover/scripts/regional_crossover_caption_scene.py \
+                --visual_region {input.visual_region:q} \
+                --language_region {input.language_region:q} \
+                --vision_models {params.vision_models} \
+                --vision_neighbours {input.vision_neighbours:q} \
+                --language_models {params.language_models} \
+                --language_neighbours {input.language_neighbours:q} \
+                --iterations {params.iterations} \
+                --seed {params.seed} \
+                --cells {output.cells:q} \
+                --families {output.families:q}
+        """
+
+rule regional_crossover_narratives:
+    input:
+        language_region = brain_neighbours("language_mind", "narratives"),
+        whole_cortex = brain_neighbours("mind", "narratives"),
+        model_neighbours = model_neighbours("language", "narratives")
+    output:
+        regions = f"{OUTPUT_DIR}/regional_crossover_narratives.tsv"
+    params:
+        iterations = config["bootstrap"]["narratives"]["iterations"],
+        seed = config["bootstrap"]["narratives"]["seed"]
+    conda:
+        ENVIRONMENT
+    shell:
+        r"""
+            python3 workflow/additional_tests/regional_crossover/scripts/regional_crossover_narratives.py \
+                --language_region {input.language_region:q} \
+                --whole_cortex {input.whole_cortex:q} \
+                --model_neighbours {input.model_neighbours:q} \
+                --iterations {params.iterations} \
+                --seed {params.seed} \
+                --regions {output.regions:q}
+        """

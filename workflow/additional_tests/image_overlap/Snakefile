@@ -1,0 +1,35 @@
+# written with AI assistance: Claude Code, Claude Opus 5.5 (claude-opus-5-5)
+# last AI edit: 2026-11-26, see docs/changelog/developers/ for details
+configfile: "config/config.yaml"
+
+import os
+
+include: "../additional_tests.smk"
+
+# the COCO images shared by the retained NSD and Caption Scene stimuli, counted by COCO
+# image ID; run from the project root with
+#     snakemake -s workflow/additional_tests/image_overlap/Snakefile --use-conda --cores 1
+
+rule image_overlap:
+    input:
+        nsd_stimulus_info = f"{config['nsd_data']['dataset_dir']}/nsddata/experiments/nsd/nsd_stim_info_merged.csv",
+        nsd_brain_embeddings = "results/mind/nsd_data/isc_dataframe.parquet",
+        caption_scene_brain_embeddings = "results/mind/caption_scene/isc_dataframe.parquet",
+        # the Caption Scene stimulus index sits next to its image folder
+        caption_scene_stimulus_index = os.path.join(
+            os.path.dirname(config["caption_scene"]["stimuli_dir"]["vision"]),
+            "Stimulus_index.tsv",
+        )
+    output:
+        image_overlap = f"{TESTS_DIR}/image_overlap/image_overlap.tsv"
+    conda:
+        ENVIRONMENT
+    shell:
+        r"""
+            python3 workflow/additional_tests/image_overlap/scripts/image_overlap.py \
+                --nsd_stimulus_info {input.nsd_stimulus_info:q} \
+                --nsd_brain_embeddings {input.nsd_brain_embeddings:q} \
+                --caption_scene_brain_embeddings {input.caption_scene_brain_embeddings:q} \
+                --caption_scene_stimulus_index {input.caption_scene_stimulus_index:q} \
+                --image_overlap {output.image_overlap:q}
+        """

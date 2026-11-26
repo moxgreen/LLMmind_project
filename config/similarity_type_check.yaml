@@ -1,0 +1,14 @@
+# written with AI assistance: Claude Code, Claude Opus 5.5 (claude-opus-5-5)
+# last AI edit: 2026-11-26, see docs/changelog/developers/ for details
+
+# settings of workflow/additional_tests/similarity_type_check/Snakefile, added on top of
+# config/config.yaml
+
+# draws of the subjects of every story, each subsampled to the smallest story's subject count
+subsample_draws: 20
+
+# parcels with the highest mean ISC left out in the skew condition
+top_parcels: 17
+
+# offset added to the ISC before the log transform, which makes every value positive
+log_offset: 0.05

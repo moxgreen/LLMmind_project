@@ -259,11 +259,15 @@ Layout, shared by all plots (constants and helpers in `libraries/visualisation_u
 
 ## 8. Robustness checks of the whole-cortex results
 
-One-off checks made on 2026-11-05, from the existing summary tables, ISC tables and embeddings;
-they are not pipeline rules and change no result. Unless stated, each permutation null uses
-*N* = 10,000 and seed 37, and Benjamini-Hochberg (BH) q-values use the families given below. Every
-RSA check first reproduced the published coefficients to within 10⁻⁵. Numbers below give cosine /
-Pearson / Spearman.
+Checks of the whole-cortex results, made from the main pipeline's summary tables, ISC tables,
+embeddings and neighbour files; they change no pipeline result. Except the model-size analysis, a
+one-off check made on 2026-11-05 that no script in the repository rebuilds, each is an additional
+test with its own Snakefile, outside the main pipeline; how to run them and their output tables are
+in the [additional-tests guide](../guides/additional_tests.md). Their numbers below come from the
+run of 2026-11-26 on the outputs of the main run of 2026-11-25. Unless stated, each permutation
+null uses the pipeline's relabelling stream (*N* = 10,000, seed 37), and Benjamini-Hochberg (BH)
+q-values use the families given below. Every RSA check first reproduces the published coefficients
+to within 10⁻⁵ and stops otherwise. Numbers below give cosine / Pearson / Spearman.
 
 ### Model size
 
@@ -334,28 +338,30 @@ them under cosine). What makes them stand apart in the brain has not been tested
 
 **Restricted permutations** on all 18 units use the 240 permutations that permute the five unrelated
 units and optionally swap {`merlin`, `sherlock`} with the Shapes block; the other two blocks stay
-fixed, so 36 of the 153 pairs never change. No model reaches q < 0.05 (uncorrected p < 0.05: 2 / 1 / 1
-of 24), and the smallest attainable p is 1/240 ≈ 0.004. Both ways of pairing the swapped units give
-the same p-values. No swapped permutation reaches the observed ρ (null mean about 0.0–0.1), whereas
-the unswapped ones have about the observed ρ (null mean 0.43 / 0.48 / 0.57, median 60–70 of 120 at
-least as large), which is what the Shapes dependence predicts.
+fixed, so 36 of the 153 pairs never change. No model reaches q < 0.05 (uncorrected p < 0.05: 1 / 2 / 1
+of 24), and the smallest attainable p is 1/240 ≈ 0.004. The two ways of pairing the swapped units
+give the same p-values for every model but one (Gemma 2 27B under cosine: 0.404 and 0.408). Swapped
+permutations reach the observed ρ only for that model under cosine, whose coefficient is the lowest
+(0.303; 23–24 of 120), and their null means are close to zero (median 0.10 / 0.00 / 0.05), whereas
+the unswapped ones have about the observed ρ (median null mean 0.43 / 0.47 / 0.57, median 53 /
+63.5 / 62 of 120 at least as large), which is what the Shapes dependence predicts.
 
 **Leave-out checks.** To find which units drive the result, the published RSA was recomputed without
 single units and blocks:
 
 | Check | ρ, median over models | Models with q < 0.05 |
 |---|---|---|
-| All 18 units (published) | 0.395 / 0.469 / 0.550 | 24 / 24 / 24 |
-| Without the 20 pairs inside a block (133 pairs) | 0.378 / 0.498 / 0.542 | not tested |
-| One unit per block, 72 subsets of 9 units | 0.392 / 0.489 / 0.499 | 0.8% / 12.0% / 8.9% of model-subset tests |
-| Without any one non-Shapes unit (17 units) | 0.388–0.478 / 0.461–0.530 / 0.545–0.614 | 24 / 24 / 23–24 |
-| Without `shapesphysical` (17 units) | 0.212 / 0.287 / 0.381 | 0 / 0 / 22 |
-| Without `shapessocial` (17 units) | 0.281 / 0.324 / 0.418 | 0 / 0 / 23 |
-| **Without both Shapes units (16 units)** | **−0.008 / 0.030 / 0.156** | **0 / 0 / 0** |
-| Without `merlin` and `sherlock` (16 units) | 0.459 / 0.561 / 0.645 | 24 / 24 / 24 |
-| Without the Shapes units, `merlin` and `sherlock` (14 units) | 0.079 / 0.129 / 0.268 | 0 / 0 / 19 |
-| Without Milky Way (15 units) | 0.427 / 0.515 / 0.540 | 24 / 24 / 24 |
-| Without the 6-unit block (12 units) | 0.494 / 0.549 / 0.613 | 23 / 24 / 23 |
+| All 18 units (published) | 0.428 / 0.460 / 0.549 | 24 / 24 / 24 |
+| Without the 20 pairs inside a block (133 pairs) | 0.401 / 0.480 / 0.542 | not tested |
+| One unit per block, 72 subsets of 9 units | 0.413 / 0.472 / 0.499 | 3.5% / 8.2% / 8.7% of model-subset tests |
+| Without any one non-Shapes unit (17 units) | 0.421–0.501 / 0.464–0.538 / 0.545–0.615 | 23–24 / 23–24 / 23–24 |
+| Without `shapesphysical` (17 units) | 0.242 / 0.267 / 0.381 | 0 / 0 / 22 |
+| Without `shapessocial` (17 units) | 0.302 / 0.313 / 0.418 | 0 / 0 / 23 |
+| **Without both Shapes units (16 units)** | **0.018 / 0.006 / 0.155** | **0 / 0 / 0** |
+| Without `merlin` and `sherlock` (16 units) | 0.533 / 0.582 / 0.645 | 24 / 24 / 24 |
+| Without the Shapes units, `merlin` and `sherlock` (14 units) | 0.139 / 0.147 / 0.268 | 0 / 0 / 19 |
+| Without Milky Way (15 units) | 0.446 / 0.494 / 0.540 | 24 / 24 / 24 |
+| Without the 6-unit block (12 units) | 0.558 / 0.568 / 0.613 | 23 / 24 / 23 |
 
 BH runs across the 24 models for each similarity type and unit set. Removing any other unit or block
 leaves the result in place; removing both Shapes units removes it, so the RSA largely reflects the
@@ -374,8 +380,8 @@ rank-transformed brain and model similarities and relabels the model residuals; 
 
 | Dataset | Published ρ | ρ controlling for duration | ρ controlling for tokens | Models with q < 0.05: published, duration, tokens |
 |---|---|---|---|---|
-| Narratives | 0.395 / 0.469 / 0.550 | 0.395 / 0.469 / 0.549 | 0.403 / 0.475 / 0.555 | 24 / 24 / 24 in all three |
-| Nature Stories | 0.099 / 0.168 / 0.196 | 0.106 / 0.181 / 0.242 | 0.073 / 0.143 / 0.195 | 0 / 0 / 1; 0 / 0 / 2; 0 / 0 / 1 |
+| Narratives | 0.428 / 0.460 / 0.549 | 0.424 / 0.468 / 0.549 | 0.431 / 0.468 / 0.554 | 24 / 24 / 24 in all three |
+| Nature Stories | 0.237 / 0.210 / 0.197 | 0.221 / 0.234 / 0.241 | 0.230 / 0.196 / 0.196 | 0 / 1 / 1; 0 / 3 / 2; 0 / 1 / 1 |
 
 Duration similarity does not predict brain geometry (one-sided upper-tail p ≥ 0.79 in Narratives,
 ≥ 0.17 in Nature Stories) or any model's geometry (no q < 0.05). Mean ISC per story is not associated
@@ -387,8 +393,8 @@ Nature Stories. This is a pairwise control: it does not exclude every effect of 
 ### Why the similarity types differ on Narratives
 
 On Narratives at *k* = 5, local alignment is significant for almost every model under Spearman
-similarity but for few under cosine or Pearson. Two explanations were tested on 2026-11-09, both
-from the existing parcel time series and model neighbours: the number of subjects per story (14–75;
+similarity but for few under cosine or Pearson. Two explanations are tested, both from the existing
+parcel time series and model neighbours: the number of subjects per story (14–75;
 the leave-one-out ISC grows with it, and only Spearman similarity is insensitive to a monotonic
 change of scale), and the skew of the ISC vectors across parcels (median skewness 1.74; the 17
 parcels with the highest mean ISC carry a median 57% of each story's variance around its mean). For
@@ -398,10 +404,10 @@ recomputed, and tested with the pipeline's relabelling null (same seed and permu
 
 | Condition | Models with p < 0.05 (cosine / Pearson / Spearman) | Models with q < 0.05 |
 |---|---|---|
-| Published ISC | 4 / 3 / 23 | 0 / 0 / 23 |
-| Every story subsampled to 14 subjects (20 seeded draws; median, range) | 18 (8–22) / 11.5 (2–22) / 23 (20–24) | 16 (0–22) / 2 (0–22) / 23 (20–24) |
-| Without the 17 highest-ISC parcels | 17 / 20 / 23 | 11 / 20 / 23 |
-| log(ISC + 0.05) | 16 / 21 / 23 | 3 / 21 / 23 |
+| Published ISC | 4 / 9 / 23 | 0 / 0 / 23 |
+| Every story subsampled to 14 subjects (20 seeded draws; median, range) | 22 (9–24) / 14.5 (2–23) / 23 (20–24) | 22 (0–24) / 1 (0–23) / 23 (19–24) |
+| Without the 17 highest-ISC parcels | 22 / 24 / 23 | 22 / 24 / 23 |
+| log(ISC + 0.05) | 16 / 23 / 23 | 10 / 23 / 23 |
 
 The subsampled ISC was recomputed with `compute_leave_one_out_isc()`, after the same truncation to
 the shortest run and averaging of repeated runs as the pipeline (the full recomputation reproduces
@@ -410,18 +416,18 @@ are ≤ 0, the smallest −0.041); it reduces the median skewness to 0.30. The 1
 16, 44, 74, 76, 77, 78, 79, 81, 116, 117, 148, 149, 183, 187, 188, 189) include 9 of the language
 region: 7 of its 9 auditory parcels and 2 of its 8 language parcels.
 
-- **Skew is the main cause for Pearson similarity.** Removing the 17 parcels or log-transforming
-  brings Pearson to 20–21 of 24 corrected models, close to Spearman. These parcels, mostly auditory,
-  have high ISC in every story, so they dominate every story's vector and make the stories look
-  alike.
+- **Skew is the main cause for both cosine and Pearson similarity.** Removing the 17 parcels brings
+  Pearson to 24 and cosine to 22 of 24 corrected models, as many as Spearman; log-transforming
+  brings Pearson to 23 but cosine only to 10. These parcels, mostly auditory, have high ISC in every
+  story, so they dominate every story's vector and make the stories look alike.
 - **The number of subjects also matters for cosine similarity.** With equal numbers, cosine reaches
-  a median of 18 nominally significant models, but the result varies widely between draws. Why
-  cosine is more sensitive to it than Pearson was not tested; cosine does not centre the vectors,
-  so a pattern shared by all stories weighs on it more.
+  a median of 22 corrected models, but the result varies widely between draws (0–24). Why cosine is
+  more sensitive to it than Pearson was not tested; cosine does not centre the vectors, so a
+  pattern shared by all stories weighs on it more.
 - **Spearman similarity is stable under every condition** (23 of 24 models).
 
 So the gap between the similarity types comes from a few high-ISC, mostly auditory parcels and, for
-cosine, from the unequal numbers of subjects. One-off check; no pipeline result changed.
+cosine, also from the unequal numbers of subjects. No pipeline result changed.
 
 ## Changes
 
@@ -570,3 +576,18 @@ can be written from this page alone. Nothing in the analysis changed.
 Section 6 is now headed "Spearman RSA (global alignment)" and says how it differs from the
 Spearman similarity type, which the old heading "Spearman alignment" did not; the size analysis
 states that it uses total parameter counts. Wording only.
+
+### 2026-11-26 12:00 — robustness checks rerun as additional tests
+
+Section 8: the Narratives dependency checks, the duration and length controls and the
+similarity-type check are now additional tests with their own Snakefiles
+([`additional_tests.md`](../guides/additional_tests.md)), instead of one-off scripts that no longer
+existed; only the model-size analysis is still a one-off check. Their numbers were replaced by the
+tests' first run (2026-11-26), on the outputs of the main run of 2026-11-25. They differ from the
+2026-11-05 and 2026-11-09 values because the model similarities now use the capped embeddings
+(section 1): the published Narratives RSA is 0.428 / 0.460 / 0.549 instead of 0.395 / 0.469 /
+0.550, and Nature Stories 0.237 / 0.210 / 0.197 instead of 0.099 / 0.168 / 0.196. The conclusions
+hold, with three corrections: the two pairings of the swapped blocks differ for one model; swapped
+permutations reach the observed coefficient for that one model under cosine; and removing the
+highest-ISC parcels now lifts cosine too (22 of 24 corrected models, previously 11), so skew
+explains both cosine and Pearson rather than mainly Pearson.

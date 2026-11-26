@@ -33,8 +33,9 @@ the pipeline:
   settings that change many results, the software environments, model
   limitations and what to do when a run fails
 - [`docs/guides/additional_tests.md`](docs/guides/additional_tests.md)
-  — how to run each test outside the main pipeline (such as the layer-depth
-  pilot): settings, outputs and reruns
+  — how to run each test outside the main pipeline (the layer-depth pilot, the
+  robustness checks, the image overlap, the regional crossover): settings,
+  outputs and reruns
 - [`docs/reference/study_overview.md`](docs/reference/study_overview.md)
   — start here to write the article: study design, datasets, models, parameters,
   which page covers each part of the article, which numbers the workflow
@@ -59,9 +60,9 @@ the pipeline:
   hypergeometric tests, enrichment, the Benjamini-Hochberg families, and what
   every figure shows and how it is laid out (a source for the methods section)
 - [`docs/reference/regional_crossover.md`](docs/reference/regional_crossover.md)
-  — a collaborator's one-off analysis, outside the workflow: every model class
-  in every brain region on Caption Scene, and language region vs whole cortex
-  on Narratives, with its limits
+  — a collaborator's analysis, run as an additional test: every model class in
+  every brain region on Caption Scene, and language region vs whole cortex on
+  Narratives, with its limits
 - [`docs/reference/clean_run_duration.md`](docs/reference/clean_run_duration.md)
   — how long a clean run takes on node5 (about 33 h), rule by rule
 - [`docs/changelog/developers/`](docs/changelog/developers/) and
@@ -75,7 +76,7 @@ the pipeline:
 ## Repository layout
 
 ```
-config/                     Snakemake configuration (config.yaml; layer_depth_pilot.yaml, overlay for the layer-depth pilot)
+config/                     Snakemake configuration (config.yaml; one overlay per additional test, such as layer_depth_pilot.yaml)
 workflow/
   Snakefile                 Top-level Snakefile: wires up all modules and the `all` rule
   libraries/                Shared Python helper modules (similarity, alignment,
@@ -93,8 +94,12 @@ workflow/
   spearman_alignment/       Spearman rank-correlation alignment (model- and concept-level)
   visualisation/            Plotting rules (heatmaps, line plots, boxplots)
   additional_tests/         Tests outside the main pipeline, one folder and
-                             Snakefile per test (layer_depth_pilot/: runs the
-                             main workflow once per layer depth)
+                             Snakefile per test: layer_depth_pilot/,
+                             narratives_dependencies/,
+                             duration_length_controls/,
+                             similarity_type_check/, image_overlap/,
+                             regional_crossover/; additional_tests.smk holds
+                             their shared definitions
   envs/                     Base environment for running Snakemake itself
                              (LLMmind_project_environment.yaml spec + the
                              materialized LLMmind_project/ conda prefix,
@@ -389,9 +394,17 @@ snakemake --use-conda --cores <N> -n
 snakemake --use-conda --cores <N>
 ```
 
-The additional tests, such as the layer-depth pilot, are outside the main
-pipeline and have their own Snakefiles in `workflow/additional_tests/`; how to
-run each one is in the
+The additional tests are outside the main pipeline and have their own
+Snakefiles in `workflow/additional_tests/`. To run them all, one after the
+other (the layer-depth pilot last: about 6 h 30 min on the GPU):
+
+```bash
+for test in narratives_dependencies duration_length_controls similarity_type_check image_overlap regional_crossover layer_depth_pilot; do
+    snakemake -s workflow/additional_tests/$test/Snakefile --use-conda --cores 4 --resources gpu=1 || break
+done
+```
+
+How to run each one, its settings and its outputs are in the
 [additional-tests guide](docs/guides/additional_tests.md).
 
 All pipeline behaviour (datasets, models, similarity metrics, neighbourhood
@@ -446,3 +459,6 @@ combined summary tables have a `similarity_type` column instead.
   transcripts match the word and phoneme timing of the fMRI release, built only
   by `snakemake --use-conda --cores 1 all_nature_stories_dataset` (see section 4
   of [`nature_stories_stimuli.md`](docs/reference/nature_stories_stimuli.md)).
+- `results/tests/<test>/` — the tables of the additional tests, written only
+  when a test is run (see the
+  [additional-tests guide](docs/guides/additional_tests.md)).

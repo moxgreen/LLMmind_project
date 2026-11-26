@@ -1,0 +1,16 @@
+# written with AI assistance: Claude Code, Claude Opus 5.5 (claude-opus-5-5)
+# last AI edit: 2026-11-26, see docs/changelog/developers/ for details
+
+# settings of workflow/additional_tests/narratives_dependencies/Snakefile, added on top of
+# config/config.yaml
+
+# Narratives units that share a story, speaker or production source; the restricted
+# permutations keep each block in place, except that the two 2-unit blocks may be swapped
+unit_blocks:
+  moth_ogrady: ["pieman", "piemanpni", "bronx", "slumlordreach", "notthefallintact", "black"]
+  milky_way: ["milkywayoriginal", "milkywaysynonyms", "milkywayvodka"]
+  merlin_sherlock: ["merlin", "sherlock"]
+  shapes: ["shapesphysical", "shapessocial"]
+
+# units with no listed relation, permuted among themselves
+unrelated_units: ["21styear", "forgot", "lucy", "prettymouth", "tunnel"]

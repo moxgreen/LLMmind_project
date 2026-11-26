@@ -5,9 +5,11 @@
 A collaborator asked whether the whole-cortex alignment of the language models on Caption Scene
 comes from the language cortex or from the visual cortex. To answer it, they compared both model
 classes with both brain regions, and checked the language models on Narratives. This page describes
-what was computed, the results, what has been checked and how far the results go. The analysis is
-not part of the workflow: it was run with two scripts outside the repository
-(`test_caption_scene.py`, `test_narratives.py`), which read the pipeline's nearest-neighbour files.
+what was computed, the results, what has been checked and how far the results go. The collaborator
+ran it with two scripts (`test_caption_scene.py`, `test_narratives.py`) that read the pipeline's
+nearest-neighbour files. It is now an additional test outside the main pipeline, whose two scripts
+follow the collaborator's step by step and reproduce their numbers exactly; how to run it and its
+output tables are in the [additional-tests guide](../guides/additional_tests.md), section 6.
 
 ## 1. The question
 
@@ -21,7 +23,8 @@ that whole-cortex alignment comes from.
 
 ## 2. Method
 
-Both scripts use the files the pipeline already writes, under Spearman similarity:
+Both scripts (and the test that reproduces them) use the files the pipeline already writes, under
+Spearman similarity:
 
 - brain neighbours: `results/{mind,language_mind,vision_mind}/{dataset}/isc_spearman_nearest_neighbours.parquet`;
 - model neighbours: `results/{language,vision}_models/{dataset}/spearman_nearest_neighbours/*.parquet`.
@@ -52,17 +55,20 @@ interaction (A + D) − (B + C). On Narratives the contrast is language region �
 
 ## 3. Results
 
+From the test's run of 2026-11-26, on the outputs of the main run of 2026-11-25
+(`results/tests/regional_crossover/`).
+
 **Caption Scene** (Spearman similarity, *k* = 125, median over models):
 
 | | Visual region | Language region |
 |---|---|---|
-| Vision models | A = 1.1465 | B = 1.0115 |
-| Language models | C = 1.2080 | D = 1.0010 |
+| Vision models | A = 1.1453 | B = 1.0113 |
+| Language models | C = 1.2078 | D = 1.0012 |
 
 | Contrast | Value | 95% bootstrap interval |
 |---|---|---|
-| A − C | −0.0614 | [−0.0791, −0.0448] |
-| (A + D) − (B + C) | −0.0720 | [−0.0928, −0.0521] |
+| A − C | −0.0624 | [−0.0797, −0.0460] |
+| (A + D) − (B + C) | −0.0725 | [−0.0935, −0.0530] |
 
 - Both model classes are at chance in the language region.
 - In the visual region the language models score higher than the vision models.
@@ -70,10 +76,10 @@ interaction (A + D) − (B + C). On Narratives the contrast is language region �
   Gemma 4 1.218, Gemma 3 1.206, Gemma 2 1.205, OpenLLaMA 1.205, Gemma 3n 1.185, Gemma 1.164. Six of
   the seven are above the best vision family, CLIP (1.180).
 - **Vision-model families in the visual region:** the three base CLIP models (B/16, L/14, H/14) have
-  a median of 1.180 and their ImageNet fine-tuned versions 1.146; each base model scores higher than
-  its fine-tuned version, under all three similarity types. DINOv2 is the lowest family (1.126),
-  although under Spearman RSA, which compares all concept pairs instead of the neighbours, it
-  has the highest coefficients of the vision models (ρ ≈ 0.015).
+  a median of 1.180 and their ImageNet fine-tuned versions 1.145; each base model scores higher than
+  its fine-tuned version, under all three similarity types. DINOv2 is the lowest family (1.125),
+  although under Spearman RSA, which compares all concept pairs instead of the neighbours, its four
+  models have the highest whole-cortex coefficients of the vision models (ρ = 0.009–0.015).
 
 **Narratives** (Spearman similarity, *k* = 5, 24 language models, median over models):
 
@@ -81,19 +87,19 @@ interaction (A + D) − (B + C). On Narratives the contrast is language region �
 |---|---|
 | Language region | 1.5489 |
 | Whole cortex | 1.5678 |
-| Language region − whole cortex | −0.0189, 95% bootstrap interval [−0.3211, +0.2267] |
+| Language region − whole cortex | −0.0189, 95% bootstrap interval [−0.3022, +0.2267] |
 
 ## 4. What has been checked
 
-- **Recomputed on 2026-11-13** from the pipeline's files with the method of section 2: all four
-  Caption Scene cells, every language-model family median and both Narratives values match to the
-  fourth decimal.
+- **Reproduced exactly** (2026-11-26): the collaborator's two scripts, run unchanged on the current
+  pipeline outputs, and the additional test give the same cells, family medians, Narratives values
+  and bootstrap intervals to every printed decimal; the test uses the same random streams.
 - Cells A and D also agree with the pipeline's own region results
-  (`results/tsv_summaries/all_model_brain_alignment_scores_{vision,language}.tsv`): 1.1464 and
-  1.0008 as medians of the pipeline's enrichment, which divides by the Monte Carlo null mean.
-- The CLIP and DINOv2 comparisons were checked on the same tables, under all three similarity types.
-- **Not checked:** the bootstrap intervals, and the scripts themselves beyond their numbers. The
-  results were first reported in a summary written by Gemini, which is replaced by this page.
+  (`results/tsv_summaries/all_model_brain_alignment_scores_{vision,language}.tsv`): 1.1452 and
+  1.0011 as medians of the pipeline's enrichment, which divides by the Monte Carlo null mean.
+- The CLIP and DINOv2 comparisons were checked on the same tables, under all three similarity types
+  (2026-11-26).
+- The results were first reported in a summary written by Gemini, which is replaced by this page.
 
 ## 5. Interpretation and limits
 
@@ -116,12 +122,12 @@ interaction (A + D) − (B + C). On Narratives the contrast is language region �
   (*n* = 18, *k* = 5) and 8 on Caption Scene (*n* = 1000, *k* = 125). The Narratives value (1.55)
   therefore cannot be set against Caption Scene's (1.001). In concrete terms, on Narratives a story
   shares about 2.3 of its 5 nearest stories between brain and model, against 1.5 by chance.
-- **Narratives, language region vs whole cortex.** The interval spans −0.32 to +0.23: no
+- **Narratives, language region vs whole cortex.** The interval spans −0.30 to +0.23: no
   difference is detected, which does not show the two are equal. With 18 stories, the alignment
   may also reflect topic or length rather than language processing as such.
 - **Model-level significance on Narratives depends on the similarity type.** In the pipeline's
-  language-region results, 24 of 24 models are significant under Spearman similarity, 20 under
-  Pearson and 18 under cosine (Benjamini-Hochberg q < 0.05).
+  language-region results, 24 of 24 models are significant under Spearman and Pearson similarity
+  and 21 under cosine (Benjamini-Hochberg q < 0.05; 2026-11-26).
 - **Smaller claims.** The CLIP comparison rests on three pairs and one fine-tuning recipe, with no
   test, and the visual region holds early and higher visual cortex together, so it does not isolate
   low-level representations. The DINOv2 result shows that the two alignment measures rank the
@@ -146,3 +152,15 @@ and the Caption Scene bootstrap used 2000 iterations (the summary said 1000).
 
 Section 3 calls the global measure "Spearman RSA", the term used on the other reference pages
 (see [`statistics.md`](statistics.md), section 6). Wording only.
+
+### 2026-11-26 12:00 — analysis reproduced by an additional test
+
+The analysis is now an additional test (`workflow/additional_tests/regional_crossover/`) whose two
+scripts follow the collaborator's step by step; it and the collaborator's scripts, rerun unchanged,
+give identical numbers. Section 3 now quotes the test's first run (2026-11-26) on the outputs of
+the main run of 2026-11-25: the Caption Scene cells and contrasts moved in the fourth decimal (for
+example A 1.1465 → 1.1453), because the model neighbours now come from the capped embeddings. The
+bootstrap intervals are now checked; the lower bound of the Narratives interval is −0.3022, not
+the −0.3211 quoted before, which had never been checked. Section 4 says what was reproduced; section 5 updates the Narratives
+language-region significance (24 / 24 / 21 models instead of 24 / 20 / 18) and the DINOv2 Spearman
+RSA range.

@@ -1,0 +1,54 @@
+# written with AI assistance: Claude Code, Claude Opus 5.5 (claude-opus-5-5)
+# last AI edit: 2026-11-26, see docs/changelog/developers/ for details
+configfile: "config/config.yaml"
+configfile: "config/duration_length_controls.yaml"
+
+include: "../additional_tests.smk"
+
+# the duration and length controls of the whole-cortex Spearman RSA on the story datasets:
+# partial RSA controlling for story duration and token count, and the associations of
+# duration with the brain and model geometries and with mean ISC; run from the project root
+# with
+#     snakemake -s workflow/additional_tests/duration_length_controls/Snakefile --use-conda --cores 1
+
+DATASETS = list(config["repetition_times"])
+OUTPUT_DIR = f"{TESTS_DIR}/duration_length_controls"
+
+rule duration_length_controls:
+    input:
+        brain_embeddings = [f"results/mind/{dataset}/isc_dataframe.parquet" for dataset in DATASETS],
+        manifests = [f"results/mind/{dataset}/manifests/isc_manifest.tsv" for dataset in DATASETS],
+        model_embeddings = [path for dataset in DATASETS for path in model_embeddings(dataset)],
+        spearman_summary = SPEARMAN_SUMMARY
+    output:
+        stimuli = f"{OUTPUT_DIR}/stimuli.tsv",
+        models = f"{OUTPUT_DIR}/models.tsv",
+        brain_duration = f"{OUTPUT_DIR}/brain_duration.tsv",
+        mean_isc = f"{OUTPUT_DIR}/mean_isc_associations.tsv"
+    params:
+        datasets = DATASETS,
+        repetition_times = list(config["repetition_times"].values()),
+        models = LANGUAGE_MODELS,
+        similarity_types = config["similarity_types"],
+        number_of_relabellings = config["number_of_relabellings"],
+        random_seed = config["random_seed"]
+    conda:
+        ENVIRONMENT
+    shell:
+        r"""
+            python3 workflow/additional_tests/duration_length_controls/scripts/duration_length_controls.py \
+                --datasets {params.datasets} \
+                --repetition_times {params.repetition_times} \
+                --brain_embeddings {input.brain_embeddings:q} \
+                --manifests {input.manifests:q} \
+                --models {params.models} \
+                --model_embeddings {input.model_embeddings:q} \
+                --spearman_summary {input.spearman_summary:q} \
+                --similarity_types {params.similarity_types} \
+                --number_of_relabellings {params.number_of_relabellings} \
+                --random_seed {params.random_seed} \
+                --stimuli {output.stimuli:q} \
+                --models_output {output.models:q} \
+                --brain_duration {output.brain_duration:q} \
+                --mean_isc {output.mean_isc:q}
+        """

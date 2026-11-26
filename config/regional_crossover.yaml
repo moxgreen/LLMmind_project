@@ -1,0 +1,17 @@
+# written with AI assistance: Claude Code, Claude Opus 5.5 (claude-opus-5-5)
+# last AI edit: 2026-11-26, see docs/changelog/developers/ for details
+
+# settings of workflow/additional_tests/regional_crossover/Snakefile, added on top of
+# config/config.yaml; the values are the collaborator's
+
+# the only similarity type tested; the neighbour files are read at their stored (largest) k
+similarity_type: "spearman"
+
+# concept bootstrap of each dataset: iterations and random seed
+bootstrap:
+  caption_scene:
+    iterations: 2000
+    seed: 20261109
+  narratives:
+    iterations: 1000
+    seed: 42

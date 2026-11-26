@@ -1,0 +1,50 @@
+# written with AI assistance: Claude Code, Claude Opus 5.5 (claude-opus-5-5)
+# last AI edit: 2026-11-26, see docs/changelog/developers/ for details
+configfile: "config/config.yaml"
+configfile: "config/narratives_dependencies.yaml"
+
+include: "../additional_tests.smk"
+
+# the Narratives dependency checks of the whole-cortex Spearman RSA: restricted permutations,
+# leave-out RSA and how far each unit stands apart; run from the project root with
+#     snakemake -s workflow/additional_tests/narratives_dependencies/Snakefile --use-conda --cores 1
+
+OUTPUT_DIR = f"{TESTS_DIR}/narratives_dependencies"
+
+rule narratives_dependencies:
+    input:
+        brain_embeddings = "results/mind/narratives/isc_dataframe.parquet",
+        model_embeddings = model_embeddings("narratives"),
+        spearman_summary = SPEARMAN_SUMMARY
+    output:
+        restricted_permutations = f"{OUTPUT_DIR}/restricted_permutations.tsv",
+        leave_out = f"{OUTPUT_DIR}/leave_out.tsv",
+        unit_distinctness = f"{OUTPUT_DIR}/unit_distinctness.tsv"
+    params:
+        models = LANGUAGE_MODELS,
+        unit_blocks = [
+            f"{name}={','.join(units)}"
+            for name, units in config["unit_blocks"].items()
+        ],
+        unrelated_units = config["unrelated_units"],
+        similarity_types = config["similarity_types"],
+        number_of_relabellings = config["number_of_relabellings"],
+        random_seed = config["random_seed"]
+    conda:
+        ENVIRONMENT
+    shell:
+        r"""
+            python3 workflow/additional_tests/narratives_dependencies/scripts/narratives_dependencies.py \
+                --brain_embeddings {input.brain_embeddings:q} \
+                --models {params.models} \
+                --model_embeddings {input.model_embeddings:q} \
+                --spearman_summary {input.spearman_summary:q} \
+                --unit_blocks {params.unit_blocks} \
+                --unrelated_units {params.unrelated_units} \
+                --similarity_types {params.similarity_types} \
+                --number_of_relabellings {params.number_of_relabellings} \
+                --random_seed {params.random_seed} \
+                --restricted_permutations {output.restricted_permutations:q} \
+                --leave_out {output.leave_out:q} \
+                --unit_distinctness {output.unit_distinctness:q}
+        """

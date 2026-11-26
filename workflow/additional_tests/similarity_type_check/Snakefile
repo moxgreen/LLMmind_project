@@ -1,0 +1,57 @@
+# written with AI assistance: Claude Code, Claude Opus 5.5 (claude-opus-5-5)
+# last AI edit: 2026-11-26, see docs/changelog/developers/ for details
+configfile: "config/config.yaml"
+configfile: "config/similarity_type_check.yaml"
+
+include: "../additional_tests.smk"
+
+# why Narratives local alignment depends on the similarity type: the model-level alignment of
+# the language models recomputed with subsampled subjects, without the highest-ISC parcels and
+# with log ISC; run from the project root with
+#     snakemake -s workflow/additional_tests/similarity_type_check/Snakefile --use-conda --cores 1
+
+DATASET = "narratives"
+OUTPUT_DIR = f"{TESTS_DIR}/similarity_type_check"
+
+rule similarity_type_check:
+    input:
+        brain_embeddings = f"results/mind/{DATASET}/isc_dataframe.parquet",
+        manifest = f"results/mind/{DATASET}/manifests/isc_manifest.tsv",
+        model_neighbours = [
+            f"results/language_models/{DATASET}/{similarity_type}_nearest_neighbours/{model}_{similarity_type}_nearest_neighbours.parquet"
+            for similarity_type in config["similarity_types"]
+            for model in LANGUAGE_MODELS
+        ],
+        alignment_summary = "results/tsv_summaries/all_model_brain_alignment_scores.tsv"
+    output:
+        summary = f"{OUTPUT_DIR}/summary.tsv",
+        isc_properties = f"{OUTPUT_DIR}/isc_properties.tsv"
+    params:
+        models = LANGUAGE_MODELS,
+        similarity_types = config["similarity_types"],
+        number_of_neighbours = config[DATASET]["number_of_neighbours"],
+        subsample_draws = config["subsample_draws"],
+        top_parcels = config["top_parcels"],
+        log_offset = config["log_offset"],
+        number_of_relabellings = config["number_of_relabellings"],
+        random_seed = config["random_seed"]
+    conda:
+        ENVIRONMENT
+    shell:
+        r"""
+            python3 workflow/additional_tests/similarity_type_check/scripts/similarity_type_check.py \
+                --brain_embeddings {input.brain_embeddings:q} \
+                --manifest {input.manifest:q} \
+                --models {params.models} \
+                --similarity_types {params.similarity_types} \
+                --model_neighbours {input.model_neighbours:q} \
+                --alignment_summary {input.alignment_summary:q} \
+                --number_of_neighbours {params.number_of_neighbours} \
+                --subsample_draws {params.subsample_draws} \
+                --top_parcels {params.top_parcels} \
+                --log_offset {params.log_offset} \
+                --number_of_relabellings {params.number_of_relabellings} \
+                --random_seed {params.random_seed} \
+                --summary {output.summary:q} \
+                --isc_properties {output.isc_properties:q}
+        """

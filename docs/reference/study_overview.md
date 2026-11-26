@@ -5,7 +5,8 @@
 The pages in `docs/reference/` are the main source for the article that accompanies this code.
 This page is their entry point: it summarises the study design, lists the datasets, models and
 analysis parameters, says which page documents each part of the article, which numbers the
-workflow reproduces and which come from one-off checks, and gathers the limitations and the
+workflow and its additional tests reproduce and which come from one-off checks, and gathers the
+limitations and the
 references. Every fact that has a home on another page is only summarised here, with a link.
 
 ## 1. Study design
@@ -162,25 +163,27 @@ Numbers measured on the outputs of an earlier pipeline run say which run when it
 recompute it from the current tables or confirm that nothing it depends on has changed since its
 date.
 
-**Not reproduced by the workflow.** These numbers come from one-off checks, run once on the
+**Reproduced by the additional tests.** These analyses are outside the main pipeline, each with its
+own Snakefile in `workflow/additional_tests/` and its tables in `results/tests/`; how to run them is
+in the [additional-tests guide](../guides/additional_tests.md):
+
+- the layer-depth pilot: 21 language models read at five relative depths on Narratives and Nature
+  Stories, results in [`model_embeddings.md`](model_embeddings.md), "Layer-depth pilot results";
+- the robustness checks of [`statistics.md`](statistics.md), section 8, except the model-size
+  analysis: Narratives dependencies, duration and length, similarity types;
+- the overlap of the NSD and Caption Scene images ([`fmri_preprocessing.md`](fmri_preprocessing.md));
+- the regional crossover analysis ([`regional_crossover.md`](regional_crossover.md)).
+
+**Not reproduced by the repository.** These numbers come from one-off checks, run once on the
 workflow's outputs; no rule or script in the repository rebuilds them:
 
-- the robustness checks of [`statistics.md`](statistics.md), section 8, including the model-size
-  analysis;
+- the model-size analysis of [`statistics.md`](statistics.md), section 8;
 - the NSD trial-history figures (81% of preceding trials subject-specific; 178 of 1000 images with
   the same preceding trial in all subjects) in [`fmri_preprocessing.md`](fmri_preprocessing.md),
   "Limitation: the hemodynamic delay";
-- the overlap of the NSD and Caption Scene images ([`fmri_preprocessing.md`](fmri_preprocessing.md));
-- the regional crossover analysis ([`regional_crossover.md`](regional_crossover.md)), run with two
-  scripts that are not in the repository;
 - the check of the Nature Stories corrected run onsets (README, "Input files that are not plain
   downloads"). The TextGrid word-level check, in contrast, is a workflow rule
   ([`nature_stories_stimuli.md`](nature_stories_stimuli.md), section 4).
-
-**Layer-depth pilot.** A sensitivity analysis run by its own Snakefile, not by the main workflow:
-21 language models read at five relative depths on Narratives and Nature Stories. Its tables are
-in `results/tests/layer_depth_pilot_<D>/` and its results in
-[`model_embeddings.md`](model_embeddings.md), "Layer-depth pilot results".
 
 ## 7. Limitations
 
@@ -221,7 +224,7 @@ Each point is described in full on the page linked.
 - **Ventral temporal cortex outside the visual region**, which is the 7-network `Vis` network
   ([`brain_regions.md`](brain_regions.md), section 5).
 - **No cross-modality regional comparison in the workflow.** Each model is compared only with its
-  own modality's region; the one-off crossover analysis is outside the workflow
+  own modality's region; the crossover analysis is an additional test outside the main pipeline
   ([`regional_crossover.md`](regional_crossover.md)).
 - **Not every analysis is reproducible from the repository** (section 6).
 
@@ -366,3 +369,12 @@ Section 6 no longer calls the layer-depth pilot "in progress" and points to its 
 "Last layer only" limitation states what the pilot found. A block duplicated by an editing error
 earlier the same day (the end of section 6, section 7 and the old reference list, repeated after
 the new references) was removed.
+
+### 2026-11-26 12:00 — additional tests
+
+Section 6 gains a list of the analyses reproduced by the additional tests outside the main pipeline
+(the layer-depth pilot, the robustness checks except model size, the image overlap and the
+regional crossover), which were one-off checks until now; the remaining one-off checks are the
+model-size analysis, the NSD trial-history figures and the check of the corrected Nature Stories
+onsets. The limitation on cross-modality regional comparisons says the crossover is now an
+additional test.

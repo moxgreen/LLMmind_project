@@ -1,0 +1,11 @@
+# written with AI assistance: Claude Code, Claude Opus 5.5 (claude-opus-5-5)
+# last AI edit: 2026-11-26, see docs/changelog/developers/ for details
+
+# settings of workflow/additional_tests/duration_length_controls/Snakefile, added on top of
+# config/config.yaml
+
+# the story datasets tested, with the repetition time of their scans in seconds, which turns
+# a scan length in volumes into minutes
+repetition_times:
+  narratives: 1.5
+  nature_stories: 2.0

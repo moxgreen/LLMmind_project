@@ -109,7 +109,7 @@ git history and may include later human edits.
 | `docs/reference/clean_run_duration.md` | written | 2026-10-22 | Claude Opus 5.5 (`claude-opus-5-5`) | not yet reviewed |
 | `docs/reference/fmri_preprocessing.md` | written | 2026-11-26 | Claude Opus 5.5 (`claude-opus-5-5`) | not yet reviewed |
 | `docs/reference/nature_stories_stimuli.md` | written | 2026-11-25 | Claude Opus 5.5 (`claude-opus-5-5`) | not yet reviewed |
-| `docs/reference/model_embeddings.md` | written | 2026-11-25 | Claude Opus 5.5 (`claude-opus-5-5`) | not yet reviewed |
+| `docs/reference/model_embeddings.md` | written | 2026-11-26 | Claude Opus 5.5 (`claude-opus-5-5`) | not yet reviewed |
 | `docs/reference/regional_crossover.md` | written | 2026-11-26 | Claude Opus 5.5 (`claude-opus-5-5`) | not yet reviewed |
 | `docs/reference/statistics.md` | written | 2026-11-26 | Claude Opus 5.5 (`claude-opus-5-5`) | not yet reviewed |
 | `docs/reference/study_overview.md` | written | 2026-11-26 | Claude Opus 5.5 (`claude-opus-5-5`) | not yet reviewed |

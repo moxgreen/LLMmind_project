@@ -143,9 +143,39 @@ first chunk of each text. It shrinks as texts get longer. Every stimulus of a mo
 treatment, but a shared offset still compresses the similarities between stimuli, and none of
 the three similarity types removes it. At intermediate depths the per-token normalisation above
 limits the weight of an outsized BOS, as the final norm does at the last layer; the cap of
-section 5 clips what remains. Excluding the BOS
-position from the mean would change every language-model embedding and every result downstream,
-so it has not been done. The manuscript's methods state that the BOS token is included.
+section 5 clips what remains. The manuscript's methods state that the BOS token is included.
+
+**Measured effect of the BOS token: no conclusion changes.** The BOS position was removed from
+the mean for all 24 language models on the three language datasets. The nearest neighbours,
+whole-cortex alignment and relabelling p-values were then recomputed with the pipeline's own
+functions (whole cortex only; same relabelling stream, *N* = 10,000; capped vectors).
+- **Method.** In a causal decoder the BOS hidden state does not depend on the text that follows,
+  so it is one vector *c* per model. A one-chunk vector with *L* text tokens is (*c* + *L*·*m*)/(*L* + 1),
+  where *m* is the mean over the text tokens, so *m* follows exactly from the stored vector. For
+  texts of several chunks the same correction is applied with the chunk weights of the stored mean.
+- **Checks.** Each check was run on two captions per model:
+  - recomputing a vector reproduces the stored one within 10⁻⁷;
+  - the corrected vector matches the mean computed directly without BOS within 0.6%;
+  - the BOS term is 2–23% of the vector's norm;
+  - cosine between the original and the BOS-free vector is 0.976–0.9999.
+- **The 8-bit OpenLLaMA 13B is the exception.** In this model the BOS state changes with the text
+  (by up to 62%), because 8-bit inference treats outlier features according to the whole input.
+  Its BOS-free embeddings were therefore recomputed directly, by dropping position 0 from the mean
+  in every chunk.
+- **Results** (24 models; Benjamini-Hochberg across the models for each dataset, similarity type
+  and *k*):
+
+| Dataset | Neighbours shared with the original, median (min) | Largest change in alignment | Models with q < 0.05 |
+|---|---|---|---|
+| Caption Scene, *k* = 5 / 25 / 125 | 97% / 98% / 98% (89% / 91% / 94%) | 0.0012 | unchanged: 0 / 24 / 24 under every similarity type |
+| Narratives, *k* = 5 | 100% (99%) | 0.011 | unchanged: 0 cosine, 0 Pearson, 23 Spearman |
+| Nature Stories, *k* = 3 | 100% (100%) | < 0.0001 | unchanged: 0 cosine, 0 Pearson, 3 Spearman |
+
+Only uncorrected p-values cross 0.05, and only on Caption Scene at *k* = 5, where no model passes
+the correction either way. With p < 0.05, cosine goes from 4 to 6 models and Spearman from 9 to
+11; Pearson stays at 8. Excluding the BOS token would therefore change the numbers only slightly
+and no conclusion, so the pipeline keeps it. The check was run once (2026-11-26) on the outputs of
+the main run of 2026-11-25 and is not part of the workflow. The Spearman RSA was not recomputed.
 
 ## 4. Vision models (image stimuli)
 
@@ -189,8 +219,8 @@ The content comes from the code (`get_embeddings.py`, `compute_similarity.py`,
 source (`modeling_timm_wrapper.py`, `modeling_dinov2.py`). The ImageNet-12k fine-tuning of the
 `clip_i21k_ft_*` models was checked on the Hugging Face model card of
 `timm/vit_base_patch16_clip_224.laion2b_ft_in12k` (an 11,821-class subset of ImageNet-22k).
-**Not verified:** the size of the BOS outlier in these specific models was not measured. The
-large-dimension figures for BLOOMZ-560m come from a single story (`pieman`, run on CPU).
+The BOS figures of section 3 come from a one-off check run on node5 and the frontend on 2026-11-26.
+**Not verified:** the large-dimension figures for BLOOMZ-560m come from a single story (`pieman`, run on CPU).
 `hidden_states[L]` equal to the last hidden state was checked for BLOOMZ-560m only (identical
 vectors with *f* = 1 and without the option). The quotations from Antonello et al. (2023) were
 read on 2026-11-25 in arXiv v4 (sections 3.1–3.3), those from Caucheteux & King (2022) the same
@@ -281,3 +311,10 @@ which until now were only in the project's working notes.
 Section 3: the pilot's Snakefile moved to `workflow/additional_tests/layer_depth_pilot/`, with the
 other tests outside the main pipeline; how to run it is in
 [`additional_tests.md`](../guides/additional_tests.md).
+
+### 2026-11-26 14:45 — effect of the BOS token measured
+
+Section 3 used to say that excluding the BOS token had not been tried, and section 6 that the BOS
+outlier had not been measured. Both now report a one-off check on all 24 language models. Removing
+the BOS token keeps 89–100% of the nearest neighbours and changes alignment by at most 0.011. Every
+model that is significant after correction stays significant, so the pipeline keeps the BOS token.

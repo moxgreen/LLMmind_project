@@ -3,6 +3,7 @@
 > *Written with AI assistance (Claude Code). See [`docs/AI_USAGE.md`](../../AI_USAGE.md).*
 
 - Five extra analyses can now be rerun from the repository as additional tests (new feature, documentation)
+- The effect of the start-of-text token on the language models was measured: it changes no result (documentation)
 
 ---
 
@@ -34,3 +35,20 @@ Kind: new feature, documentation
   the Narratives RSA still rests on the two Shapes stories, and duration and length still explain
   none of it. One conclusion changed: removing the few highest-ISC parcels now helps cosine as much
   as Pearson, so skew explains most of the gap between the similarity types.
+
+---
+
+## 14:45 — The start-of-text token changes no result
+
+Kind: documentation
+
+- Each language model reads a special start-of-text token (BOS) before every text, and its output
+  for that token was included in the text's vector. This was flagged as a possible distortion,
+  especially for the short Caption Scene captions.
+- A one-off check removed it from the vectors of all 24 language models and recomputed the
+  alignment.
+  - About 97% of each concept's nearest neighbours stay the same.
+  - Alignment scores change by at most 0.011.
+  - Every model that was significant after correction stays significant, and none becomes so.
+- The pipeline therefore stays as it is. The details are in `docs/reference/model_embeddings.md`,
+  section 3.

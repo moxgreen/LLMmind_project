@@ -205,8 +205,9 @@ Each point is described in full on the page linked.
   layer-depth pilot, BLOOMZ, Gemma and Gemma 2 align better at intermediate depths and Gemma 3 and
   Gemma 4 at the last layer, so the last layer underestimates some families' alignment more than
   others ([`model_embeddings.md`](model_embeddings.md), "Layer-depth pilot results").
-- **BOS token in the mean** of every language-model chunk
-  ([`model_embeddings.md`](model_embeddings.md), "Caveat: the BOS token is included in the mean").
+- **BOS token in the mean** of every language-model chunk. Removing it changes the neighbours
+  slightly (89–100% shared) and no corrected significance ([`model_embeddings.md`](model_embeddings.md),
+  "Measured effect of the BOS token").
 - **Model size is confounded.** Within the Gemma 2, Gemma 3, Gemma 4 and OpenLLaMA families only
   the largest models are quantised; the families differ in training data, training objective
   (next-token prediction for the language models, of which BLOOMZ is also instruction-tuned;
@@ -378,3 +379,8 @@ regional crossover), which were one-off checks until now; the remaining one-off 
 model-size analysis, the NSD trial-history figures and the check of the corrected Nature Stories
 onsets. The limitation on cross-modality regional comparisons says the crossover is now an
 additional test.
+
+### 2026-11-26 14:45 — BOS token checked
+
+The limitation about the BOS token now gives the result of the one-off check: removing the BOS
+token changes no conclusion.

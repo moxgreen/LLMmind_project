@@ -3,6 +3,7 @@
 > *Written with AI assistance (Claude Code). See [`docs/AI_USAGE.md`](../../AI_USAGE.md).*
 
 - Five one-off analyses turned into additional tests under `workflow/additional_tests/`; documentation updated with their numbers (new feature, documentation)
+- Effect of the BOS token on the language-model embeddings measured; no pipeline change (documentation)
 
 ---
 
@@ -82,3 +83,47 @@ Kind: new feature, documentation
   medians, values and 95% intervals as the test. The image overlap matches the documented counts.
   After line wrapping, the crossover, duration and similarity tests were force-rerun: outputs
   byte-identical. `snakemake -n` on all six test Snakefiles: "Nothing to be done".
+
+---
+
+## 14:45 — Effect of the BOS token measured
+
+Kind: documentation
+
+- One-off check of SUGGESTIONS I4 (IS4), run outside the repository; no code changed.
+  - **BOS vector.** On node5, *c* = `last_hidden_state` of `[BOS]` alone was computed for every
+    language model (`get_embeddings.load_model()` with the configured quantization).
+  - **BOS-free embeddings from the stored files** (frontend). G = (F − w·c)/ρ, with
+    w = Σ Lᵢ/(Lᵢ+1)/S and ρ = Σ Lᵢ²/(Lᵢ+1)/S over the chunks of `embed_long_text()`.
+  - **OpenLLaMA 13B (8-bit, LLM.int8)** is the exception: position 0 differs from *c* by up to
+    62%, so its embeddings were recomputed directly. `embed_long_text()` was run with
+    `extract_embedding_from_output()` wrapped to mask position 0. Chunking was checked against
+    the stored `n_tokens`/`n_chunks`.
+  - **Downstream.** Neighbours from `compute_topk_on_concept_subset()`, relabelled null from
+    `compute_relabelled_common_neighbours_for_all_k()` (*N* = 10,000, seed 37), observed counts
+    from `compute_common_neighbours()`; whole cortex, every similarity type and *k*.
+- **Result** (24 models):
+  - neighbour overlap 89–100%, median at least 97%;
+  - largest alignment change: 0.0012 on Caption Scene, 0.011 on Narratives, under 0.0001 on Nature
+    Stories;
+  - BH q < 0.05 counts identical in every (dataset, similarity, *k*);
+  - uncorrected p < 0.05 on Caption Scene at *k* = 5: cosine 4 → 6, Spearman 9 → 11.
+- **Conclusions do not move,** so no `[heavy]` pipeline change follows.
+- **Documentation:**
+  - `docs/reference/model_embeddings.md`: section 3 gains "Measured effect of the BOS token";
+    section 6 drops "the BOS outlier was not measured".
+  - `docs/reference/study_overview.md`: the BOS limitation gives the result.
+- SUGGESTIONS I4/IS4 removed.
+
+### Context
+
+- Request: "proceed with I4"; then "submit a short sbatch job" for the three OpenLLaMA models.
+  Slurm jobs 89521 and 89522: placeholder jobs on node5 for ssh access, cancelled after use.
+- Files changed: `docs/reference/model_embeddings.md`, `docs/reference/study_overview.md`,
+  `docs/AI_USAGE.md`.
+- Verification:
+  - On two captions per model, the recomputed vector reproduces the stored one within 10⁻⁷, and
+    the correction matches the direct BOS-free mean within 0.6% (all except OpenLLaMA 13B).
+  - The original variant reproduces `observed_average_alignment_score` and
+    `model_level_empirical_p_value` of `all_model_brain_alignment_scores.tsv` (language rows)
+    within 8·10⁻⁶ and 5·10⁻¹¹.

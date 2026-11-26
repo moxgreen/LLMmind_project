@@ -65,14 +65,18 @@ Pooling does not change. The final norm is looked up for BLOOMZ and Gemma only: 
 read at an intermediate depth stops with an error naming it. The normalisation and the Gemma 3n
 stream were checked on small randomly initialised BLOOM, Gemma, Gemma 3 and Gemma 3n models
 (*f* = 1 gives the default vector; *f* = 0.5 the mean of the normalised tokens). On the real
-checkpoints, *f* = 1 gives exactly the default vectors for all 21 pilot models on Narratives and
-Nature Stories, quantised Gemma models included; the intermediate depths of the real models ran
+checkpoints, a run at *f* = 1 gave exactly the default vectors for all 21 pilot models on
+Narratives and Nature Stories, quantised Gemma models included; the intermediate depths of the real models ran
 without errors but have no reference to be compared with.
 
 `relative_depth` is set only for the layer-depth pilot: `workflow/additional_tests/layer_depth_pilot/Snakefile`
-runs the main workflow once per depth listed in `config/layer_depth_pilot.yaml` (25%, 50%, 67%,
-75% and 100%), on the five BLOOMZ models and the 16 enabled Gemma models, on Narratives and Nature
+runs the main workflow once per depth listed in `config/layer_depth_pilot.yaml` (25%, 50%, 67%
+and 75%), on the five BLOOMZ models and the 16 enabled Gemma models, on Narratives and Nature
 Stories (how to run it: [additional-tests guide](../guides/additional_tests.md), section 1).
+The last layer (100%) is not run by the pilot: its vectors, and therefore all its scores and
+p-values, are those of the main pipeline, so the final-layer reference is the main
+`results/tsv_summaries/` restricted to these 21 models, with Benjamini-Hochberg correction across
+those 21.
 The BLOOMZ models have
 24 blocks (560m, 1b1, 1b7; *k* = 18) or 30 (3b, 7b1; *k* = 23), read from their local
 `config.json`. The depth was fixed before any result was seen, from brain-encoding studies of
@@ -96,7 +100,8 @@ the main result.
 
 **Layer-depth pilot results.** Run on 2026-11-20 and again from the pilot's own Snakefile on
 2026-11-23 (node5, identical tables), with the per-token normalisation and the cap of section 5;
-21 models (5 BLOOMZ, 16 Gemma), depths 25/50/67/75/100%. Exact permutation p-values for the
+21 models (5 BLOOMZ, 16 Gemma), depths 25/50/67/75% from the pilot and 100% from the main
+results of the same models. Exact permutation p-values for the
 within-family size trends (at most 5 models per family); no correction across depths, similarity
 types or families. Outputs: `results/tests/layer_depth_pilot_<D>/results/tsv_summaries/`.
 
@@ -206,7 +211,7 @@ observed neighbours, the relabelled neighbours (computed on the brain's concepts
 Spearman RSA all use the same cap. Brain representations are never capped. On the layer-depth
 pilot (Narratives) the cap changed the scores by −0.02 to +0.03 on average per model family; in
 Gemma 3 4B at 67% depth the largest value is about 45 900 against a cap of about 73. At the final
-layer (pilot at 100% depth against the main results, same vectors), the cap raises the
+layer (the same vectors with and without the cap), the cap raises the
 brain-model scores of the 21 pilot models by 0.01 (nearest neighbours) and 0.02 (RSA) on average
 on Narratives, and the RSA by 0.06 on average on Nature Stories (up to 0.42 in single cases,
 0.08–0.17 on average for BLOOMZ and Gemma 7B), where the share of cases with p < 0.05 rises from
@@ -318,3 +323,11 @@ Section 3 used to say that excluding the BOS token had not been tried, and secti
 outlier had not been measured. Both now report a one-off check on all 24 language models. Removing
 the BOS token keeps 89–100% of the nearest neighbours and changes alignment by at most 0.011. Every
 model that is significant after correction stays significant, so the pipeline keeps the BOS token.
+
+### 2026-11-26 16:40 — the pilot no longer runs the last layer
+
+Section 3: the pilot runs 25%, 50%, 67% and 75% only. Its 100% run had the same embeddings and
+exactly the same summary tables as the main results for its 21 models (every value of the four
+tables checked), so the final-layer reference is now taken from the main results. The pilot
+results are unchanged. Section 5 now describes the cap comparison at the final layer without
+referring to the 100% run.

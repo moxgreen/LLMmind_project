@@ -6,6 +6,7 @@
 - Effect of the BOS token on the language-model embeddings measured; no pipeline change (documentation)
 - Concept-level plot rules, scripts and folders renamed from "scatterplot" to "boxplot" (refactor, documentation)
 - New rule `plot_alignment_enrichment_model_size`: enrichment against model size, with within-family Spearman's ρ (new feature, documentation)
+- Layer-depth pilot no longer runs the last layer (depth 1); its results directory removed (removal, documentation)
 
 ---
 
@@ -149,9 +150,10 @@ Kind: refactor, documentation
   `plot_spearman_alignment`). The input keys of `rule all` and `rule all_visualisation` are renamed
   to match (`concept_*_boxplots`).
 - Snakemake does not know the new paths, so the next run redraws these plots (57 + 57 + 27 jobs,
-  about 18 min) and the matching `plot_spearman_alignment` jobs; no data is recomputed. The old
-  folders are listed under "Leftover outputs from older versions" in the running guide and can be
-  deleted after that run.
+  about 18 min) and the matching `plot_spearman_alignment` jobs; no data is recomputed. The nine
+  old `*_scatterplots*` folders (141 PNG files) were deleted from `results/pictures/` at the
+  developer's request, while the pipeline was running on node5 (it no longer reads or writes them),
+  and taken off the running guide's "Leftover outputs from older versions".
 - TODO P11/S11 removed.
 
 ### Context
@@ -212,3 +214,43 @@ Kind: new feature, documentation
   - `snakemake -n` (frontend) schedules 143 jobs: `plot_alignment_enrichment_model_size` 1,
     `plot_concept_alignment_boxplot` 57, `plot_concept_alignment_enrichment_boxplot` 57,
     `plot_spearman_alignment` 27 (renamed outputs) and `all`; nothing upstream.
+
+---
+
+## 16:40 — Layer-depth pilot without the last layer
+
+Kind: removal, documentation
+
+- `config/layer_depth_pilot.yaml`: `relative_depths` goes from `[0.25, 0.5, 0.67, 0.75, 1]` to
+  `[0.25, 0.5, 0.67, 0.75]`; the comment says why. `workflow/additional_tests/layer_depth_pilot/Snakefile`
+  is unchanged: `LAYER_DEPTHS` and the `depth` wildcard constraint come from the config, so the
+  depth-100 job is no longer a target.
+- Removed `results/tests/layer_depth_pilot_100/` (131 MB: embeddings, neighbours, relabelled
+  scores, the four summary tables and the inner `.snakemake/`). `rm -r` removed only the folder's
+  own symlinks to `config/`, `resources/`, `workflow/` and the brain results, not their targets.
+  The outer `.snakemake/metadata/` records of its summary tables remain (harmless; listed under
+  "Leftover outputs from older versions").
+- The final-layer reference for the pilot (the 100% column of the pilot tables in
+  `docs/reference/model_embeddings.md`, section 3, and in the manuscript) is now the main
+  `results/tsv_summaries/` restricted to the 21 pilot models, with Benjamini-Hochberg across
+  those 21. The p-values are identical, so the column does not change.
+- Documentation: `docs/reference/model_embeddings.md` (sections 3 and 5),
+  `docs/guides/additional_tests.md` (introduction and section 1: depths, run time about 5 h
+  instead of 6 h 30 min, final-layer comparison), `docs/guides/running_and_troubleshooting.md`
+  (leftover outputs), `README.md` (run time of the additional tests), `docs/AI_USAGE.md`. Today's
+  changelog files were renamed from `…_new_feature_refactor_documentation.md` to
+  `…_new_feature_refactor_removal_documentation.md`.
+
+### Context
+
+- Request: the developer pointed out that depth 1 necessarily repeats the main workflow and asked
+  to drop it from the pilot and from `results/`.
+- Files changed: `config/layer_depth_pilot.yaml`, the documentation files above; removed
+  `results/tests/layer_depth_pilot_100/`.
+- Verification:
+  - Before removal, the four summary tables of the 100% run were compared with the main tables
+    filtered to the 21 pilot models and the two pilot datasets: 2142, 2142, 1008 and 1008 rows,
+    every row matched, largest absolute difference 0.0.
+  - After removal, `snakemake -s workflow/additional_tests/layer_depth_pilot/Snakefile -n`
+    (frontend, project environment): "Nothing to be done"; the linked `config/`, `resources/`,
+    `workflow/`, `results/mind/` and `results/language_mind/` are intact.

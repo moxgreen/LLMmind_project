@@ -30,7 +30,7 @@ definitions are in `workflow/additional_tests/additional_tests.smk`.
 | Image overlap | `workflow/additional_tests/image_overlap/Snakefile` | [`fmri_preprocessing.md`](../reference/fmri_preprocessing.md), "Overlap between the Caption Scene and NSD images" |
 | Regional crossover | `workflow/additional_tests/regional_crossover/Snakefile` | [`regional_crossover.md`](../reference/regional_crossover.md) |
 
-**Running every test.** One after the other, the pilot last because it takes about 6 h 30 min and
+**Running every test.** One after the other, the pilot last because it takes about 5 h and
 needs the GPU (on node5); `|| break` stops at the first test that fails:
 
 ```bash
@@ -67,7 +67,7 @@ snakemake -s workflow/additional_tests/layer_depth_pilot/Snakefile --cores 4 --r
 ```
 
 **Settings.** `config/layer_depth_pilot.yaml` holds the depths (`relative_depths`, now
-0.25, 0.5, 0.67, 0.75 and 1), the datasets and the models (`model_subset`); the inner runs add it
+0.25, 0.5, 0.67 and 0.75), the datasets and the models (`model_subset`); the inner runs add it
 on top of `config/config.yaml` without changing it.
 
 **What a depth job does.** The Snakefile has one rule, `run_layer_depth_pilot`, with one job per
@@ -89,15 +89,15 @@ other, and:
    are plain inputs, and a missing one stops the run.
 
 A full depth is 1348 jobs (21 models, two datasets), all model-side, and takes about
-1 h 10 min to 1 h 25 min on node5; the five depths run one after the other, about 6 h 30 min in all.
+1 h 10 min to 1 h 25 min on node5; the four depths run one after the other, about 5 h in all.
 
 **Outputs.** Each depth's results go to `results/tests/layer_depth_pilot_<D>/results/` with the
 main workflow's file names (the depth is only in the directory name); its summary tables are in
-`results/tests/layer_depth_pilot_<D>/results/tsv_summaries/`. No main result is touched. The 100%
-run reads the same vectors as the main pipeline and serves as the final-layer comparison
-computed with the same code: its embeddings are identical to the main pipeline's for all 21
-models, quantised Gemma models included, so its summary tables differ from the main ones only by
-the cap of model values. Intermediate depths of the quantised models have run without errors but
+`results/tests/layer_depth_pilot_<D>/results/tsv_summaries/`. No main result is touched. The last
+layer (depth 1) is not run: its embeddings, and every value of its four summary tables, are
+identical to the main pipeline's for these 21 models, quantised Gemma models included, so the
+final-layer comparison uses the main `results/tsv_summaries/` restricted to the pilot models.
+Intermediate depths of the quantised models have run without errors but
 have not been checked further.
 
 **Rerunning.** A depth job runs only when one of its four summary tables is missing. After a
@@ -296,3 +296,10 @@ Added the Narratives dependency checks, the duration and length controls, the si
 check, the image overlap and the regional crossover, which used to be one-off scripts outside the
 repository, with one section each; the introduction gains the table of every test, the command
 that runs them all and how they are rerun.
+
+### 2026-11-26 16:40 — pilot runs four depths
+
+Section 1: the pilot no longer runs the last layer (depth 1), whose results were identical to the
+main ones for its 21 models; the depths, the run time (about 5 h instead of 6 h 30 min) and the
+final-layer comparison, now taken from the main results, are updated, as is the run time quoted
+in the introduction.

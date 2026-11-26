@@ -329,10 +329,6 @@ code no longer produces or reads. They are safe to delete:
 - plot folders directly under `results/` (for example `results/alignment_heatmaps/`): plots now
   live in `results/pictures/`. Move them there to keep the plots without redrawing them, or delete
   them;
-- `results/pictures/concept_alignment_scatterplots*/`,
-  `results/pictures/concept_alignment_enrichment_scatterplots*/` and
-  `results/pictures/concept_spearman_alignment_scatterplots*/` (with their `_language` and
-  `_vision` versions): the same concept-level plots now go to the matching `*_boxplots*/` folders;
 - `results/spearman_alignment/`: the Spearman tables now sit in
   `results/spearman_alignment_scores/` and the plots in `results/pictures/`;
 - NSD parcel files without a repetition in their name
@@ -348,6 +344,8 @@ code no longer produces or reads. They are safe to delete:
   written as files);
 - `results/mind/nature_stories/qc/valid_voxel_counts.tsv` (the per-subject voxel counts are
   only printed now);
+- `results/tests/layer_depth_pilot_100/` (the layer-depth pilot no longer runs the last layer,
+  whose results are the main ones);
 - in `.snakemake/metadata/` and `.snakemake/incomplete/`, the records of files that no longer
   exist (each file name is the base64-encoded path of an output). Snakemake reads a record only
   when its file exists, so removing them changes nothing.
@@ -545,4 +543,10 @@ pipeline; its Snakefile moved to `workflow/additional_tests/layer_depth_pilot/`.
 
 The command that redraws every plot uses the renamed rules `plot_concept_alignment_boxplot` and
 `plot_concept_alignment_enrichment_boxplot` and includes the new `plot_alignment_enrichment_model_size`.
-The old `*_scatterplots*` plot folders are listed under "Leftover outputs from older versions".
+The old `*_scatterplots*` plot folders were deleted from `results/pictures/` the same day, so they
+are not listed under "Leftover outputs from older versions".
+
+### 2026-11-26 16:40 — pilot directory at 100% depth listed as leftover
+
+"Leftover outputs from older versions" now lists `results/tests/layer_depth_pilot_100/`, since
+the layer-depth pilot no longer runs the last layer.

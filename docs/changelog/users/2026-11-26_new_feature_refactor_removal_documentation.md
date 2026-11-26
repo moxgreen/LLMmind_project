@@ -6,6 +6,7 @@
 - The effect of the start-of-text token on the language models was measured: it changes no result (documentation)
 - The concept-level plots are now called boxplots, in their folder names too (refactor, documentation)
 - New plots of alignment enrichment against model size, and a table of the size trend within each model family (new feature, documentation)
+- The layer-depth pilot no longer recomputes the last layer, which gave the same results as the main analysis (removal, documentation)
 
 ---
 
@@ -65,8 +66,8 @@ The concept-level plots were called "scatterplots" although they are boxplots wi
 concept. Their folders in `results/pictures/` are now `concept_alignment_boxplots/`,
 `concept_alignment_enrichment_boxplots/` and `concept_spearman_alignment_boxplots/` (and their
 `_language` and `_vision` versions). The plots themselves do not change. The next pipeline run
-draws them into the new folders, which takes about 20 minutes and recomputes no data; afterwards
-the old `*_scatterplots` folders can be deleted.
+draws them into the new folders, which takes about 20 minutes and recomputes no data. The old
+`*_scatterplots` folders have been deleted.
 
 ---
 
@@ -86,3 +87,19 @@ The pipeline now shows whether larger models align better with the brain:
   five models per family no trend can be significant.
 
 This replaces the earlier one-off model-size test, which no script in the repository reproduced.
+
+---
+
+## 16:40 — The layer-depth pilot no longer recomputes the last layer
+
+Kind: removal, documentation
+
+- The layer-depth pilot now reads the models at 25%, 50%, 67% and 75% of their depth only. Reading
+  them at 100% gave exactly the same numbers as the main analysis (checked value by value), so it
+  only cost about 1 h 20 min of GPU time.
+- For the comparison with the last layer, use the main results in `results/tsv_summaries/`,
+  keeping only the 21 BLOOMZ and Gemma models of the pilot. The numbers quoted for 100% depth do
+  not change.
+- The old folder `results/tests/layer_depth_pilot_100/` was deleted; if you have a copy elsewhere,
+  it is safe to delete too.
+- Running every additional test now takes about 5 h on the GPU instead of 6 h 30 min.

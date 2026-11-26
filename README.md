@@ -396,7 +396,7 @@ snakemake --use-conda --cores <N>
 
 The additional tests are outside the main pipeline and have their own
 Snakefiles in `workflow/additional_tests/`. To run them all, one after the
-other (the layer-depth pilot last: about 6 h 30 min on the GPU):
+other (the layer-depth pilot last: about 5 h on the GPU):
 
 ```bash
 for test in narratives_dependencies duration_length_controls similarity_type_check image_overlap regional_crossover layer_depth_pilot; do

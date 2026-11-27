@@ -2,7 +2,7 @@
 
 > *Written with AI assistance (Claude Code). See [`docs/AI_USAGE.md`](../AI_USAGE.md).*
 
-The additional tests are analyses outside the main pipeline: sensitivity checks and controls whose
+The additional tests are analyses outside the main pipeline: sensitivity tests whose
 results are quoted in the reference pages. They never run with the main workflow: none is included
 in `workflow/Snakefile` or in its `rule all`, and a normal run neither builds nor changes them.
 
@@ -17,20 +17,20 @@ Every test follows the same layout:
 Run each test from the project root, with the base environment active, by passing its Snakefile
 with `-s`. The tests read the main pipeline's outputs (brain results, embeddings,
 nearest-neighbour files, summary tables), so run the main pipeline first; a test whose inputs are
-missing stops. The tests other than the pilot share the numeric environment of the main pipeline
+missing stops. The tests other than the layer-depth test share the numeric environment of the main pipeline
 (`workflow/llm_mind_alignment/envs/`), so they build no new environment, and their common
 definitions are in `workflow/additional_tests/additional_tests.smk`.
 
 | Test | Snakefile | Method and results |
 |---|---|---|
-| Layer-depth pilot | `workflow/additional_tests/layer_depth_pilot/Snakefile` | [`model_embeddings.md`](../reference/model_embeddings.md), section 3 |
-| Narratives dependencies | `workflow/additional_tests/narratives_dependencies/Snakefile` | [`statistics.md`](../reference/statistics.md), section 8 |
-| Duration and length controls | `workflow/additional_tests/duration_length_controls/Snakefile` | [`statistics.md`](../reference/statistics.md), section 8 |
-| Similarity-type check | `workflow/additional_tests/similarity_type_check/Snakefile` | [`statistics.md`](../reference/statistics.md), section 8 |
-| Image overlap | `workflow/additional_tests/image_overlap/Snakefile` | [`fmri_preprocessing.md`](../reference/fmri_preprocessing.md), "Overlap between the Caption Scene and NSD images" |
-| Regional crossover | `workflow/additional_tests/regional_crossover/Snakefile` | [`regional_crossover.md`](../reference/regional_crossover.md) |
+| Layer-depth test | `workflow/additional_tests/layer_depth_pilot/Snakefile` | [`model_embeddings.md`](../reference/model_embeddings.md), section 3 |
+| Narratives dependency test | `workflow/additional_tests/narratives_dependencies/Snakefile` | [`statistics.md`](../reference/statistics.md), section 8 |
+| Duration and length test | `workflow/additional_tests/duration_length_controls/Snakefile` | [`statistics.md`](../reference/statistics.md), section 8 |
+| Similarity-type test | `workflow/additional_tests/similarity_type_check/Snakefile` | [`statistics.md`](../reference/statistics.md), section 8 |
+| Image overlap test | `workflow/additional_tests/image_overlap/Snakefile` | [`fmri_preprocessing.md`](../reference/fmri_preprocessing.md), "Overlap between the Caption Scene and NSD images" |
+| Regional crossover test | `workflow/additional_tests/regional_crossover/Snakefile` | [`regional_crossover.md`](../reference/regional_crossover.md) |
 
-**Running every test.** One after the other, the pilot last because it takes about 5 h 30 min and
+**Running every test.** One after the other, the layer-depth test last because it takes about 5 h 30 min and
 needs the GPU (on node5); `|| break` stops at the first test that fails:
 
 ```bash
@@ -39,7 +39,7 @@ for test in narratives_dependencies duration_length_controls similarity_type_che
 done
 ```
 
-Add `-n` to the `snakemake` line for a dry run. The five tests other than the pilot take about
+Add `-n` to the `snakemake` line for a dry run. The five tests other than the layer-depth test take about
 13 min in all on one core (frontend, 2026-11-26).
 
 **Rerunning.** A test reruns when one of its outputs is missing, one of its inputs is newer (for
@@ -49,15 +49,15 @@ parameters). Snakemake does not see edits to a test's script: after such an edit
 `results/tests/`. How Snakemake decides what to rerun
 in general is in the [running guide](running_and_troubleshooting.md), section 2.
 
-## 1. Layer-depth pilot
+## 1. Layer-depth test
 
-The pilot reads the 24 language models of the main analysis (five BLOOMZ, the 16 Gemma models
+The test reads the 24 language models of the main analysis (five BLOOMZ, the 16 Gemma models
 that are not commented out in `config/config.yaml`, three OpenLLaMA) at a chosen relative depth instead of their last
 layer, on Narratives and Nature Stories, and computes the brain-model nearest-neighbour alignment and the
 Spearman RSA (whole cortex and language region). Why and how the layer is chosen is in
 [`model_embeddings.md`](../reference/model_embeddings.md), section 3.
 
-**Running it.** The pilot has its own Snakefile, `workflow/additional_tests/layer_depth_pilot/Snakefile`, run
+**Running it.** The test has its own Snakefile, `workflow/additional_tests/layer_depth_pilot/Snakefile`, run
 from the project root with the base environment active (on node5, or through
 `run_snakemake_workflow.sh`, whose last command is this one):
 
@@ -76,12 +76,12 @@ other, and:
 
 1. links `results/tests/layer_depth_pilot_<D>/` to the project's `config/`, `resources/` and
    `workflow/`, and its `results/mind/<dataset>` and `results/language_mind/<dataset>` to the main
-   brain results of every pilot dataset, so the brain side is reused, not recomputed or copied
+   brain results of every dataset of the test, so the brain side is reused, not recomputed or copied
    (`ln -T` stops the job if a real directory is in the way);
 2. runs the main workflow in that directory (`snakemake --directory …`) with
    `--config relative_depth=<D/100>` (`relative_depth` is null in `config/config.yaml`),
    `--conda-prefix` set to the project's environments (without it Snakemake would build new ones
-   inside the pilot directory), and `--allowed-rules` listing only the model-side rules:
+   inside the test directory), and `--allowed-rules` listing only the model-side rules:
    `get_embeddings`, `compute_llm_nearest_neighbours`, the alignment, relabelling,
    hypergeometric and empirical p-value and Spearman rules, and the two aggregations. Since the
    brain results and `resources/` are links, a brain, ISC, stimulus or download job would write
@@ -135,7 +135,7 @@ for D in 25 50 67 75; do
 done
 ```
 
-## 2. Narratives dependencies
+## 2. Narratives dependency test
 
 Tests whether the whole-cortex Spearman RSA of the language models on Narratives survives the
 dependencies between the 18 units (shared story, speaker or source). Method and results:
@@ -174,7 +174,7 @@ about 8 min.
 
 **Rerunning.** `--forcerun narratives_dependencies`.
 
-## 3. Duration and length controls
+## 3. Duration and length test
 
 Tests whether story duration or length explains the whole-cortex Spearman RSA of the language models
 on Narratives and Nature Stories. Method and results: [`statistics.md`](../reference/statistics.md),
@@ -210,7 +210,7 @@ the number of subjects. Runs in about 2 min.
 
 **Rerunning.** `--forcerun duration_length_controls`.
 
-## 4. Similarity-type check
+## 4. Similarity-type test
 
 Tests why local alignment on Narratives (*k* = 5) is significant for almost every language model
 under Spearman similarity but for few under cosine or Pearson. Method and results:
@@ -247,7 +247,7 @@ parcel time series must match the published ISC. Runs in about 1 min 30 s.
 
 **Rerunning.** `--forcerun similarity_type_check`.
 
-## 5. Image overlap
+## 5. Image overlap test
 
 Counts the COCO images shared by the retained NSD and Caption Scene stimuli. Results:
 [`fmri_preprocessing.md`](../reference/fmri_preprocessing.md), "Overlap between the Caption Scene
@@ -272,7 +272,7 @@ images retained in both datasets and their COCO IDs, full-set overlaps).
 
 **Rerunning.** `--forcerun image_overlap`.
 
-## 6. Regional crossover
+## 6. Regional crossover test
 
 A collaborator's analysis, reproduced as closely as possible: on Caption Scene, vision and language
 models in the visual and language regions; on Narratives, the language models in the language
@@ -334,3 +334,7 @@ in the introduction.
 Section 1: the pilot covers the three OpenLLaMA models too (24 models, 1540 jobs per depth, about
 5 h 30 min in all). A new paragraph explains why a forced rerun recomputes every embedding and how
 to add models with `--rerun-triggers mtime input` instead, as was done for OpenLLaMA.
+
+### 2026-11-27 13:40 — every additional test called a test
+
+The layer-depth pilot is now called the layer-depth test, and the other tests are named the same way: Narratives dependency test, duration and length test, similarity-type test, image overlap test and regional crossover test (table, section headings and introduction). File, rule and directory names are unchanged (`layer_depth_pilot`, `narratives_dependencies`, …).

@@ -135,8 +135,8 @@ Hardware and run time: one NVIDIA RTX A5000 (24 GB); a clean run takes about 33 
 | Brain regions | [`brain_regions.md`](brain_regions.md) |
 | Similarity, alignment score, null, tests, enrichment, RSA | [`statistics.md`](statistics.md), sections 1–6 |
 | Figures and their conventions | [`statistics.md`](statistics.md), section 7 |
-| Robustness checks (model size, Narratives dependencies, duration, similarity types) | [`statistics.md`](statistics.md), section 8 |
-| Regional crossover (exploratory) | [`regional_crossover.md`](regional_crossover.md) |
+| Robustness tests (model size, Narratives dependencies, duration, similarity types) | [`statistics.md`](statistics.md), section 8 |
+| Regional crossover test (exploratory) | [`regional_crossover.md`](regional_crossover.md) |
 | Limitations | section 7 below |
 | Compute | [`clean_run_duration.md`](clean_run_duration.md) |
 
@@ -169,12 +169,12 @@ date.
 own Snakefile in `workflow/additional_tests/` and its tables in `results/tests/`; how to run them is
 in the [additional-tests guide](../guides/additional_tests.md):
 
-- the layer-depth pilot: 21 language models read at five relative depths on Narratives and Nature
-  Stories, results in [`model_embeddings.md`](model_embeddings.md), "Layer-depth pilot results";
-- the robustness checks of [`statistics.md`](statistics.md), section 8, except the model-size
-  analysis (main pipeline): Narratives dependencies, duration and length, similarity types;
+- the layer-depth test: the 24 language models read at four intermediate relative depths on
+  Narratives and Nature Stories, compared with the last layer of the main analysis, results in [`model_embeddings.md`](model_embeddings.md), "Layer-depth test results";
+- the robustness tests of [`statistics.md`](statistics.md), section 8, except the model-size
+  analysis (main pipeline): the Narratives dependency, duration and length, and similarity-type tests;
 - the overlap of the NSD and Caption Scene images ([`fmri_preprocessing.md`](fmri_preprocessing.md));
-- the regional crossover analysis ([`regional_crossover.md`](regional_crossover.md)).
+- the regional crossover test ([`regional_crossover.md`](regional_crossover.md)).
 
 **Not reproduced by the repository.** These numbers come from one-off checks, run once on the
 workflow's outputs; no rule or script in the repository rebuilds them:
@@ -203,9 +203,9 @@ Each point is described in full on the page linked.
   parcels ([`statistics.md`](statistics.md), section 8, "Why the similarity types differ on
   Narratives").
 - **Last layer only.** The main analysis reads every model at its last hidden state. In the
-  layer-depth pilot, BLOOMZ, Gemma and Gemma 2 align better at intermediate depths and Gemma 3 and
+  layer-depth test, BLOOMZ, Gemma, Gemma 2 and OpenLLaMA align better at intermediate depths and Gemma 3 and
   Gemma 4 at the last layer, so the last layer underestimates some families' alignment more than
-  others ([`model_embeddings.md`](model_embeddings.md), "Layer-depth pilot results").
+  others ([`model_embeddings.md`](model_embeddings.md), "Layer-depth test results").
 - **BOS token in the mean** of every language-model chunk. Removing it changes the neighbours
   slightly (89–100% shared) and no corrected significance ([`model_embeddings.md`](model_embeddings.md),
   "Measured effect of the BOS token").
@@ -226,7 +226,7 @@ Each point is described in full on the page linked.
 - **Ventral temporal cortex outside the visual region**, which is the 7-network `Vis` network
   ([`brain_regions.md`](brain_regions.md), section 5).
 - **No cross-modality regional comparison in the workflow.** Each model is compared only with its
-  own modality's region; the crossover analysis is an additional test outside the main pipeline
+  own modality's region; the regional crossover test is an additional test outside the main pipeline
   ([`regional_crossover.md`](regional_crossover.md)).
 - **Not every analysis is reproducible from the repository** (section 6).
 
@@ -390,3 +390,7 @@ token changes no conclusion.
 
 Section 6: the model-size analysis is no longer a one-off check; the main pipeline writes its table
 `model_size_within_family_spearman.tsv`, listed with the other workflow outputs.
+
+### 2026-11-27 13:40 — additional tests named as tests; layer-depth test updated
+
+The additional tests are named as tests (robustness tests, regional crossover test, layer-depth test). The layer-depth test is described as it now runs, the 24 language models at four intermediate depths compared with the last layer of the main analysis, and OpenLLaMA is listed among the families that align better at intermediate depths.

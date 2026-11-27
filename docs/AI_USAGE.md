@@ -106,15 +106,15 @@ git history and may include later human edits.
 | `docs/changelog/users/2026-11-26_new_feature_refactor_removal_documentation.md` | written | 2026-11-26 | Claude Opus 5.5 (`claude-opus-5-5`) | not yet reviewed |
 | `docs/changelog/users/2026-11-27_documentation.md` | written | 2026-11-27 | Claude Opus 5.5 (`claude-opus-5-5`) | not yet reviewed |
 | `docs/guides/additional_tests.md` | written | 2026-11-27 | Claude Opus 5.5 (`claude-opus-5-5`) | not yet reviewed |
-| `docs/guides/running_and_troubleshooting.md` | written | 2026-11-26 | Claude Opus 5.5 (`claude-opus-5-5`) | not yet reviewed |
+| `docs/guides/running_and_troubleshooting.md` | written | 2026-11-27 | Claude Opus 5.5 (`claude-opus-5-5`) | not yet reviewed |
 | `docs/reference/brain_regions.md` | written | 2026-11-25 | Claude Opus 5.5 (`claude-opus-5-5`) | not yet reviewed |
 | `docs/reference/clean_run_duration.md` | written | 2026-11-26 | Claude Opus 5.5 (`claude-opus-5-5`) | not yet reviewed |
-| `docs/reference/fmri_preprocessing.md` | written | 2026-11-26 | Claude Opus 5.5 (`claude-opus-5-5`) | not yet reviewed |
+| `docs/reference/fmri_preprocessing.md` | written | 2026-11-27 | Claude Opus 5.5 (`claude-opus-5-5`) | not yet reviewed |
 | `docs/reference/nature_stories_stimuli.md` | written | 2026-11-25 | Claude Opus 5.5 (`claude-opus-5-5`) | not yet reviewed |
 | `docs/reference/model_embeddings.md` | written | 2026-11-27 | Claude Opus 5.5 (`claude-opus-5-5`) | not yet reviewed |
-| `docs/reference/regional_crossover.md` | written | 2026-11-26 | Claude Opus 5.5 (`claude-opus-5-5`) | not yet reviewed |
-| `docs/reference/statistics.md` | written | 2026-11-26 | Claude Opus 5.5 (`claude-opus-5-5`) | not yet reviewed |
-| `docs/reference/study_overview.md` | written | 2026-11-26 | Claude Opus 5.5 (`claude-opus-5-5`) | not yet reviewed |
+| `docs/reference/regional_crossover.md` | written | 2026-11-27 | Claude Opus 5.5 (`claude-opus-5-5`) | not yet reviewed |
+| `docs/reference/statistics.md` | written | 2026-11-27 | Claude Opus 5.5 (`claude-opus-5-5`) | not yet reviewed |
+| `docs/reference/study_overview.md` | written | 2026-11-27 | Claude Opus 5.5 (`claude-opus-5-5`) | not yet reviewed |
 | `.gitignore` | edited | 2026-10-02 | Claude Opus 5.5 (`claude-opus-5-5`) * | not yet reviewed |
 | `config/layer_depth_pilot.yaml` | written | 2026-11-26 | Claude Opus 5.5 (`claude-opus-5-5`) | not yet reviewed |
 | `config/config.yaml` | edited | 2026-11-13 | Claude Opus 5.5 (`claude-opus-5-5`) | not yet reviewed |

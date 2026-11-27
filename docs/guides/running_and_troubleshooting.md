@@ -67,7 +67,7 @@ runs alongside other jobs the run briefly uses more CPUs than `--cores`. Lower
 
 ### Additional tests
 
-The tests outside the main pipeline, such as the layer-depth pilot, have their own Snakefiles in
+The tests outside the main pipeline, such as the layer-depth test, have their own Snakefiles in
 `workflow/additional_tests/`; how to run each one is in [`additional_tests.md`](additional_tests.md).
 
 ## 2. When Snakemake reruns a job
@@ -103,7 +103,7 @@ edits.
 **The `get_embeddings` command text.** Snakemake also reruns a job when the `shell:` text of
 its rule changes. `--relative_depth` is written in that text as `{params.relative_depth_arg}`,
 which is empty when `relative_depth` is null (the main pipeline) and `--relative_depth <f>` when a
-run sets it (the layer-depth pilot); changing `relative_depth` reruns the embeddings through the
+run sets it (the layer-depth test); changing `relative_depth` reruns the embeddings through the
 `params` trigger, not through the text.
 
 **Not covered.** For every other rule, force the rerun yourself with `--forcerun <rule>` after
@@ -344,7 +344,7 @@ code no longer produces or reads. They are safe to delete:
   written as files);
 - `results/mind/nature_stories/qc/valid_voxel_counts.tsv` (the per-subject voxel counts are
   only printed now);
-- `results/tests/layer_depth_pilot_100/` (the layer-depth pilot no longer runs the last layer,
+- `results/tests/layer_depth_pilot_100/` (the layer-depth test no longer runs the last layer,
   whose results are the main ones);
 - in `.snakemake/metadata/` and `.snakemake/incomplete/`, the records of files that no longer
   exist (each file name is the base64-encoded path of an output). Snakemake reads a record only
@@ -550,3 +550,7 @@ are not listed under "Leftover outputs from older versions".
 
 "Leftover outputs from older versions" now lists `results/tests/layer_depth_pilot_100/`, since
 the layer-depth pilot no longer runs the last layer.
+
+### 2026-11-27 13:40 — layer-depth test
+
+The layer-depth pilot is called the layer-depth test (sections 1 and 2 and the leftover outputs); its file and directory names are unchanged.

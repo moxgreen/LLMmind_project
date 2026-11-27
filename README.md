@@ -33,8 +33,8 @@ the pipeline:
   settings that change many results, the software environments, model
   limitations and what to do when a run fails
 - [`docs/guides/additional_tests.md`](docs/guides/additional_tests.md)
-  — how to run each test outside the main pipeline (the layer-depth pilot, the
-  robustness checks, the image overlap, the regional crossover): settings,
+  — how to run each test outside the main pipeline (the layer-depth test, the
+  robustness tests, the image overlap test, the regional crossover test): settings,
   outputs and reruns
 - [`docs/reference/study_overview.md`](docs/reference/study_overview.md)
   — start here to write the article: study design, datasets, models, parameters,
@@ -60,7 +60,7 @@ the pipeline:
   hypergeometric tests, enrichment, the Benjamini-Hochberg families, and what
   every figure shows and how it is laid out (a source for the methods section)
 - [`docs/reference/regional_crossover.md`](docs/reference/regional_crossover.md)
-  — a collaborator's analysis, run as an additional test: every model class in
+  — the regional crossover test, a collaborator's analysis: every model class in
   every brain region on Caption Scene, and language region vs whole cortex on
   Narratives, with its limits
 - [`docs/reference/clean_run_duration.md`](docs/reference/clean_run_duration.md)
@@ -396,7 +396,7 @@ snakemake --use-conda --cores <N>
 
 The additional tests are outside the main pipeline and have their own
 Snakefiles in `workflow/additional_tests/`. To run them all, one after the
-other (the layer-depth pilot last: about 5 h 30 min on the GPU):
+other (the layer-depth test last: about 5 h 30 min on the GPU):
 
 ```bash
 for test in narratives_dependencies duration_length_controls similarity_type_check image_overlap regional_crossover layer_depth_pilot; do

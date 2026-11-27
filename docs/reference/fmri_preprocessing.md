@@ -224,8 +224,8 @@ limitation.
 ### Overlap between the Caption Scene and NSD images
 
 Both image datasets draw on COCO. Counted by COCO image ID, over the 1000 retained images of each
-(the concepts of `results/mind/{caption_scene,nsd_data}/isc_dataframe.parquet`), by the image-overlap
-additional test ([`additional_tests.md`](../guides/additional_tests.md), section 5), whose table
+(the concepts of `results/mind/{caption_scene,nsd_data}/isc_dataframe.parquet`), by the image overlap
+test ([`additional_tests.md`](../guides/additional_tests.md), section 5), whose table
 `results/tests/image_overlap/image_overlap.tsv` holds every number below (last run on 2026-11-26,
 same numbers as the first count on 2026-11-09):
 
@@ -376,3 +376,7 @@ paper's DOI. The methods text still could not be read verbatim, so the note keep
 "Overlap between the Caption Scene and NSD images": the counts are now produced by the
 image-overlap additional test instead of a one-off script; its first run (2026-11-26) gives the same
 numbers as the count of 2026-11-09.
+
+### 2026-11-27 13:40 — image overlap test
+
+"Overlap between the Caption Scene and NSD images" names its source the image overlap test, like the other additional tests.

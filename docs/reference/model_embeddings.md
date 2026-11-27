@@ -70,12 +70,12 @@ the 21 BLOOMZ and Gemma models on Narratives and Nature Stories, quantised Gemma
 the intermediate depths of the real models ran without errors but have no reference to be compared
 with.
 
-`relative_depth` is set only for the layer-depth pilot: `workflow/additional_tests/layer_depth_pilot/Snakefile`
+`relative_depth` is set only for the layer-depth test: `workflow/additional_tests/layer_depth_pilot/Snakefile`
 runs the main workflow once per depth listed in `config/layer_depth_pilot.yaml` (25%, 50%, 67%
 and 75%), on the 24 language models of the main analysis (five BLOOMZ, 16 enabled Gemma, three
 OpenLLaMA), on Narratives and Nature Stories (how to run it:
 [additional-tests guide](../guides/additional_tests.md), section 1). The last layer is not run by
-the pilot: its vectors, and therefore all its scores and p-values, are those of the main pipeline,
+the test: its vectors, and therefore all its scores and p-values, are those of the main pipeline,
 so the final-layer reference is the main `results/tsv_summaries/` as they are, with the same
 models and the same Benjamini-Hochberg families.
 The BLOOMZ models have
@@ -96,13 +96,13 @@ construction (Gröger, Wen & Brbić 2026, arXiv:2602.14486, Sec. 4.2).
 
 **Decision: the main analysis reads the last layer.** Every result of the main pipeline uses the
 model's last hidden state (`relative_depth: null`); another depth is used only where a run
-specifies it, as the pilot does. The pilot results below are therefore a sensitivity analysis, not
+specifies it, as the test does. The test results below are therefore a sensitivity analysis, not
 the main result.
 
-**Layer-depth pilot results.** Run on 2026-11-20 and again from the pilot's own Snakefile on
+**Layer-depth test results.** Run on 2026-11-20 and again from the test's own Snakefile on
 2026-11-23 (node5, identical tables), with the per-token normalisation and the cap of section 5;
 the three OpenLLaMA models were added on 2026-11-27 without recomputing the other 21. 24 models
-(5 BLOOMZ, 16 Gemma, 3 OpenLLaMA), depths 25/50/67/75% from the pilot and the last layer from the
+(5 BLOOMZ, 16 Gemma, 3 OpenLLaMA), depths 25/50/67/75% from the test and the last layer from the
 main results. Exact permutation p-values for the within-family size trends (at most 5 models per
 family); no correction across depths, similarity types or families. Outputs:
 `results/tests/layer_depth_pilot_<D>/results/tsv_summaries/`.
@@ -142,7 +142,7 @@ family); no correction across depths, similarity types or families. Outputs:
 **Caveat: a few very large dimensions.** In BLOOMZ-560m, on one Narratives story, the three
 largest of the 1024 dimensions hold 38% of the squared norm of the last-layer vector and 50% at
 75% depth. Such dimensions dominate cosine and Pearson similarity but not Spearman similarity,
-which uses ranks; the pilot compares the three similarity types for this reason. Every model
+which uses ranks; the test compares the three similarity types for this reason. Every model
 vector is capped before any similarity is computed (section 5), which bounds these dimensions.
 
 **Caveat: the BOS token is included in the mean.** In many decoder models, Gemma and
@@ -215,7 +215,7 @@ stimulus' 95th percentile of absolute values (`capped_embedding_matrix()` and `C
 `workflow/libraries/compute_similarity.py`). *c* is computed on the whole embeddings file, so the
 observed neighbours, the relabelled neighbours (computed on the brain's concepts only) and the
 Spearman RSA all use the same cap. Brain representations are never capped. On the layer-depth
-pilot (Narratives) the cap changed the scores by −0.02 to +0.03 on average per model family; in
+test (Narratives) the cap changed the scores by −0.02 to +0.03 on average per model family; in
 Gemma 3 4B at 67% depth the largest value is about 45 900 against a cap of about 73. At the final
 layer (the same vectors with and without the cap), the cap raises the
 brain-model scores of the 21 BLOOMZ and Gemma models by 0.01 (nearest neighbours) and 0.02 (RSA) on average
@@ -346,3 +346,7 @@ as they are. The depth table gains an OpenLLaMA row and names its last column "L
 significance shares, the pooled size trend (now over 24 models) and the Nature Stories shares are
 recomputed, and the OpenLLaMA size trend is added. The final norm used at intermediate depths is
 described as any `ln_f` or `norm` layer, which includes LLaMA, instead of BLOOMZ and Gemma only.
+
+### 2026-11-27 13:40 — layer-depth test
+
+Sections 3 and 5 call the layer-depth pilot the layer-depth test; its file and directory names are unchanged.

@@ -1,4 +1,4 @@
-# Regional crossover: each model class in each brain region
+# Regional crossover test: each model class in each brain region
 
 > *Written with AI assistance (Claude Code). See [`docs/AI_USAGE.md`](../AI_USAGE.md).*
 
@@ -164,3 +164,7 @@ bootstrap intervals are now checked; the lower bound of the Narratives interval 
 the −0.3211 quoted before, which had never been checked. Section 4 says what was reproduced; section 5 updates the Narratives
 language-region significance (24 / 24 / 21 models instead of 24 / 20 / 18) and the DINOv2 Spearman
 RSA range.
+
+### 2026-11-27 13:40 — regional crossover test
+
+The page title names the analysis the regional crossover test, like the other additional tests.

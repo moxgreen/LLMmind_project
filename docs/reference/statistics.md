@@ -268,16 +268,16 @@ Layout, shared by all plots (constants and helpers in `libraries/visualisation_u
   symmetric around 0, and the enrichment plot keeps the symlog axis, fitted on the axis positions
   and starting at 0 at the lowest.
 
-## 8. Robustness checks of the whole-cortex results
+## 8. Robustness tests of the whole-cortex results
 
-Checks of the whole-cortex results, made from the main pipeline's summary tables, ISC tables,
+Tests of the whole-cortex results, made from the main pipeline's summary tables, ISC tables,
 embeddings and neighbour files; they change no pipeline result. The model-size analysis is part of
-the main pipeline; every other check is an additional test with its own Snakefile, outside the main
+the main pipeline; every other one is an additional test with its own Snakefile, outside the main
 pipeline; how to run them and their output tables are in the
 [additional-tests guide](../guides/additional_tests.md). Their numbers below come from the
 run of 2026-11-26 on the outputs of the main run of 2026-11-25. Unless stated, each permutation
 null uses the pipeline's relabelling stream (*N* = 10,000, seed 37), and Benjamini-Hochberg (BH)
-q-values use the families given below. Every RSA check first reproduces the published coefficients
+q-values use the families given below. Every RSA test first reproduces the published coefficients
 to within 10⁻⁵ and stops otherwise. Numbers below give cosine / Pearson / Spearman.
 
 ### Model size
@@ -609,3 +609,7 @@ count against RSA coefficient and enrichment across all models of a modality, wi
 smallest q 0.396 language / 0.456 vision, computed on the tables from before the switch to capped
 model vectors) is replaced by the pipeline rule's within-family Spearman's ρ of the enrichment,
 without p-values; the RSA outcome is dropped, at the developer's request.
+
+### 2026-11-27 13:40 — robustness tests
+
+Section 8 is called "Robustness tests of the whole-cortex results" and calls each of its analyses a test instead of a check, like the other additional tests.

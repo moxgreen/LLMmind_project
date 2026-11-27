@@ -33,3 +33,6 @@ model_subset:
   - "gemma4_e4b"
   - "gemma4_12b"
   - "gemma4_31b"
+  - "openllama_3b"
+  - "openllama_7b"
+  - "openllama_13b"

@@ -1,5 +1,5 @@
 # edited with AI assistance: Claude Code, Claude Opus 5.5 (claude-opus-5-5)
-# last AI edit: 2026-11-20, see docs/changelog/developers/ for details
+# last AI edit: 2026-11-26, see docs/changelog/developers/ for details
 import argparse
 import gc
 import math
@@ -120,7 +120,7 @@ def move_inputs_to_device(
 
 def final_norm(model) -> torch.nn.Module:
     # the norm the model applies to every token after its last block: ln_f (BLOOM) or norm
-    # (Gemma 1-4, under language_model in the multimodal Gemma 3, 3n and 4 checkpoints)
+    # (LLaMA, Gemma 1-4, under language_model in the multimodal Gemma 3, 3n and 4 checkpoints)
     for owner in (model, getattr(model, "language_model", None,)):
         for name in ("ln_f", "norm"):
             module = getattr(owner, name, None,)

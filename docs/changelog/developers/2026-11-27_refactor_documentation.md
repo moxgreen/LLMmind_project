@@ -4,6 +4,7 @@
 
 - Layer-depth pilot results with OpenLLaMA recorded; rerun recipe for adding models documented (documentation)
 - The layer-depth pilot and the other additional tests are all called tests in the documentation (documentation)
+- "pilot" removed from the layer-depth test's files, rule, variables and result directories (refactor, documentation)
 
 ---
 
@@ -70,3 +71,40 @@ Kind: documentation
 - Files changed: the seven documentation files above, `docs/AI_USAGE.md`.
 - Verification: each exact replacement was required to match once (the script stops otherwise);
   `grep -i pilot` on the bodies of the living documents now finds only identifiers.
+
+---
+
+## 15:25 — "pilot" removed from the layer-depth test's code and outputs
+
+Kind: refactor, documentation
+
+- `workflow/additional_tests/layer_depth_pilot/` → `workflow/additional_tests/layer_depth/`;
+  `config/layer_depth_pilot.yaml` → `config/layer_depth.yaml` (both `mv`, contents otherwise kept).
+- In the test's Snakefile: `configfile:` and the inner `--configfile` point to
+  `config/layer_depth.yaml`; `PILOT_DIR` → `DEPTH_DIR` (`results/tests/layer_depth_{depth}`),
+  `PILOT_TARGETS` → `DEPTH_TARGETS`, `PILOT_RULES` → `ALLOWED_RULES`; rule
+  `run_layer_depth_pilot` → `run_layer_depth`; `params.pilot_dir` → `params.depth_dir`; comments.
+- Results moved with `mv`: `results/tests/layer_depth_pilot_{25,50,67,75}` →
+  `results/tests/layer_depth_{25,50,67,75}`. The links inside each directory are relative and at the
+  same depth, and each inner run's `.snakemake/` moved with its directory, so nothing is recomputed.
+- Comments only: `config/config.yaml` (`relative_depth` is set per depth by the test's Snakefile;
+  the old comment still said "set to 0.75 by config/layer_depth_pilot.yaml"), `workflow/Snakefile`
+  (`model_subset` overlay example) and `workflow/llm_nearest_neighbours/Snakefile`
+  (`relative_depth_arg`, a comment under `params:`, not part of any value Snakemake tracks).
+- Documentation: paths, the rule name and the rerun loop in `README.md`,
+  `docs/guides/additional_tests.md` and `docs/reference/model_embeddings.md` (bodies only; `## Changes`
+  sections and older changelogs keep the old names); `docs/guides/running_and_troubleshooting.md`
+  lists `results/tests/layer_depth_pilot_<D>/` under leftover outputs.
+
+### Context
+
+- Request: "change pilot also in the code, were needed"; the developer approved the rename and asked
+  to proceed although TODO S9 and S10 are not yet approved.
+- Files changed: `workflow/additional_tests/layer_depth/Snakefile`, `config/layer_depth.yaml`,
+  `config/config.yaml`, `workflow/Snakefile`, `workflow/llm_nearest_neighbours/Snakefile`, the four
+  documentation files above, `docs/AI_USAGE.md`.
+- Verification: `grep -i pilot` finds nothing in the code; a dry run of the test's Snakefile reports
+  "Nothing to be done"; the links in `results/tests/layer_depth_25/` resolve; the documented inner
+  loop (`--rerun-triggers mtime input --allowed-rules ...`) dry-runs to "Nothing to be done" at all
+  four depths, and so does the main workflow with `--rerun-triggers mtime input`.
+

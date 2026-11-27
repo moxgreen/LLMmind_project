@@ -346,6 +346,9 @@ code no longer produces or reads. They are safe to delete:
   only printed now);
 - `results/tests/layer_depth_pilot_100/` (the layer-depth test no longer runs the last layer,
   whose results are the main ones);
+- `results/tests/layer_depth_pilot_<D>/` for the other depths: the layer-depth test now writes to
+  `results/tests/layer_depth_<D>/`. Rename the directories (`mv`) to keep their results; the links
+  inside them stay valid;
 - in `.snakemake/metadata/` and `.snakemake/incomplete/`, the records of files that no longer
   exist (each file name is the base64-encoded path of an output). Snakemake reads a record only
   when its file exists, so removing them changes nothing.
@@ -554,3 +557,8 @@ the layer-depth pilot no longer runs the last layer.
 ### 2026-11-27 13:40 — layer-depth test
 
 The layer-depth pilot is called the layer-depth test (sections 1 and 2 and the leftover outputs); its file and directory names are unchanged.
+
+### 2026-11-27 15:25 — old layer-depth directory names listed as leftover
+
+"Leftover outputs from older versions" now lists `results/tests/layer_depth_pilot_<D>/`, since the
+layer-depth test writes to `results/tests/layer_depth_<D>/`, and says how to keep their results.

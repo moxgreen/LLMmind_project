@@ -1,21 +1,21 @@
 # written with AI assistance: Claude Code, Claude Opus 5.5 (claude-opus-5-5)
-# last AI edit: 2026-11-25, see docs/changelog/developers/ for details
-configfile: "config/layer_depth_pilot.yaml"
+# last AI edit: 2026-11-27, see docs/changelog/developers/ for details
+configfile: "config/layer_depth.yaml"
 
-# the layer-depth pilot: one job per depth runs the main workflow (workflow/Snakefile) in its own
-# directory, results/tests/layer_depth_pilot_<D>/, on the datasets and models of
-# config/layer_depth_pilot.yaml; run from the project root with
-#     snakemake -s workflow/additional_tests/layer_depth_pilot/Snakefile --cores 4 --resources gpu=1
+# the layer-depth test: one job per depth runs the main workflow (workflow/Snakefile) in its own
+# directory, results/tests/layer_depth_<D>/, on the datasets and models of
+# config/layer_depth.yaml; run from the project root with
+#     snakemake -s workflow/additional_tests/layer_depth/Snakefile --cores 4 --resources gpu=1
 
 # depths in percent, the directory names; the depth is passed as D/100 written as short as
 # possible (1, not 1.0), because it is part of the get_embeddings shell text, whose change
 # would rerun every embedding of that depth
 LAYER_DEPTHS = [round(100*relative_depth) for relative_depth in config["relative_depths"]]
 
-PILOT_DIR = "results/tests/layer_depth_pilot_{depth}"
+DEPTH_DIR = "results/tests/layer_depth_{depth}"
 
 # the summary tables each depth produces, relative to its directory
-PILOT_TARGETS = [
+DEPTH_TARGETS = [
     "results/tsv_summaries/all_model_brain_alignment_scores.tsv",
     "results/tsv_summaries/all_model_brain_alignment_scores_language.tsv",
     "results/tsv_summaries/all_spearman_alignment_scores.tsv",
@@ -25,7 +25,7 @@ PILOT_TARGETS = [
 # the only rules an inner run may use: the model side. The brain results and resources/ are
 # links to the main ones, so a brain, stimulus or download job would write into them; with
 # these rules only, the existing brain files are plain inputs and a missing one stops the run
-PILOT_RULES = [
+ALLOWED_RULES = [
     "get_embeddings",
     "compute_llm_nearest_neighbours",
     "compute_llm_mind_alignment_score",
@@ -43,42 +43,42 @@ wildcard_constraints:
 rule all:
     input:
         summaries = expand(
-            f"{PILOT_DIR}/{{target}}",
+            f"{DEPTH_DIR}/{{target}}",
             depth = LAYER_DEPTHS,
-            target = PILOT_TARGETS,
+            target = DEPTH_TARGETS,
         )
 
-rule run_layer_depth_pilot:
+rule run_layer_depth:
     # link the depth's directory to config/, resources/, workflow/ and the brain results of every
-    # pilot dataset (ln -T stops if a real directory is in the way), then run the main workflow
+    # dataset of the test (ln -T stops if a real directory is in the way), then run the main workflow
     # there; this job runs only when a summary table is missing, so after a code change add
-    # --forcerun run_layer_depth_pilot and let the inner run decide what to recompute
+    # --forcerun run_layer_depth and let the inner run decide what to recompute
     output:
-        summaries = [f"{PILOT_DIR}/{target}" for target in PILOT_TARGETS]
+        summaries = [f"{DEPTH_DIR}/{target}" for target in DEPTH_TARGETS]
     params:
-        pilot_dir = PILOT_DIR,
+        depth_dir = DEPTH_DIR,
         relative_depth = lambda wc: f"{int(wc.depth)/100:g}",
         datasets = config["datasets"],
-        targets = PILOT_TARGETS,
-        allowed_rules = PILOT_RULES
+        targets = DEPTH_TARGETS,
+        allowed_rules = ALLOWED_RULES
     threads: 4
     resources:
         gpu = 1
     shell:
         r"""
-            mkdir -p {params.pilot_dir}/results/mind {params.pilot_dir}/results/language_mind
+            mkdir -p {params.depth_dir}/results/mind {params.depth_dir}/results/language_mind
             for folder in config resources workflow; do
-                ln -sfnT "../../../$folder" "{params.pilot_dir}/$folder"
+                ln -sfnT "../../../$folder" "{params.depth_dir}/$folder"
             done
             for dataset in {params.datasets}; do
                 for mind in mind language_mind; do
-                    ln -sfnT "../../../../../results/$mind/$dataset" "{params.pilot_dir}/results/$mind/$dataset"
+                    ln -sfnT "../../../../../results/$mind/$dataset" "{params.depth_dir}/results/$mind/$dataset"
                 done
             done
 
             snakemake {params.targets} \
-                --directory {params.pilot_dir} \
-                --configfile "$PWD/config/layer_depth_pilot.yaml" \
+                --directory {params.depth_dir} \
+                --configfile "$PWD/config/layer_depth.yaml" \
                 --config relative_depth={params.relative_depth} \
                 --use-conda \
                 --conda-prefix "$PWD/.snakemake/conda" \

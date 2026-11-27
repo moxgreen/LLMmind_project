@@ -1,5 +1,5 @@
 # edited with AI assistance: Claude Code, Claude Opus 5.5 (claude-opus-5-5)
-# last AI edit: 2026-11-25, see docs/changelog/developers/ for details
+# last AI edit: 2026-11-27, see docs/changelog/developers/ for details
 from pathlib import Path
 
 def chunk_max_length_arg(model):
@@ -53,7 +53,7 @@ rule get_embeddings:
         chunk_overlap = config["chunk_overlap"],
         pool = lambda wc: config["pooling"][config["models"][wc.model]["modality"]],
         # the block every model is read at, as a fraction of its depth; no flag (the last hidden
-        # state) unless relative_depth is set, as in the layer-depth pilot
+        # state) unless relative_depth is set, as in the layer-depth test
         relative_depth_arg = (
             "" if config["relative_depth"] is None
             else f"--relative_depth {config['relative_depth']}"

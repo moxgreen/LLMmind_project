@@ -1,5 +1,5 @@
 # edited with AI assistance: Claude Code, Claude Opus 5.5 (claude-opus-5-5)
-# last AI edit: 2026-11-26, see docs/changelog/developers/ for details
+# last AI edit: 2026-11-27, see docs/changelog/developers/ for details
 configfile: "config/config.yaml"
 
 from itertools import combinations
@@ -32,7 +32,7 @@ if config["relative_depth"] is not None and not 0 < config["relative_depth"] <= 
     raise ValueError(f"config: relative_depth is {config['relative_depth']!r}, expected null or a number in (0, 1]")
 
 DATASETS = list(config["datasets"])
-# model_subset, set only by a config overlay such as config/layer_depth_pilot.yaml, runs only these models
+# model_subset, set only by a config overlay such as config/layer_depth.yaml, runs only these models
 MODEL_KEYS = config.get("model_subset", list(config["models"].keys()))
 SIMILARITY_TYPES = list(config["similarity_types"])
 

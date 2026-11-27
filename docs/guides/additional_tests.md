@@ -23,7 +23,7 @@ definitions are in `workflow/additional_tests/additional_tests.smk`.
 
 | Test | Snakefile | Method and results |
 |---|---|---|
-| Layer-depth test | `workflow/additional_tests/layer_depth_pilot/Snakefile` | [`model_embeddings.md`](../reference/model_embeddings.md), section 3 |
+| Layer-depth test | `workflow/additional_tests/layer_depth/Snakefile` | [`model_embeddings.md`](../reference/model_embeddings.md), section 3 |
 | Narratives dependency test | `workflow/additional_tests/narratives_dependencies/Snakefile` | [`statistics.md`](../reference/statistics.md), section 8 |
 | Duration and length test | `workflow/additional_tests/duration_length_controls/Snakefile` | [`statistics.md`](../reference/statistics.md), section 8 |
 | Similarity-type test | `workflow/additional_tests/similarity_type_check/Snakefile` | [`statistics.md`](../reference/statistics.md), section 8 |
@@ -34,7 +34,7 @@ definitions are in `workflow/additional_tests/additional_tests.smk`.
 needs the GPU (on node5); `|| break` stops at the first test that fails:
 
 ```bash
-for test in narratives_dependencies duration_length_controls similarity_type_check image_overlap regional_crossover layer_depth_pilot; do
+for test in narratives_dependencies duration_length_controls similarity_type_check image_overlap regional_crossover layer_depth; do
     snakemake -s workflow/additional_tests/$test/Snakefile --use-conda --cores 4 --resources gpu=1 || break
 done
 ```
@@ -57,24 +57,24 @@ layer, on Narratives and Nature Stories, and computes the brain-model nearest-ne
 Spearman RSA (whole cortex and language region). Why and how the layer is chosen is in
 [`model_embeddings.md`](../reference/model_embeddings.md), section 3.
 
-**Running it.** The test has its own Snakefile, `workflow/additional_tests/layer_depth_pilot/Snakefile`, run
+**Running it.** The test has its own Snakefile, `workflow/additional_tests/layer_depth/Snakefile`, run
 from the project root with the base environment active (on node5, or through
 `run_snakemake_workflow.sh`, whose last command is this one):
 
 ```bash
-snakemake -s workflow/additional_tests/layer_depth_pilot/Snakefile --cores 4 --resources gpu=1 -n   # dry run
-snakemake -s workflow/additional_tests/layer_depth_pilot/Snakefile --cores 4 --resources gpu=1
+snakemake -s workflow/additional_tests/layer_depth/Snakefile --cores 4 --resources gpu=1 -n   # dry run
+snakemake -s workflow/additional_tests/layer_depth/Snakefile --cores 4 --resources gpu=1
 ```
 
-**Settings.** `config/layer_depth_pilot.yaml` holds the depths (`relative_depths`, now
+**Settings.** `config/layer_depth.yaml` holds the depths (`relative_depths`, now
 0.25, 0.5, 0.67 and 0.75), the datasets and the models (`model_subset`); the inner runs add it
 on top of `config/config.yaml` without changing it.
 
-**What a depth job does.** The Snakefile has one rule, `run_layer_depth_pilot`, with one job per
+**What a depth job does.** The Snakefile has one rule, `run_layer_depth`, with one job per
 depth *D* (in percent). Each job reserves 4 cores and the GPU, so the depths run one after the
 other, and:
 
-1. links `results/tests/layer_depth_pilot_<D>/` to the project's `config/`, `resources/` and
+1. links `results/tests/layer_depth_<D>/` to the project's `config/`, `resources/` and
    `workflow/`, and its `results/mind/<dataset>` and `results/language_mind/<dataset>` to the main
    brain results of every dataset of the test, so the brain side is reused, not recomputed or copied
    (`ln -T` stops the job if a real directory is in the way);
@@ -92,9 +92,9 @@ A full depth is 1540 jobs (24 models, two datasets), all model-side. Without Ope
 jobs) a depth took 1 h 10 min to 1 h 25 min on node5, and the three OpenLLaMA models add 3–6 min
 per depth; the four depths run one after the other, about 5 h 30 min in all.
 
-**Outputs.** Each depth's results go to `results/tests/layer_depth_pilot_<D>/results/` with the
+**Outputs.** Each depth's results go to `results/tests/layer_depth_<D>/results/` with the
 main workflow's file names (the depth is only in the directory name); its summary tables are in
-`results/tests/layer_depth_pilot_<D>/results/tsv_summaries/`. No main result is touched. The last
+`results/tests/layer_depth_<D>/results/tsv_summaries/`. No main result is touched. The last
 layer (depth 1) is not run: its embeddings, and every value of its four summary tables, are
 identical to the main pipeline's (checked for the 21 BLOOMZ and Gemma models, quantised Gemma
 models included), so the final-layer comparison uses the main `results/tsv_summaries/`.
@@ -102,18 +102,18 @@ Intermediate depths of the quantised models have run without errors but
 have not been checked further.
 
 **Rerunning.** A depth job runs only when one of its four summary tables is missing. After a
-code or settings change, add `--forcerun run_layer_depth_pilot`: every depth job then starts its
+code or settings change, add `--forcerun run_layer_depth`: every depth job then starts its
 inner run, which recomputes only what Snakemake sees as outdated ([running guide](running_and_troubleshooting.md), section 2). Edits to a script
 that Snakemake does not see, such as `get_embeddings.py`, are not picked up that way: first delete
 the outputs of the first affected rule in each depth directory, for example
-`results/tests/layer_depth_pilot_*/results/language_models/*/embeddings/*.parquet` after a change
+`results/tests/layer_depth_*/results/language_models/*/embeddings/*.parquet` after a change
 to `get_embeddings.py`, which recomputes every embedding and everything downstream. Copy
-`results/tests/layer_depth_pilot_<D>/results/tsv_summaries/` elsewhere first to keep the previous
+`results/tests/layer_depth_<D>/results/tsv_summaries/` elsewhere first to keep the previous
 numbers.
 
 **Adding models without recomputing the others.** The embeddings of the 21 BLOOMZ and Gemma models
 were computed before the `get_embeddings` rule received its depth flag as a parameter, so their
-Snakemake records differ from the current rule: a `--forcerun run_layer_depth_pilot` recomputes
+Snakemake records differ from the current rule: a `--forcerun run_layer_depth` recomputes
 every embedding of every depth (about 5 h 30 min), although the vectors would not change. To
 compute only missing outputs and the summary tables, run each depth's inner workflow directly,
 with `--rerun-triggers mtime input` (this is how OpenLLaMA was added):
@@ -124,8 +124,8 @@ for D in 25 50 67 75; do
         results/tsv_summaries/all_model_brain_alignment_scores_language.tsv \
         results/tsv_summaries/all_spearman_alignment_scores.tsv \
         results/tsv_summaries/all_spearman_alignment_scores_language.tsv \
-        --directory results/tests/layer_depth_pilot_$D \
-        --configfile "$PWD/config/layer_depth_pilot.yaml" \
+        --directory results/tests/layer_depth_$D \
+        --configfile "$PWD/config/layer_depth.yaml" \
         --config relative_depth=$(python3 -c "print(f'{$D/100:g}')") \
         --use-conda --conda-prefix "$PWD/.snakemake/conda" \
         --cores 4 --resources gpu=1 \
@@ -338,3 +338,9 @@ to add models with `--rerun-triggers mtime input` instead, as was done for OpenL
 ### 2026-11-27 13:40 — every additional test called a test
 
 The layer-depth pilot is now called the layer-depth test, and the other tests are named the same way: Narratives dependency test, duration and length test, similarity-type test, image overlap test and regional crossover test (table, section headings and introduction). File, rule and directory names are unchanged (`layer_depth_pilot`, `narratives_dependencies`, …).
+
+### 2026-11-27 15:25 — layer-depth file and directory names without "pilot"
+
+The test's Snakefile is now `workflow/additional_tests/layer_depth/Snakefile`, its settings
+`config/layer_depth.yaml`, its rule `run_layer_depth` and its outputs
+`results/tests/layer_depth_<D>/`; every path, command and rule name above follows.

@@ -70,8 +70,8 @@ the 21 BLOOMZ and Gemma models on Narratives and Nature Stories, quantised Gemma
 the intermediate depths of the real models ran without errors but have no reference to be compared
 with.
 
-`relative_depth` is set only for the layer-depth test: `workflow/additional_tests/layer_depth_pilot/Snakefile`
-runs the main workflow once per depth listed in `config/layer_depth_pilot.yaml` (25%, 50%, 67%
+`relative_depth` is set only for the layer-depth test: `workflow/additional_tests/layer_depth/Snakefile`
+runs the main workflow once per depth listed in `config/layer_depth.yaml` (25%, 50%, 67%
 and 75%), on the 24 language models of the main analysis (five BLOOMZ, 16 enabled Gemma, three
 OpenLLaMA), on Narratives and Nature Stories (how to run it:
 [additional-tests guide](../guides/additional_tests.md), section 1). The last layer is not run by
@@ -105,7 +105,7 @@ the three OpenLLaMA models were added on 2026-11-27 without recomputing the othe
 (5 BLOOMZ, 16 Gemma, 3 OpenLLaMA), depths 25/50/67/75% from the test and the last layer from the
 main results. Exact permutation p-values for the within-family size trends (at most 5 models per
 family); no correction across depths, similarity types or families. Outputs:
-`results/tests/layer_depth_pilot_<D>/results/tsv_summaries/`.
+`results/tests/layer_depth_<D>/results/tsv_summaries/`.
 
 - **Narratives, Spearman RSA by depth** (mean over models, similarity types, whole cortex and
   language region; 25 / 50 / 67 / 75% and the last layer):
@@ -350,3 +350,9 @@ described as any `ln_f` or `norm` layer, which includes LLaMA, instead of BLOOMZ
 ### 2026-11-27 13:40 — layer-depth test
 
 Sections 3 and 5 call the layer-depth pilot the layer-depth test; its file and directory names are unchanged.
+
+### 2026-11-27 15:25 — layer-depth file and directory names without "pilot"
+
+The test's Snakefile is now `workflow/additional_tests/layer_depth/Snakefile`, its settings
+`config/layer_depth.yaml`, its rule `run_layer_depth` and its outputs
+`results/tests/layer_depth_<D>/`; every path, command and rule name above follows.

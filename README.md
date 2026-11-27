@@ -76,7 +76,7 @@ the pipeline:
 ## Repository layout
 
 ```
-config/                     Snakemake configuration (config.yaml; one overlay per additional test, such as layer_depth_pilot.yaml)
+config/                     Snakemake configuration (config.yaml; one overlay per additional test, such as layer_depth.yaml)
 workflow/
   Snakefile                 Top-level Snakefile: wires up all modules and the `all` rule
   libraries/                Shared Python helper modules (similarity, alignment,
@@ -94,7 +94,7 @@ workflow/
   spearman_alignment/       Spearman rank-correlation alignment (model- and concept-level)
   visualisation/            Plotting rules (heatmaps, line plots, boxplots)
   additional_tests/         Tests outside the main pipeline, one folder and
-                             Snakefile per test: layer_depth_pilot/,
+                             Snakefile per test: layer_depth/,
                              narratives_dependencies/,
                              duration_length_controls/,
                              similarity_type_check/, image_overlap/,
@@ -399,7 +399,7 @@ Snakefiles in `workflow/additional_tests/`. To run them all, one after the
 other (the layer-depth test last: about 5 h 30 min on the GPU):
 
 ```bash
-for test in narratives_dependencies duration_length_controls similarity_type_check image_overlap regional_crossover layer_depth_pilot; do
+for test in narratives_dependencies duration_length_controls similarity_type_check image_overlap regional_crossover layer_depth; do
     snakemake -s workflow/additional_tests/$test/Snakefile --use-conda --cores 4 --resources gpu=1 || break
 done
 ```

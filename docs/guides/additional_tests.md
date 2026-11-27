@@ -30,7 +30,7 @@ definitions are in `workflow/additional_tests/additional_tests.smk`.
 | Image overlap | `workflow/additional_tests/image_overlap/Snakefile` | [`fmri_preprocessing.md`](../reference/fmri_preprocessing.md), "Overlap between the Caption Scene and NSD images" |
 | Regional crossover | `workflow/additional_tests/regional_crossover/Snakefile` | [`regional_crossover.md`](../reference/regional_crossover.md) |
 
-**Running every test.** One after the other, the pilot last because it takes about 5 h and
+**Running every test.** One after the other, the pilot last because it takes about 5 h 30 min and
 needs the GPU (on node5); `|| break` stops at the first test that fails:
 
 ```bash
@@ -51,8 +51,8 @@ in general is in the [running guide](running_and_troubleshooting.md), section 2.
 
 ## 1. Layer-depth pilot
 
-The pilot reads the five BLOOMZ models and the 16 Gemma models (every Gemma entry of
-`config/config.yaml` that is not commented out) at a chosen relative depth instead of their last
+The pilot reads the 24 language models of the main analysis (five BLOOMZ, the 16 Gemma models
+that are not commented out in `config/config.yaml`, three OpenLLaMA) at a chosen relative depth instead of their last
 layer, on Narratives and Nature Stories, and computes the brain-model nearest-neighbour alignment and the
 Spearman RSA (whole cortex and language region). Why and how the layer is chosen is in
 [`model_embeddings.md`](../reference/model_embeddings.md), section 3.
@@ -88,15 +88,16 @@ other, and:
    into the main ones; with this list such jobs are never scheduled, the existing brain files
    are plain inputs, and a missing one stops the run.
 
-A full depth is 1348 jobs (21 models, two datasets), all model-side, and takes about
-1 h 10 min to 1 h 25 min on node5; the four depths run one after the other, about 5 h in all.
+A full depth is 1540 jobs (24 models, two datasets), all model-side. Without OpenLLaMA (1348
+jobs) a depth took 1 h 10 min to 1 h 25 min on node5, and the three OpenLLaMA models add 3–6 min
+per depth; the four depths run one after the other, about 5 h 30 min in all.
 
 **Outputs.** Each depth's results go to `results/tests/layer_depth_pilot_<D>/results/` with the
 main workflow's file names (the depth is only in the directory name); its summary tables are in
 `results/tests/layer_depth_pilot_<D>/results/tsv_summaries/`. No main result is touched. The last
 layer (depth 1) is not run: its embeddings, and every value of its four summary tables, are
-identical to the main pipeline's for these 21 models, quantised Gemma models included, so the
-final-layer comparison uses the main `results/tsv_summaries/` restricted to the pilot models.
+identical to the main pipeline's (checked for the 21 BLOOMZ and Gemma models, quantised Gemma
+models included), so the final-layer comparison uses the main `results/tsv_summaries/`.
 Intermediate depths of the quantised models have run without errors but
 have not been checked further.
 
@@ -109,6 +110,30 @@ the outputs of the first affected rule in each depth directory, for example
 to `get_embeddings.py`, which recomputes every embedding and everything downstream. Copy
 `results/tests/layer_depth_pilot_<D>/results/tsv_summaries/` elsewhere first to keep the previous
 numbers.
+
+**Adding models without recomputing the others.** The embeddings of the 21 BLOOMZ and Gemma models
+were computed before the `get_embeddings` rule received its depth flag as a parameter, so their
+Snakemake records differ from the current rule: a `--forcerun run_layer_depth_pilot` recomputes
+every embedding of every depth (about 5 h 30 min), although the vectors would not change. To
+compute only missing outputs and the summary tables, run each depth's inner workflow directly,
+with `--rerun-triggers mtime input` (this is how OpenLLaMA was added):
+
+```bash
+for D in 25 50 67 75; do
+    snakemake results/tsv_summaries/all_model_brain_alignment_scores.tsv \
+        results/tsv_summaries/all_model_brain_alignment_scores_language.tsv \
+        results/tsv_summaries/all_spearman_alignment_scores.tsv \
+        results/tsv_summaries/all_spearman_alignment_scores_language.tsv \
+        --directory results/tests/layer_depth_pilot_$D \
+        --configfile "$PWD/config/layer_depth_pilot.yaml" \
+        --config relative_depth=$(python3 -c "print(f'{$D/100:g}')") \
+        --use-conda --conda-prefix "$PWD/.snakemake/conda" \
+        --cores 4 --resources gpu=1 \
+        --rerun-triggers mtime input \
+        --allowed-rules get_embeddings compute_llm_nearest_neighbours compute_llm_mind_alignment_score relabel_llm_similarity_and_compute_relabelled_llm_alignment_score compute_empirical_p_value compute_hypergeometric_p_value aggregate_all_p_value_outputs compute_spearman_alignment_with_empirical_p_value aggregate_all_spearman_alignment_scores \
+        || break
+done
+```
 
 ## 2. Narratives dependencies
 
@@ -303,3 +328,9 @@ Section 1: the pilot no longer runs the last layer (depth 1), whose results were
 main ones for its 21 models; the depths, the run time (about 5 h instead of 6 h 30 min) and the
 final-layer comparison, now taken from the main results, are updated, as is the run time quoted
 in the introduction.
+
+### 2026-11-27 11:45 — OpenLLaMA in the pilot
+
+Section 1: the pilot covers the three OpenLLaMA models too (24 models, 1540 jobs per depth, about
+5 h 30 min in all). A new paragraph explains why a forced rerun recomputes every embedding and how
+to add models with `--rerun-triggers mtime input` instead, as was done for OpenLLaMA.

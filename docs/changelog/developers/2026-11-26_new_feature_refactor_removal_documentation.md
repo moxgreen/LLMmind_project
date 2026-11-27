@@ -7,6 +7,7 @@
 - Concept-level plot rules, scripts and folders renamed from "scatterplot" to "boxplot" (refactor, documentation)
 - New rule `plot_alignment_enrichment_model_size`: enrichment against model size, with within-family Spearman's ρ (new feature, documentation)
 - Layer-depth pilot no longer runs the last layer (depth 1); its results directory removed (removal, documentation)
+- OpenLLaMA models added to the layer-depth pilot (new feature)
 
 ---
 
@@ -254,3 +255,34 @@ Kind: removal, documentation
   - After removal, `snakemake -s workflow/additional_tests/layer_depth_pilot/Snakefile -n`
     (frontend, project environment): "Nothing to be done"; the linked `config/`, `resources/`,
     `workflow/`, `results/mind/` and `results/language_mind/` are intact.
+
+---
+
+## 16:50 — OpenLLaMA models added to the layer-depth pilot
+
+Kind: new feature
+
+- `config/layer_depth_pilot.yaml`: `openllama_3b`, `openllama_7b` and `openllama_13b` added to
+  `model_subset` (24 models). No code path changes: `final_norm()` in
+  `workflow/llm_nearest_neighbours/scripts/get_embeddings.py` already returns any `ln_f` or `norm`
+  submodule, and `AutoModel` loads OpenLLaMA as `LlamaModel`, whose `norm` is `LlamaRMSNorm`. Only
+  the function's comment now names LLaMA (the `get_embeddings` rule does not hash the script, so the
+  edit triggers no rerun).
+- Rerun found while checking: the pilot's embeddings of 2026-11-23 predate the move of the depth
+  flag into `params.relative_depth_arg` (2026-11-25), so the inner runs flag all 48 embeddings per
+  depth with "Code has changed; Params have changed" (1540 jobs per depth). With
+  `--rerun-triggers mtime input` the inner run plans only 196 jobs per depth: 6 embeddings, their
+  downstream jobs and the four aggregations. The run itself and the documentation are in the
+  2026-11-27 changelog.
+
+### Context
+
+- Request: "add openllama models to the pilot", then "proceed with the changes to the pilot".
+- Files changed: `config/layer_depth_pilot.yaml`, `get_embeddings.py` (comment and attribution
+  date only), `docs/AI_USAGE.md`.
+- Verification: a randomly initialised `LlamaConfig` model (4 blocks, hidden size 32) loaded with
+  `AutoModel`, run on the frontend with the `llm_nearest_neighbours` environment from the session
+  scratchpad: `final_norm()` returns `LlamaRMSNorm`; `relative_depth = 1` gives exactly the
+  default vector; `relative_depth = 0.5` equals the mean of `model.norm(hidden_states[2])` and
+  differs from the raw block and from the default. Inner dry run for depth 25 with and without
+  `--rerun-triggers mtime input` (job counts above). The real checkpoints have 26, 32 and 40 blocks.

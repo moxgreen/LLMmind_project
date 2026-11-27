@@ -61,25 +61,26 @@ after its last block: each token then counts with the same scale in the mean, an
 tokens cannot dominate it. Gemma 3n keeps four parallel streams of its hidden state ("AltUp") until
 after its last block; at an intermediate block only stream 0 is kept, the one its attention and
 feed-forward blocks update (streams 1–3 are cheaper predicted copies in projected coordinates).
-Pooling does not change. The final norm is looked up for BLOOMZ and Gemma only: any other model
-read at an intermediate depth stops with an error naming it. The normalisation and the Gemma 3n
-stream were checked on small randomly initialised BLOOM, Gemma, Gemma 3 and Gemma 3n models
-(*f* = 1 gives the default vector; *f* = 0.5 the mean of the normalised tokens). On the real
-checkpoints, a run at *f* = 1 gave exactly the default vectors for all 21 pilot models on
-Narratives and Nature Stories, quantised Gemma models included; the intermediate depths of the real models ran
-without errors but have no reference to be compared with.
+Pooling does not change. The final norm is the model's `ln_f` (BLOOM) or `norm` (LLaMA, Gemma)
+layer; a model with neither, read at an intermediate depth, stops with an error naming it. The
+normalisation and the Gemma 3n stream were checked on small randomly initialised BLOOM, LLaMA,
+Gemma, Gemma 3 and Gemma 3n models (*f* = 1 gives the default vector; *f* = 0.5 the mean of the
+normalised tokens). On the real checkpoints, a run at *f* = 1 gave exactly the default vectors for
+the 21 BLOOMZ and Gemma models on Narratives and Nature Stories, quantised Gemma models included;
+the intermediate depths of the real models ran without errors but have no reference to be compared
+with.
 
 `relative_depth` is set only for the layer-depth pilot: `workflow/additional_tests/layer_depth_pilot/Snakefile`
 runs the main workflow once per depth listed in `config/layer_depth_pilot.yaml` (25%, 50%, 67%
-and 75%), on the five BLOOMZ models and the 16 enabled Gemma models, on Narratives and Nature
-Stories (how to run it: [additional-tests guide](../guides/additional_tests.md), section 1).
-The last layer (100%) is not run by the pilot: its vectors, and therefore all its scores and
-p-values, are those of the main pipeline, so the final-layer reference is the main
-`results/tsv_summaries/` restricted to these 21 models, with Benjamini-Hochberg correction across
-those 21.
+and 75%), on the 24 language models of the main analysis (five BLOOMZ, 16 enabled Gemma, three
+OpenLLaMA), on Narratives and Nature Stories (how to run it:
+[additional-tests guide](../guides/additional_tests.md), section 1). The last layer is not run by
+the pilot: its vectors, and therefore all its scores and p-values, are those of the main pipeline,
+so the final-layer reference is the main `results/tsv_summaries/` as they are, with the same
+models and the same Benjamini-Hochberg families.
 The BLOOMZ models have
-24 blocks (560m, 1b1, 1b7; *k* = 18) or 30 (3b, 7b1; *k* = 23), read from their local
-`config.json`. The depth was fixed before any result was seen, from brain-encoding studies of
+24 blocks (560m, 1b1, 1b7; *k* = 18) or 30 (3b, 7b1; *k* = 23) and the OpenLLaMA models 26, 32 or
+40 (3b, 7b, 13b; *k* = 20, 24, 30), read from their local `config.json`. The depth was fixed before any result was seen, from brain-encoding studies of
 decoder language models. Antonello, Vaidya & Huth (2023, arXiv:2305.11863, section 3.1) find that
 "the OPT models have maximum performance with layers that are roughly 3/4 into the model" (their
 best model reads layer 33 of 48 of OPT-30B, about 69%), while their LLaMA models peak "in
@@ -100,15 +101,16 @@ the main result.
 
 **Layer-depth pilot results.** Run on 2026-11-20 and again from the pilot's own Snakefile on
 2026-11-23 (node5, identical tables), with the per-token normalisation and the cap of section 5;
-21 models (5 BLOOMZ, 16 Gemma), depths 25/50/67/75% from the pilot and 100% from the main
-results of the same models. Exact permutation p-values for the
-within-family size trends (at most 5 models per family); no correction across depths, similarity
-types or families. Outputs: `results/tests/layer_depth_pilot_<D>/results/tsv_summaries/`.
+the three OpenLLaMA models were added on 2026-11-27 without recomputing the other 21. 24 models
+(5 BLOOMZ, 16 Gemma, 3 OpenLLaMA), depths 25/50/67/75% from the pilot and the last layer from the
+main results. Exact permutation p-values for the within-family size trends (at most 5 models per
+family); no correction across depths, similarity types or families. Outputs:
+`results/tests/layer_depth_pilot_<D>/results/tsv_summaries/`.
 
 - **Narratives, Spearman RSA by depth** (mean over models, similarity types, whole cortex and
-  language region; 25 / 50 / 67 / 75 / 100%):
+  language region; 25 / 50 / 67 / 75% and the last layer):
 
-  | Family | 25% | 50% | 67% | 75% | 100% |
+  | Family | 25% | 50% | 67% | 75% | Last layer |
   |---|---|---|---|---|---|
   | BLOOMZ | 0.497 | 0.526 | 0.527 | 0.517 | 0.494 |
   | Gemma | 0.508 | 0.506 | 0.514 | 0.476 | 0.470 |
@@ -116,20 +118,24 @@ types or families. Outputs: `results/tests/layer_depth_pilot_<D>/results/tsv_sum
   | Gemma 3 | 0.492 | 0.492 | 0.475 | 0.465 | 0.526 |
   | Gemma 3n | 0.482 | 0.511 | 0.428 | 0.476 | 0.488 |
   | Gemma 4 | 0.479 | 0.507 | 0.471 | 0.476 | 0.536 |
+  | OpenLLaMA | 0.495 | 0.504 | 0.500 | 0.492 | 0.477 |
 
-  BLOOMZ, Gemma and Gemma 2 align best at intermediate depths and worst at the last layer; Gemma 3
-  and Gemma 4 align best at the last layer (best depth per case: Gemma 3 21/30, Gemma 4 16/24). No
-  single relative depth suits every architecture. Local alignment (5 nearest neighbours) is
-  flatter, highest at 25–67% for every family except Gemma 3n.
+  BLOOMZ, Gemma, Gemma 2 and OpenLLaMA align best at intermediate depths and worst at the last
+  layer; Gemma 3 and Gemma 4 align best at the last layer (best depth per case: Gemma 3 21/30,
+  Gemma 4 16/24, OpenLLaMA 2/18). No single relative depth suits every architecture. Local
+  alignment (5 nearest neighbours) is flatter, highest at 25–67% for every family except Gemma 3n.
 - **Narratives, significance:** RSA p < 0.05 in every case at every depth; local alignment
-  p < 0.05 in 93 / 94 / 90 / 83% of cases at 25–75%, against 75% at the last layer.
+  p < 0.05 in 93 / 95 / 92 / 85% of cases at 25–75%, against 73% at the last layer.
 - **Narratives, model size:** no significant positive trend within any family at any depth.
   Gemma 3 RSA in the language region decreases with size at 67% and 75% (ρ = −1, p = 0.017, all
-  three similarity types). Pooled over the 21 models, RSA decreases with size at 67–75% (9 of 12
-  conditions, ρ −0.51 to −0.75; t approximation) and is flat at the last layer; this pooled trend
-  is confounded with family, since the largest models are mostly Gemma 3 and 4.
-- **Nature Stories** (11 stories, RSA only): weak at every depth (RSA p < 0.05 in 19 / 11 / 14 /
-  22 / 32% of cases at 25–100%); too few stories to support a depth choice.
+  three similarity types). OpenLLaMA (three models, so no trend can be significant) has no
+  consistent sign at 25–67% and ρ between −0.5 and −1 at 75% and at the last layer. Pooled over
+  the 24 models, RSA decreases with size at 67–75% (9 of 12 conditions, ρ −0.42 to −0.75;
+  t approximation) and is flat at the last layer; this pooled trend is confounded with family,
+  since the largest models are mostly Gemma 3 and 4.
+- **Nature Stories** (11 stories, RSA only): weak at every depth (RSA p < 0.05 in 19 / 10 / 12 /
+  19% of cases at 25–75%, against 30% at the last layer); too few stories to support a depth
+  choice.
 - **Caveat.** Choosing a depth for the main analysis from these numbers would be a maximum over
   layers, the selection the fixed-depth design avoids; this is one reason the last layer is kept.
 
@@ -212,7 +218,7 @@ Spearman RSA all use the same cap. Brain representations are never capped. On th
 pilot (Narratives) the cap changed the scores by −0.02 to +0.03 on average per model family; in
 Gemma 3 4B at 67% depth the largest value is about 45 900 against a cap of about 73. At the final
 layer (the same vectors with and without the cap), the cap raises the
-brain-model scores of the 21 pilot models by 0.01 (nearest neighbours) and 0.02 (RSA) on average
+brain-model scores of the 21 BLOOMZ and Gemma models by 0.01 (nearest neighbours) and 0.02 (RSA) on average
 on Narratives, and the RSA by 0.06 on average on Nature Stories (up to 0.42 in single cases,
 0.08–0.17 on average for BLOOMZ and Gemma 7B), where the share of cases with p < 0.05 rises from
 14% to 32%.
@@ -331,3 +337,12 @@ exactly the same summary tables as the main results for its 21 models (every val
 tables checked), so the final-layer reference is now taken from the main results. The pilot
 results are unchanged. Section 5 now describes the cap comparison at the final layer without
 referring to the 100% run.
+
+### 2026-11-27 11:45 — OpenLLaMA added to the pilot
+
+Section 3: the pilot now covers all 24 language models, the three OpenLLaMA models included
+(their blocks and the depths read are given), and its final-layer reference is the main results
+as they are. The depth table gains an OpenLLaMA row and names its last column "Last layer"; the
+significance shares, the pooled size trend (now over 24 models) and the Nature Stories shares are
+recomputed, and the OpenLLaMA size trend is added. The final norm used at intermediate depths is
+described as any `ln_f` or `norm` layer, which includes LLaMA, instead of BLOOMZ and Gemma only.

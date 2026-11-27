@@ -7,6 +7,7 @@
 - The concept-level plots are now called boxplots, in their folder names too (refactor, documentation)
 - New plots of alignment enrichment against model size, and a table of the size trend within each model family (new feature, documentation)
 - The layer-depth pilot no longer recomputes the last layer, which gave the same results as the main analysis (removal, documentation)
+- The layer-depth pilot also covers the three OpenLLaMA models (new feature)
 
 ---
 
@@ -103,3 +104,12 @@ Kind: removal, documentation
 - The old folder `results/tests/layer_depth_pilot_100/` was deleted; if you have a copy elsewhere,
   it is safe to delete too.
 - Running every additional test now takes about 5 h on the GPU instead of 6 h 30 min.
+
+---
+
+## 16:50 — The layer-depth pilot also covers the OpenLLaMA models
+
+Kind: new feature
+
+- The pilot now reads all 24 language models of the main analysis at intermediate depths, the
+  three OpenLLaMA models included. Their results are in the 2026-11-27 changes.
